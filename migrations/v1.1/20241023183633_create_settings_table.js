@@ -18,7 +18,7 @@ exports.up = function (knex) {
             return knex("settings").insert([
                 {
                     academy_name: "Default Academy",
-                    logo_url: "/storage/img/tu_logo.png",
+                    logo_url: "storage/img/tu_logo.png",
                     currency: "USD",
                     date_format: "YYYY-MM-DD",
                     theme: "light",

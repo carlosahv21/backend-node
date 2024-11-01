@@ -3,6 +3,7 @@ const usersRoutes = require("./users");
 const authRoutes = require("./auth");
 const settingsRoutes = require("./settings");
 const uploadRoute = require('./upload');
+const routesRoute = require('./route');
 
 const app = express();  // Usa `app` aquí para configurar la aplicación Express
 
@@ -20,5 +21,6 @@ app.use("/settings", settingsRoutes);
 app.use("/auth", authRoutes);
 app.use("/images", uploadRoute); // Ruta para subir logo
 app.use("/users", usersRoutes);
+app.use("/routes", routesRoute);
 
 module.exports = app;
