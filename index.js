@@ -21,6 +21,19 @@ app.use('/storage', express.static('storage'));
 // Rutas de tu backend
 app.use('/api', require('./routes'));
 
+// Middleware de manejo de errores: debe estar después de las rutas
+app.use((err, req, res, next) => {
+  const status = err.status || 500;
+  const message = err.message || "Internal server error";
+  const details = err.details || "An unexpected error occurred";
+
+  res.status(status).json({
+    success: false,
+    message,
+    details,
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
