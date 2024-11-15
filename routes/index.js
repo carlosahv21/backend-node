@@ -1,12 +1,22 @@
 const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+
 const usersRoutes = require("./users");
 const authRoutes = require("./auth");
 const settingsRoutes = require("./settings");
 const uploadRoute = require('./upload');
 const routesRoute = require('./route');
 const classesRoute = require('./classes');
+const fieldsRoutes = require('./fields');
 
-const app = express();  // Usa `app` aquí para configurar la aplicación Express
+const app = express();
+
+// Configuraciones de seguridad
+app.use(helmet());
+app.use(cors());
+app.use(morgan('dev'));
 
 // Aumentar el tamaño del límite de JSON a 10MB
 app.use(express.json({ limit: '10mb' }));
@@ -20,9 +30,16 @@ app.get("/", (req, res) => {
 // Registrar las rutas
 app.use("/settings", settingsRoutes);
 app.use("/auth", authRoutes);
-app.use("/images", uploadRoute); // Ruta para subir logo
+app.use("/images", uploadRoute);
 app.use("/users", usersRoutes);
 app.use("/routes", routesRoute);
 app.use("/classes", classesRoute);
+app.use("/modules", fieldsRoutes); // Usa la nueva ruta para módulos
+
+// Middleware de manejo de errores
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Internal Server Error" });
+});
 
 module.exports = app;
