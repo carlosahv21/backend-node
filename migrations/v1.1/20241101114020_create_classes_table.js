@@ -9,13 +9,6 @@ exports.up = async function (knex) {
         table.string('date');
         table.string('hour');
         table.integer('capacity');
-        table
-            .integer('module_id')
-            .unsigned()
-            .notNullable()
-            .references('id')
-            .inTable('modules')
-            .onDelete('CASCADE');
         table.timestamps(true, true);
     });
 
@@ -30,8 +23,7 @@ exports.up = async function (knex) {
             duration: 60,
             date: "Monday",
             hour: "10:00",
-            capacity: 10,
-            module_id: 1,
+            capacity: 10
         },
         {
             name: "Salsa Casino",
@@ -41,8 +33,7 @@ exports.up = async function (knex) {
             duration: 60,
             date: "Tuesday",
             hour: "10:00",
-            capacity: 10,
-            module_id: 1,
+            capacity: 10
         },
         {
             name: "Bachata",
@@ -52,8 +43,7 @@ exports.up = async function (knex) {
             duration: 60,
             date: "Wednesday",
             hour: "10:00",
-            capacity: 10,
-            module_id: 1,
+            capacity: 10
         }
     ]);
 };
