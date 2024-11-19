@@ -19,6 +19,10 @@ exports.up = async function (knex) {
     const [classModule] = await knex('modules')
         .where('name', 'Class')
         .select('id');
+
+    const [settingsModule] = await knex('modules')
+        .where('name', 'Settings')
+        .select('id');
         
     await knex('blocks').insert([
         {
@@ -44,6 +48,14 @@ exports.up = async function (knex) {
             module_id: classModule.id,
             collapsible: false, // Este bloque no se puede colapsar
             display_mode: "edit", // Solo lectura
+        },
+        {
+            name: "General Information",
+            description: "General Information block",
+            order: 1,
+            module_id: settingsModule.id,
+            collapsible: true,
+            display_mode: "edit",
         }
     ]);
 };

@@ -29,7 +29,7 @@ exports.getFieldsByModule = async (req, res) => {
                     .where({ block_id: block.id })
                     .select(
                         'id', 'block_id', 'name', 'label', 'type', 
-                        'required', 'placeholder', 'visible', 'order', 
+                        'required', 'placeholder', 'visible', 'order_sequence', 
                         'options', 'default_value', 'validation_rules', 
                         'helper_text', 'editable', 'readonly', 'hidden'
                     );
@@ -47,7 +47,7 @@ exports.getFieldsByModule = async (req, res) => {
                         required: field.required,
                         placeholder: field.placeholder,
                         visible: field.visible,
-                        order: field.order,
+                        order_sequence: field.order_sequence,
                         options: field.options,
                         default_value: field.default_value,
                         validation_rules: field.validation_rules,
