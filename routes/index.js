@@ -10,6 +10,8 @@ const uploadRoute = require('./upload');
 const routesRoute = require('./route');
 const classesRoute = require('./classes');
 const fieldsRoutes = require('./fields');
+const modulesRoute = require('./modules');
+const blocksRoute = require('./blocks');
 
 const app = express();
 
@@ -34,7 +36,9 @@ app.use("/images", uploadRoute);
 app.use("/users", usersRoutes);
 app.use("/routes", routesRoute);
 app.use("/classes", classesRoute);
-app.use("/modules", fieldsRoutes); // Usa la nueva ruta para módulos
+app.use("/modules", modulesRoute);
+app.use("/fields", fieldsRoutes);
+app.use("/blocks", blocksRoute);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
