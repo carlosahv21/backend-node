@@ -25,12 +25,15 @@ class BaseController {
                 });
             }
 
+            const totalResult = await query.clone().count('* as count').first();
+            const total = totalResult.count;
+
+            // Aplicar paginación
             const results = await query.limit(limit).offset((page - 1) * limit);
-            const total = await this.knex(this.tableName).count('* as count').first();
 
             res.json({
                 data: results,
-                total: total.count,
+                total: total,
                 page: parseInt(page),
                 limit: parseInt(limit),
             });
