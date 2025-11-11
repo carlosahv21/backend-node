@@ -43,7 +43,9 @@ app.use("/blocks", blocksRoute);
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: "Internal Server Error" });
+  const status = err.status || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
 });
 
 module.exports = app;

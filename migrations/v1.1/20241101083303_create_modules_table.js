@@ -68,8 +68,9 @@ exports.up = async function (knex) {
             is_active: true,
             has_fields: true,
         },
-
     ]);
+    
+    console.log("Table 'modules' created successfully.");
 };
 
 exports.down = function (knex) {

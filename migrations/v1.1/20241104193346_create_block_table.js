@@ -58,6 +58,8 @@ exports.up = async function (knex) {
             display_mode: "edit",
         }
     ]);
+
+    console.log("Table 'blocks' created successfully.");
 };
 
 exports.down = function (knex) {

@@ -2,15 +2,25 @@ const jwt = require("jsonwebtoken");
 
 // Middleware para autenticar el token JWT
 function authenticateToken(req, res, next) {
-  const token =
-    req.headers["authorization"] && req.headers["authorization"].split(" ")[1];
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) return res.sendStatus(401); // Si no hay token, retornar no autorizado
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "No token provided",
+    });
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // Si el token no es válido, retornar prohibido
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
 
-    req.user = user; // Guardar la información del usuario en `req.user`
+    req.user = user; // Guardar la info del usuario
     next(); // Continuar con la solicitud
   });
 }

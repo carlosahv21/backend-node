@@ -1,28 +1,29 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const morgan = require('morgan');
 
 dotenv.config();
 
 const app = express();
 
-// Configurar CORS para permitir solicitudes desde el frontend
+// Middleware
+app.use(morgan('dev')); // Logs HTTP
+app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3001', // URL de tu frontend en React
+  origin: 'http://localhost:3001',
   credentials: true,
 }));
 
-// Middleware para procesar JSON
-app.use(express.json());
-
-// Sirve archivos estáticos desde la carpeta "storage"
+// Archivos estáticos
 app.use('/storage', express.static('storage'));
 
-// Rutas de tu backend
+// Rutas
 app.use('/api', require('./routes'));
 
-// Middleware de manejo de errores: debe estar después de las rutas
+// Manejo de errores
 app.use((err, req, res, next) => {
+  console.error(err);
   const status = err.status || 500;
   const message = err.message || "Internal server error";
   const details = err.details || "An unexpected error occurred";

@@ -1,5 +1,8 @@
-exports.up = function (knex) {
-    return knex.schema
+exports.up = async function (knex) {
+    const exists = await knex.schema.hasTable("settings");
+
+    if (!exists) {
+        await knex.schema
         .createTable("settings", function (table) {
             table.increments("id").primary(); // ID autoincremental
             table.string("academy_name").notNullable(); // Nombre de la academia
@@ -31,6 +34,9 @@ exports.up = function (knex) {
                 },
             ]);
         });
+    }
+    
+    console.log("Table 'settings' created successfully.");
 };
 
 exports.down = function (knex) {

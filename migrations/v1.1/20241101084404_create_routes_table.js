@@ -112,6 +112,8 @@ exports.up = async function(knex) {
             is_active: true,
         },
     ]);
+    
+    console.log("Table 'routes' created successfully.");
 };
 
 exports.down = function(knex) {

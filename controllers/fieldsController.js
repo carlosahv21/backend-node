@@ -6,96 +6,120 @@ class fieldsController extends BaseController {
         super('fields');
     }
 
+    /*
+    * Crea un nuevo campo en la base de datos.
+    */
     async create(req, res) {
         try {
             const data = req.body;
 
-            let rules = [];
-
-            // Si es requerido
-            if (data.required) {
-                rules.push('required');
+            // Validar campos mínimos
+            if (!data.name || !data.label || !data.type || !data.block_id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Faltan datos obligatorios: name, label, type o block_id.'
+                });
             }
 
-            // Según tipo
-            switch (data.type) {
-                case 'email':
-                    rules.push('email');
-                    break;
-                case 'number':
-                case 'integer':
-                    rules.push('integer');
-                    // reglas opcionales
-                    // enviar desde el frontend
-                    break;
-                case 'text':
-                    rules.push('string');
-                    // reglas opcionales
-                    // enviar desde el frontend
-                    break;
-                case 'select':
-                    // Revisar si hay options
-                    rules.push('in:opcion1,opcion2'); // opcional, solo si manejas options
-                    break;
-                case 'textarea':
-                    // reglas opcionales
-                    // enviar desde el frontend
-                    break;
-                case 'image':
-                    rules.push('jpg|png|jpeg|gif'); 
-                    // enviar desde el frontend
-                    break;
-                case 'date':
-                    rules.push('date');
-                    break;
-                case 'time':
-                    rules.push('time');
-                    break;
+            // Agregar valor por defecto para required si no se envía
+            if (data.required === undefined) {
+                data.required = false;
             }
 
-            // Asignar el resultado como string con pipe
-            data.validation_rules = rules.join('|');
-            
-            // Insertar en DB
-            const result = await this.knex(this.tableName).insert(data);
+            // Convertir opciones a JSON si vienen como array
+            if (data.options && Array.isArray(data.options)) {
+                data.options = JSON.stringify(data.options);
+            }
 
-            res.status(201).json({ success: true, data: result });
+            // Tomar el ultimo número de campo para el módulo
+            const lastCfNumber = await this.knex('custom_field_counters').first();
+
+            data.name = `cf_${lastCfNumber.last_cf_number}`;
+            // Actualizar el contador de campos personalizados
+            await this.knex('custom_field_counters')
+                .where({ id: lastCfNumber.id })
+                .update({ last_cf_number: lastCfNumber.last_cf_number + 2 });
+
+            // Insertar en la base de datos
+            const result = await this.knex(this.tableName)
+                .insert(data);
+
+            res.status(201).json({
+                success: true,
+                message: 'Campo creado correctamente',
+                data: result
+            });
         } catch (error) {
-            console.error("Error al crear campo:", error);
-            res.status(500).json({ success: false, message: "Error al crear el campo" });
+            console.error("❌ Error al crear campo:", error);
+            res.status(500).json({
+                success: false,
+                message: "Error al crear el campo",
+                error: error.message,
+            });
         }
-    };
+    }
 
+    /*
+    * Actualiza un campo en la base de datos.
+    */
+    async update(req, res) {
+        try {
+            const { id } = req.params;
+            const data = req.body;
+            delete data.module_id;
 
-    async getFieldsByModule (req, res) {
-        const module_id = req.params.id;
+            // Actualizar en la base de datos
+            const result = await this.knex(this.tableName)
+                .where({ id })
+                .update(data);
+
+            res.status(200).json({
+                success: true,
+                message: 'Campo actualizado correctamente',
+                data: result
+            });
+        } catch (error) {
+            console.error("❌ Error al actualizar campo:", error);
+            res.status(500).json({
+                success: false,
+                message: "Error al actualizar el campo",
+                error: error.message,
+            });
+        }
+    }
+
+    /*
+    * Obtiene todos los bloques con sus campos asociados por módulo.
+    */
+    async getFieldsByModule(req, res) {
+        const { id: module_id } = req.params;
 
         try {
-            // Obtener el nombre y el ID del módulo
+            // Verificar si el módulo existe
             const module = await this.knex('modules')
                 .where({ id: module_id })
                 .select('id', 'name')
                 .first();
 
             if (!module) {
-                return res.status(404).json({ success: false, message: 'Module not found' });
+                return res.status(404).json({
+                    success: false,
+                    message: 'Módulo no encontrado',
+                });
             }
 
             // Obtener los bloques asociados al módulo
             const blocks = await this.knex('blocks')
-                .where({ module_id: module_id })
-                .select('id', 'name', 'collapsible', 'display_mode'); // Nuevos atributos de configuración
+                .where({ module_id })
+                .select('id', 'name', 'collapsible', 'display_mode');                
 
-            // Para cada bloque, obtener los campos asociados
+            // Para cada bloque, obtener sus campos asociados
             const blocksWithFields = await Promise.all(
                 blocks.map(async (block) => {
                     const fields = await this.knex('fields')
                         .where({ block_id: block.id })
                         .select(
-                            'id', 'block_id', 'name', 'label', 'type',
-                            'required', 'placeholder', 'visible', 'order_sequence',
-                            'options', 'default_value', 'validation_rules',
-                            'helper_text', 'editable', 'readonly', 'hidden'
+                            'id', 'block_id', 'name', 'label', 'type', 'options','required', 'order_sequence'
                         );
 
                     return {
@@ -108,17 +132,9 @@ class fieldsController extends BaseController {
                             name: field.name,
                             label: field.label,
                             type: field.type,
-                            required: field.required,
-                            placeholder: field.placeholder,
-                            visible: field.visible,
-                            order_sequence: field.order_sequence,
                             options: field.options,
-                            default_value: field.default_value,
-                            validation_rules: field.validation_rules,
-                            helper_text: field.helper_text,
-                            editable: field.editable ?? true, // Define si el campo es editable
-                            readonly: field.readonly ?? false, // Define si el campo es de solo lectura
-                            hidden: field.hidden ?? false // Define si el campo está oculto
+                            required: field.required,
+                            order_sequence: field.order_sequence,
                         }))
                     };
                 })
@@ -133,10 +149,11 @@ class fieldsController extends BaseController {
                 }
             });
         } catch (error) {
-            console.error("Error al obtener los campos:", error);
+            console.error("❌ Error al obtener campos del módulo:", error);
             res.status(500).json({
                 success: false,
                 message: 'Error al obtener los campos del módulo.',
+                error: error.message,
             });
         }
     }

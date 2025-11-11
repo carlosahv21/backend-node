@@ -35,6 +35,7 @@ async function login(req, res, next) {
       user: { id: user.id, email: user.email, role: user.role },
     });
   } catch (err) {
+    console.log(err);
     next(err); // Pasar el error al middleware de manejo de errores
   }
 }

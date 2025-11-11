@@ -13,7 +13,6 @@ exports.up = async function (knex) {
     });
 
     // Las clases deben ser los generos de baile ejemplo : Salsa en linea, Salsa Casino, Bachata, etc.
-
     await knex('classes').insert([
         {
             name: "Salsa en linea",
@@ -46,6 +45,7 @@ exports.up = async function (knex) {
             capacity: 10
         }
     ]);
+    console.log("Table 'classes' created successfully.");
 };
 
 exports.down = function (knex) {
