@@ -1,4 +1,4 @@
-class CustomError extends Error {
+class utilsCustomError extends Error {
     constructor(message, status = 500, details = "An error occurred") {
         super(message); // Llamar al constructor de la clase Error
         this.status = status;
@@ -6,4 +6,4 @@ class CustomError extends Error {
     }
 }
 
-module.exports = CustomError;
+module.exports = utilsCustomError;

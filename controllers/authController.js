@@ -1,26 +1,26 @@
 const knex = require("../db/knex");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const CustomError = require("../utils/CustomError");
+const utilsCustomError = require("../utils/utilsCustomError");
 
 async function login(req, res, next) {
   const { email, password } = req.body;
 
   try {
     if (req.user) {
-      throw new CustomError("You are already logged in", 401);
+      throw new utilsCustomError("You are already logged in", 401);
     }
 
     const user = await knex("users").where({ email }).first();
 
     if (!user) {
-      throw new CustomError("Invalid email or password", 401, "User not found");
+      throw new utilsCustomError("Invalid email or password", 401, "User not found");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new CustomError("Invalid password", 401, "Password mismatch");
+      throw new utilsCustomError("Invalid password", 401, "Password mismatch");
     }
 
     const token = jwt.sign(

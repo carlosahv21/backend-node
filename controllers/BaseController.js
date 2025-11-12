@@ -1,10 +1,27 @@
 // controllers/BaseController.js
+const { da } = require('zod/locales');
 const knex = require('../db/knex');
+const { validationHandlers } = require('../utils/utilsValidations');
 
 class BaseController {
     constructor(tableName) {
         this.tableName = tableName;
         this.knex = knex;
+        this.validations = [];
+    }
+
+    // Validaciones
+    async _runValidations(data) {        
+        for (const rule of this.validations) {
+            const handler = validationHandlers[rule.name || rule];
+            if (typeof handler !== "function") continue;
+
+            const message = await handler(this.knex, this.tableName, data, rule.config || {});
+            if (message) {
+                return message;
+            }
+        }
+        return null;
     }
 
     // Obtener todos los registros con paginación, búsqueda y filtros
@@ -123,6 +140,12 @@ class BaseController {
     async create(req, res) {
         try {
             const data = req.body;
+            
+            const validationError = await this._runValidations(data);
+            if (validationError) {
+                return res.status(409).json({ message: validationError });
+            }
+            
             const { standardFields } = this.splitFields(data);
 
             const [recordId] = await this.knex(this.tableName).insert(standardFields);
@@ -139,19 +162,25 @@ class BaseController {
     // Actualizar registro
     async update(req, res) {
         try {
-            const { id } = req.params;
-            const data = req.body;
+            const data = { ...req.body, id: req.params.id };
+
+            const validationError = await this._runValidations(data);
+            
+            if (validationError) {
+                return res.status(409).json({ message: validationError });
+            }
+            
             const { standardFields } = this.splitFields(data);
 
             const updatedCount = await this.knex(this.tableName)
-                .where({ id })
+                .where({ id : data.id })
                 .update(standardFields);
 
             if (updatedCount === 0) {
                 return res.status(404).json({ message: `${this.tableName} record not found` });
             }
 
-            await this.saveCustomFields(id, data);
+            await this.saveCustomFields(data.id, data);
 
             res.json({ message: `${this.tableName} record updated successfully` });
         } catch (error) {
