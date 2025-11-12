@@ -11,7 +11,7 @@ class BaseController {
     }
 
     // Validaciones
-    async _runValidations(data) {        
+    async _runValidations(data) {
         for (const rule of this.validations) {
             const handler = validationHandlers[rule.name || rule];
             if (typeof handler !== "function") continue;
@@ -24,41 +24,60 @@ class BaseController {
         return null;
     }
 
+    // Función auxiliar para construir la query
+    _buildQuery({ search, isCount = false }) {
+        let query = this.knex(this.tableName);
+
+        // Joins dinámicos
+        if (this.joins && Array.isArray(this.joins)) {
+            this.joins.forEach(j => {
+                query = query.leftJoin(`${j.table} as ${j.alias}`, j.on[0], j.on[1]);
+            });
+        }
+
+        // Select
+        if (!isCount) {
+            query = this.selectFields && Array.isArray(this.selectFields)
+                ? query.select(this.selectFields)
+                : query.select(`${this.tableName}.*`);
+        }
+
+        // Búsqueda
+        if (search && Array.isArray(this.searchFields) && this.searchFields.length > 0) {
+            query = query.where(builder => {
+                this.searchFields.forEach((field, index) => {
+                    if (index === 0) builder.where(field, "like", `%${search}%`);
+                    else builder.orWhere(field, "like", `%${search}%`);
+                });
+            });
+        }
+
+        return query;
+    }
+
     // Obtener todos los registros con paginación, búsqueda y filtros
     async getAll(req, res) {
         try {
-            const { page = 1, limit = 10, search, filterField, filterValue } = req.query;
-            let query = this.knex(this.tableName);
+            const { page = 1, limit = 10, search } = req.query;
 
-            if (search && Array.isArray(this.searchFields) && this.searchFields.length > 0) {
-                query = query.where(builder => {
-                    this.searchFields.forEach((field, index) => {
-                        if (index === 0) {
-                            builder.where(field, 'like', `%${search}%`);
-                        } else {
-                            builder.orWhere(field, 'like', `%${search}%`);
-                        }
-                    });
-                });
-            }
-
-            const totalResult = await query.clone().count('* as count').first();
-            const total = totalResult.count;
-
-            // Aplicar paginación
+            const query = this._buildQuery({ search });
             const results = await query.limit(limit).offset((page - 1) * limit);
+
+            const totalQuery = this._buildQuery({ search, isCount: true });
+            const totalRes = await totalQuery.count("* as count").first();
 
             res.json({
                 data: results,
-                total: total,
+                total: totalRes.count,
                 page: parseInt(page),
-                limit: parseInt(limit),
+                limit: parseInt(limit)
             });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: `Error retrieving ${this.tableName} records`, error });
+            res.status(500).json({ message: "Error retrieving records", error });
         }
     }
+
 
     // Obtener un registro por ID
     async getById(req, res) {
@@ -140,12 +159,12 @@ class BaseController {
     async create(req, res) {
         try {
             const data = req.body;
-            
+
             const validationError = await this._runValidations(data);
             if (validationError) {
                 return res.status(409).json({ message: validationError });
             }
-            
+
             const { standardFields } = this.splitFields(data);
 
             const [recordId] = await this.knex(this.tableName).insert(standardFields);
@@ -165,15 +184,15 @@ class BaseController {
             const data = { ...req.body, id: req.params.id };
 
             const validationError = await this._runValidations(data);
-            
+
             if (validationError) {
                 return res.status(409).json({ message: validationError });
             }
-            
+
             const { standardFields } = this.splitFields(data);
 
             const updatedCount = await this.knex(this.tableName)
-                .where({ id : data.id })
+                .where({ id: data.id })
                 .update(standardFields);
 
             if (updatedCount === 0) {

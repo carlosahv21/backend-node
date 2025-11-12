@@ -2,15 +2,15 @@
 const BaseController = require('./BaseController');
 
 class permissionsController extends BaseController {
+    searchFields = ['name', 'description'];
+
+    validations = [
+        { name: "uniqueField", config: { field: "name" } },
+    ];
+
     constructor() {
         super('permissions');
-        this.searchFields = ['name', 'description'];
-        this.validations = [
-            { name: "uniqueField", config: { field: "name" } },
-        ];
     }
-
-    // Métodos específicos para permissions pueden agregarse aquí si es necesario.
 }
 
 module.exports = new permissionsController();

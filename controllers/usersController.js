@@ -2,15 +2,18 @@
 const BaseController = require('./BaseController');
 
 class UsersController extends BaseController {
-    constructor() {
-        super('users');
-        this.searchFields = ['first_name', 'last_name', 'email'];
-        this.validations = [
-            { name: "uniqueField", config: { field: "email" } },
-        ];
-    }
+    joins = [
+        { table: "user_roles", alias: "ur", on: ["users.id", "ur.user_id"] },
+        { table: "roles", alias: "r", on: ["ur.role_id", "r.id"] }
+    ];
 
-    // Métodos específicos para Users pueden agregarse aquí si es necesario.
+    selectFields = ["users.*", "r.name as role_name"];
+
+    searchFields = ["users.first_name", "users.last_name", "users.email", "r.name"];
+
+    constructor() {
+        super("users");
+    }
 }
 
 module.exports = new UsersController();

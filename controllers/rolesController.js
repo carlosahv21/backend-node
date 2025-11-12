@@ -2,11 +2,11 @@
 const BaseController = require('./BaseController');
 
 class RolesController extends BaseController {
+    searchFields = ['name'];
+
     constructor() {
         super('roles');
-        this.searchFields = ['name'];
     }
-
 }
 
 module.exports = new RolesController();
