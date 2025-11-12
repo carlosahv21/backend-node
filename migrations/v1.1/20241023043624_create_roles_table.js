@@ -10,6 +10,17 @@ exports.up = async function (knex) {
     });
 
     console.log('Table "roles" created successfully.');
+
+    // Roles
+    await knex("roles").insert([
+      { name: "admin", description: "Full access to all resources" },
+      { name: "student", description: "Alumno que puede inscribirse y marcar asistencia" },
+      { name: "teacher", description: "Profesor que puede ver sus clases y asistencia" },
+      { name: "receptionist", description: "Gestor diario que puede crear/editar clases, alumnos, asistencia y pagos" }
+    ]);
+
+    console.log("Default roles inserted.");
+
   }
 };
 

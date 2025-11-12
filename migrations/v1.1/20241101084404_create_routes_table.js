@@ -57,17 +57,6 @@ exports.up = async function(knex) {
             is_active: true,
         },
         {
-            name: "Users",
-            path: "/users",
-            type: "internal",
-            icon: "Team",
-            order: 1,
-            module_id: usersModule.id, // Asocia a Users
-            location: "SIDEBAR",
-            on_click_action: "navigate",
-            is_active: true,
-        },
-        {
             name: "Classes",
             path: "/classes",
             type: "internal",

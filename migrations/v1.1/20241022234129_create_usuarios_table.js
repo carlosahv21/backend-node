@@ -15,32 +15,27 @@ exports.up = async function (knex) {
       table.timestamps(true, true); // timestamps: created_at, updated_at
     });
 
-    // Insertar el administrador y el gerente
-    const hashedAdminPassword = await bcrypt.hash("admin123", 10); // Contraseña del admin encriptada
-    const hashedManagerPassword = await bcrypt.hash("manager123", 10); // Contraseña del gerente encriptada
+    // Insertar usuario admin y algunos usuarios de prueba
+    const users = [
+      { first_name: "Carlos", last_name: "Hernández", email: "admin@example.com", password: "admin123" },
+      { first_name: "Alumno1", last_name: "Prueba", email: "student1@example.com", password: "student123" },
+      { first_name: "Alumno2", last_name: "Prueba", email: "student2@example.com", password: "student123" },
+      { first_name: "Profesor1", last_name: "Prueba", email: "teacher1@example.com", password: "teacher123" },
+      { first_name: "Recepcionista", last_name: "Prueba", email: "receptionist@example.com", password: "recep123" },
+    ];
 
-    await knex("users").insert([
-      {
-        first_name: "Carlos",
-        last_name: "Hernández",
-        email: "admin@example.com",
-        password: hashedAdminPassword,
-        email_verified: true,
-        last_login: null, // El admin aún no ha iniciado sesión
-      },
-      {
-        first_name: "María",
-        last_name: "López",
-        email: "manager@example.com",
-        password: hashedManagerPassword,
-        email_verified: true,
-        last_login: null, // El gerente aún no ha iniciado sesión
-      },
-    ]);
+    // Hashear contraseñas
+    for (const user of users) {
+      user.password = await bcrypt.hash(user.password, 10);
+      user.email_verified = true;
+      user.last_login = null;
+      user.created_at = new Date();
+      user.updated_at = new Date();
+    }
 
-    console.log(
-      'Table "users" created and admin/manager inserted successfully.'
-    );
+    await knex("users").insert(users);
+
+    console.log('Table "users" created and admin/manager inserted successfully.');
   } else {
     console.log('The "users" table already exists.');
   }
