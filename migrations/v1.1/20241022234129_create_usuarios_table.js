@@ -17,7 +17,7 @@ exports.up = async function (knex) {
 
     // Insertar usuario admin y algunos usuarios de prueba
     const users = [
-      { first_name: "Carlos", last_name: "Hernández", email: "admin@example.com", password: "admin123" },
+      { first_name: "Admin", last_name: "Prueba", email: "admin@example.com", password: "admin123" },
       { first_name: "Alumno1", last_name: "Prueba", email: "student1@example.com", password: "student123" },
       { first_name: "Alumno2", last_name: "Prueba", email: "student2@example.com", password: "student123" },
       { first_name: "Profesor1", last_name: "Prueba", email: "teacher1@example.com", password: "teacher123" },

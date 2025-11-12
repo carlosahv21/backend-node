@@ -1,11 +1,13 @@
-const express = require("express");
-const { authenticateToken } = require("../middlewares/authMiddleware");
-
+// routes/users.js
+const express = require('express');
 const router = express.Router();
+const usersController = require('../controllers/usersController.js');
 
-// Ruta para obtener información del usuario autenticado
-router.get("/profile", authenticateToken, (req, res) => {
-  res.send(`Welcome ${req.user.name}!`);
-});
+// Rutas que utilizan los métodos genéricos de BaseController
+router.get('/', (req, res) => usersController.getAll(req, res)); // Obtener todos los usuarios
+router.get('/:id', (req, res) => usersController.getById(req, res)); // Obtener usuario por ID
+router.post('/', (req, res) => usersController.create(req, res)); // Crear usuario
+router.put('/:id', (req, res) => usersController.update(req, res)); // Actualizar usuario
+router.delete('/:id', (req, res) => usersController.delete(req, res)); // Eliminar usuario
 
 module.exports = router;
