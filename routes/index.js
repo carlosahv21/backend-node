@@ -12,6 +12,7 @@ const classesRoute = require('./classes');
 const fieldsRoutes = require('./fields');
 const modulesRoute = require('./modules');
 const blocksRoute = require('./blocks');
+const rolesRoute = require('./roles');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/classes", classesRoute);
 app.use("/modules", modulesRoute);
 app.use("/fields", fieldsRoutes);
 app.use("/blocks", blocksRoute);
+app.use("/roles", rolesRoute);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
