@@ -13,6 +13,7 @@ const fieldsRoutes = require('./fields');
 const modulesRoute = require('./modules');
 const blocksRoute = require('./blocks');
 const rolesRoute = require('./roles');
+const permissionsRoute = require('./permissions');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/modules", modulesRoute);
 app.use("/fields", fieldsRoutes);
 app.use("/blocks", blocksRoute);
 app.use("/roles", rolesRoute);
+app.use("/permissions", permissionsRoute);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
