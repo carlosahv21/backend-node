@@ -15,7 +15,39 @@ class UsersController extends BaseController {
         super("users");
     }
 
-    // Sobrescribimos create para manejar la encriptación y la asignación de rol
+    // Sobrescribimos getAll para filtrar por rol si se pasa en query
+    async getAll(req, res) {
+        try {
+            const { page = 1, limit = 10, search, role } = req.query;
+
+            // Construimos la query base desde el BaseController
+            let query = this._buildQuery({ search });
+
+            // Filtrar por rol si se proporciona
+            if (role) {
+                query = query.where('r.name', role);
+            }
+
+            const results = await query.limit(limit).offset((page - 1) * limit);
+
+            // Total de registros considerando el filtro
+            let totalQuery = this._buildQuery({ search, isCount: true });
+            if (role) totalQuery = totalQuery.where('r.name', role);
+            const totalRes = await totalQuery.count("* as count").first();
+
+            res.json({
+                data: results,
+                total: totalRes.count,
+                page: parseInt(page),
+                limit: parseInt(limit)
+            });
+        } catch (error) {
+            console.error("❌ Error retrieving users:", error);
+            res.status(500).json({ message: "Error retrieving users", error });
+        }
+    }
+
+    // Sobrescribimos create y update como lo tenías para manejar rol y contraseña
     async create(req, res) {
         try {
             const data = req.body;
@@ -27,23 +59,14 @@ class UsersController extends BaseController {
             }
 
             // Asegurar email_verified por defecto
-            if (data.email_verified === undefined) {
-                data.email_verified = false;
-            }
+            if (data.email_verified === undefined) data.email_verified = false;
 
-            // Separar campos estándar y personalizados
-            const { standardFields, customFields } = this.splitFields(data);
-
-            // Extraer role para no insertarlo en la tabla users
+            const { standardFields } = this.splitFields(data);
             const { role, ...userFields } = standardFields;
 
-            // Insertar usuario
             const [userId] = await this.knex(this.tableName).insert(userFields);
-
-            // Guardar campos dinámicos
             await this.saveCustomFields(userId, data);
 
-            // Asignar rol al usuario
             if (role) {
                 const roleRecord = await this.knex('roles').where({ name: role }).first();
                 if (roleRecord) {
@@ -61,30 +84,21 @@ class UsersController extends BaseController {
         }
     }
 
-    // Sobrescribimos update para manejar la asignación de rol
     async update(req, res) {
         try {
             const data = { ...req.body, id: req.params.id };
 
-            // Separar campos estándar y personalizados
-            const { standardFields, customFields } = this.splitFields(data);
-
-            // Extraer role para no insertarlo en la tabla users
+            const { standardFields } = this.splitFields(data);
             const { role, ...userFields } = standardFields;
 
-            // Actualizar usuario
             const updatedCount = await this.knex(this.tableName)
                 .where({ id: data.id })
                 .update(userFields);
 
-            if (updatedCount === 0) {
-                return res.status(404).json({ message: `${this.tableName} record not found` });
-            }
+            if (updatedCount === 0) return res.status(404).json({ message: "Usuario no encontrado" });
 
-            // Guardar campos dinámicos
             await this.saveCustomFields(data.id, data);
 
-            // Asignar rol al usuario
             if (role) {
                 const roleRecord = await this.knex('roles').where({ name: role }).first();
                 if (roleRecord) {
@@ -96,10 +110,10 @@ class UsersController extends BaseController {
                 }
             }
 
-            res.json({ message: `${this.tableName} record updated successfully` });
+            res.json({ message: "Usuario actualizado correctamente" });
         } catch (error) {
             console.error(`❌ Error updating user:`, error);
-            res.status(500).json({ message: `Error updating user`, error });
+            res.status(500).json({ message: "Error interno", error });
         }
     }
 }

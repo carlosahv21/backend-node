@@ -78,7 +78,6 @@ class BaseController {
         }
     }
 
-
     // Obtener un registro por ID
     async getById(req, res) {
         try {
