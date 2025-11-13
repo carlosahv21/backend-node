@@ -2,19 +2,32 @@
 const knex = require('../knex');
 
 async function getFieldsData() {
-    const [blockInformation] = await knex('blocks').where('name', 'Basic Information').select('id');
-    const [blockDetails] = await knex('blocks').where('name', 'Class Details').select('id');
-    const [blockSchedule] = await knex('blocks').where('name', 'Schedule').select('id');
+    const [classBlockInfo] = await knex('blocks')
+        .where({ name: 'Basic Information', module_id: 5 })
+        .select('id');
+
+    const [usersBlockInfo] = await knex('blocks')
+        .where({ name: 'Basic Information', module_id: 4 })
+        .select('id');
+
+    const [blockDetails] = await knex('blocks')
+        .where({ name: 'Class Details', module_id: 5 })
+        .select('id');
+
+    const [blockSchedule] = await knex('blocks')
+        .where({ name: 'Schedule', module_id: 5 })
+        .select('id');
+
 
     const fieldsData = [
-        // 🧩 Información general
+        // 🧩 Información general (Clases)
         {
             name: "name",
             type: "text",
             label: "Name",
             required: true,
             order_sequence: 1,
-            block_id: blockInformation.id,
+            block_id: classBlockInfo.id,
         },
         {
             name: "level",
@@ -23,7 +36,7 @@ async function getFieldsData() {
             required: true,
             order_sequence: 2,
             options: JSON.stringify(["Basic", "Intermediate", "Advanced"]),
-            block_id: blockInformation.id,
+            block_id: classBlockInfo.id,
         },
         {
             name: "genre",
@@ -32,7 +45,7 @@ async function getFieldsData() {
             required: true,
             order_sequence: 3,
             options: JSON.stringify(["Salsa", "Bachata", "Reggaeton", "Cumbia"]),
-            block_id: blockInformation.id,
+            block_id: classBlockInfo.id,
         },
 
         // 📄 Detalles
@@ -78,11 +91,51 @@ async function getFieldsData() {
             required: true,
             order_sequence: 3,
             block_id: blockSchedule.id,
+        },
+
+        // 🧩 Información Usuarios
+        {
+            name: "first_name",
+            type: "text",
+            label: "First Name",
+            required: true,
+            order_sequence: 1,
+            block_id: usersBlockInfo.id,
+        },
+        {
+            name: "last_name",
+            type: "text",
+            label: "Last Name",
+            required: true,
+            order_sequence: 2,
+            block_id: usersBlockInfo.id,
+        },
+        {
+            name: "email",
+            type: "text",
+            label: "Email",
+            required: true,
+            order_sequence: 3,
+            block_id: usersBlockInfo.id,
+        },
+        {
+            name: "password",
+            type: "password",
+            label: "Password",
+            required: true,
+            order_sequence: 4,
+            block_id: usersBlockInfo.id,
+        },
+        {
+            name: "role",
+            type: "select",
+            label: "Role",
+            required: true,
+            order_sequence: 4,
+            block_id: usersBlockInfo.id,
         }
     ];
 
-    await knex.destroy();
-    
     return fieldsData;
 }
 

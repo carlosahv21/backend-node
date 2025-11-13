@@ -111,22 +111,31 @@ class fieldsController extends BaseController {
             // Obtener los bloques asociados al módulo
             const blocks = await this.knex('blocks')
                 .where({ module_id })
-                .select('id', 'name', 'collapsible', 'display_mode');                
+                .select('id', 'name', 'collapsible', 'display_mode');
 
             // Para cada bloque, obtener sus campos asociados
             const blocksWithFields = await Promise.all(
                 blocks.map(async (block) => {
-                    const fields = await this.knex('fields')
+                    let fields = await this.knex('fields')
                         .where({ block_id: block.id })
                         .select(
-                            'id', 'block_id', 'name', 'label', 'type', 'options','required', 'order_sequence'
+                            'id', 'block_id', 'name', 'label', 'type', 'options', 'required', 'order_sequence'
                         );
+
+                    // Excepción: si hay un campo 'role', llenamos las opciones desde la tabla roles
+                    fields = await Promise.all(fields.map(async field => {
+                        if (field.name === 'role') {
+                            const roles = await this.knex('roles').select('name');
+                            field.options = roles.map(r => r.name); // ["Admin", "Manager", "User"]
+                        }
+                        return field;
+                    }));
 
                     return {
                         block_id: block.id,
                         block_name: block.name,
-                        collapsible: block.collapsible, // Permite que los bloques se colapsen en el frontend
-                        display_mode: block.display_mode || 'edit', // Define el modo de visualización por defecto
+                        collapsible: block.collapsible,
+                        display_mode: block.display_mode || 'edit',
                         fields: fields.map(field => ({
                             field_id: field.id,
                             name: field.name,
