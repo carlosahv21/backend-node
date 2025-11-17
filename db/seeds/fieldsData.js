@@ -3,19 +3,19 @@ const knex = require('../knex');
 
 async function getFieldsData() {
     const [classBlockInfo] = await knex('blocks')
-        .where({ name: 'Basic Information', module_id: 5 })
+        .where({ name: 'Basic Information', module_id: 6 })
         .select('id');
 
     const [usersBlockInfo] = await knex('blocks')
-        .where({ name: 'Basic Information', module_id: 4 })
+        .where({ name: 'Basic Information', module_id: 3 })
         .select('id');
 
     const [blockDetails] = await knex('blocks')
-        .where({ name: 'Class Details', module_id: 5 })
+        .where({ name: 'Class Details', module_id: 6 })
         .select('id');
 
     const [blockSchedule] = await knex('blocks')
-        .where({ name: 'Schedule', module_id: 5 })
+        .where({ name: 'Schedule', module_id: 6 })
         .select('id');
 
 

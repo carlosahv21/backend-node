@@ -12,16 +12,15 @@ exports.up = async function (knex) {
         table.string('name').notNullable();
         table.string('description');
         table.integer('order').defaultTo(0);
-        table.boolean('collapsible').defaultTo(false); // permite colapsar
-        table.string('display_mode').defaultTo('edit'); // 'edit' o 'readonly'
+        table.boolean('collapsible').defaultTo(false);
+        table.string('display_mode').defaultTo('edit');
         table.timestamps(true, true);
     });
 
     console.log("Table 'blocks' created successfully.");
 
-    const blocksData = await getBlocksData();
+    const blocksData = await getBlocksData(knex); // <-- PASAS knex AQUÍ
     await knex('blocks').insert(blocksData);
-    
 };
 
 exports.down = function (knex) {

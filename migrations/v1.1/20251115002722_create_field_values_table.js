@@ -35,4 +35,5 @@ exports.up = async function (knex) {
 
 exports.down = async function (knex) {
     await knex.schema.dropTableIfExists('field_values');
+    await knex.schema.dropTableIfExists('custom_field_counters');
 };

@@ -1,68 +1,52 @@
 // db/seeds/blocksData.js
-const knex = require('../knex');
 
-async function getBlocksData() {
+async function getBlocksData(knex) {
+    // Obtener los módulos
     const [classModule] = await knex('modules')
-        .where('name', 'Class')
-        .select('id');
-
-    const [settingsModule] = await knex('modules')
-        .where('name', 'Settings')
+        .where('name', 'classes')
         .select('id');
 
     const [usersModule] = await knex('modules')
-        .where('name', 'Users')
+        .where('name', 'users')
         .select('id');
 
-    const blocksData = [
-        // Bloques Clases
+    return [
+        // Bloques para Class
         {
+            module_id: classModule.id,
             name: "Basic Information",
             description: "Basic information block",
             order: 1,
-            module_id: classModule.id,
             collapsible: true,
             display_mode: "edit",
         },
         {
+            module_id: classModule.id,
             name: "Class Details",
             description: "Class details block",
             order: 2,
-            module_id: classModule.id,
             collapsible: true,
             display_mode: "edit",
         },
         {
+            module_id: classModule.id,
             name: "Schedule",
             description: "Schedule block",
             order: 3,
-            module_id: classModule.id,
             collapsible: false,
             display_mode: "edit",
         },
 
-        // Bloques Settings
+        // Bloques para Users
         {
-            name: "General Information",
-            description: "General Information block",
-            order: 1,
-            module_id: settingsModule.id,
-            collapsible: true,
-            display_mode: "edit",
-        },
-
-        // Bloques Users
-        {
+            module_id: usersModule.id,
             name: "Basic Information",
             description: "Basic user information",
             order: 1,
-            module_id: usersModule.id,
             collapsible: true,
             display_mode: "edit",
         }
     ];
-    
-    return blocksData;
 }
 
 module.exports = { getBlocksData };

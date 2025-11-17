@@ -10,19 +10,19 @@ const db = knex({
         port: process.env.DB_PORT || 3306, // El puerto por defecto es 3306 para MySQL
     },
 });
-const db_version = await db('database_version').first('version');
 // knexfile.js
 module.exports = {
     development: {
-        client: 'mysql2', // o 'pg', 'sqlite3', según tu caso
+        client: 'mysql2',
         connection: {
             host: '127.0.0.1',
             user: 'root',
             password: '',
             database: 'backend_db',
+            port: process.env.DB_PORT || 3306
         },
         migrations: {
-            directory: './migrations/'+db_version, // <-- importante
+            directory: './migrations/v1.0',
             extension: 'js'
         },
         seeds: {
