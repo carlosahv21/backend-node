@@ -25,7 +25,7 @@ class BaseController {
     }
 
     // Función auxiliar para construir la query
-    _buildQuery({ search, isCount = false }) {
+    _buildQuery({ search, isCount = false, ...queryParams }) {
         let query = this.knex(this.tableName);
 
         // Joins dinámicos
@@ -35,14 +35,14 @@ class BaseController {
             });
         }
 
-        // Select
+        // Select dinámico
         if (!isCount) {
             query = this.selectFields && Array.isArray(this.selectFields)
                 ? query.select(this.selectFields)
                 : query.select(`${this.tableName}.*`);
         }
 
-        // Búsqueda
+        // Búsqueda por texto
         if (search && Array.isArray(this.searchFields) && this.searchFields.length > 0) {
             query = query.where(builder => {
                 this.searchFields.forEach((field, index) => {
@@ -52,18 +52,32 @@ class BaseController {
             });
         }
 
+        // ⭐ FILTROS DINÁMICOS (aquí está la magia)
+        Object.keys(queryParams).forEach(key => {
+            if (["search", "page", "limit"].includes(key)) return;
+
+            let value = queryParams[key];
+
+            // convertir "true"/"false" a boolean
+            if (value === "true") value = true;
+            if (value === "false") value = false;
+
+            query = query.where(`${this.tableName}.${key}`, value);
+        });
+
         return query;
     }
+
 
     // Obtener todos los registros con paginación, búsqueda y filtros
     async getAll(req, res) {
         try {
-            const { page = 1, limit = 10, search } = req.query;
+            const { page = 1, limit = 10, ...filters } = req.query;
 
-            const query = this._buildQuery({ search });
+            const query = this._buildQuery(filters);
             const results = await query.limit(limit).offset((page - 1) * limit);
 
-            const totalQuery = this._buildQuery({ search, isCount: true });
+            const totalQuery = this._buildQuery({ ...filters, isCount: true });
             const totalRes = await totalQuery.count("* as count").first();
 
             res.json({
@@ -77,6 +91,7 @@ class BaseController {
             res.status(500).json({ message: "Error retrieving records", error });
         }
     }
+
 
     // Obtener un registro por ID
     async getById(req, res) {

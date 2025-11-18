@@ -2,27 +2,36 @@ exports.up = async function (knex) {
     // Crear tabla modules
     await knex.schema.createTable("modules", function (table) {
         table.increments("id").primary();
-        table.string("name").notNullable().unique();  // nombre del módulo
-        table.text("description").nullable();         // descripción corta
-        table.boolean("is_active").defaultTo(true);   // activo/inactivo
+        table.string("name").notNullable().unique();
+        table.text("description").nullable();
+        table.boolean("is_active").defaultTo(true);
+        table.integer("parent_module_id").unsigned().nullable();
+        table.boolean("has_custom_fields").defaultTo(false);
         table.timestamps(true, true);
     });
 
-    // Insertar los módulos iniciales según la estructura deseada
+    // Insertar módulos sin dependencias
     await knex("modules").insert([
-        { name: "settings", description: "Configuración del sistema", is_active: true },
-        { name: "dashboard", description: "Panel general", is_active: true },
-        { name: "users", description: "Gestión de usuarios", is_active: true },
-        { name: "roles", description: "Gestión de roles", is_active: true },
-        { name: "permissions", description: "Gestión de permisos", is_active: true },
-        { name: "classes", description: "Gestión de clases", is_active: true },
-        { name: "students", description: "Gestión de estudiantes", is_active: true },
-        { name: "teachers", description: "Gestión de profesores", is_active: true },
-        { name: "assistants", description: "Gestión de asistentes", is_active: true },
-        { name: "fields", description: "Campos personalizados", is_active: true },
-        { name: "modules", description: "Gestión de módulos", is_active: true },
-        { name: "blocks", description: "Bloques (estructura de clases)", is_active: true },
-        { name: "routes", description: "Gestión de rutas", is_active: true },
+        { name: "settings", description: "Configuración del sistema", has_custom_fields: false },
+        { name: "dashboard", description: "Panel general", has_custom_fields: false },
+        { name: "users", description: "Gestión de usuarios", has_custom_fields: true },
+        { name: "roles", description: "Gestión de roles", has_custom_fields: false },
+        { name: "permissions", description: "Gestión de permisos", has_custom_fields: false },
+        { name: "classes", description: "Gestión de clases", has_custom_fields: true },
+        { name: "assistants", description: "Gestión de asistentes", has_custom_fields: true },
+        { name: "fields", description: "Campos personalizados", has_custom_fields: false },
+        { name: "modules", description: "Gestión de módulos", has_custom_fields: false },
+        { name: "blocks", description: "Bloques (estructura de clases)", has_custom_fields: false },
+        { name: "routes", description: "Gestión de rutas", has_custom_fields: false },
+    ]);
+
+    // Obtener ID real del módulo users
+    const usersModule = await knex("modules").where("name", "users").first();
+
+    // Insertar dependientes de users (students, teachers)
+    await knex("modules").insert([
+        { name: "students", description: "Gestión de estudiantes", has_custom_fields: true, parent_module_id: usersModule.id },
+        { name: "teachers", description: "Gestión de profesores", has_custom_fields: true, parent_module_id: usersModule.id },
     ]);
 };
 

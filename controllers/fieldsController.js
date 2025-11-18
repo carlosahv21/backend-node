@@ -33,16 +33,17 @@ class fieldsController extends BaseController {
 
             // Tomar el ultimo número de campo para el módulo
             const lastCfNumber = await this.knex('custom_field_counters').first();
-
             data.name = `cf_${lastCfNumber.last_cf_number}`;
             // Actualizar el contador de campos personalizados
             await this.knex('custom_field_counters')
                 .where({ id: lastCfNumber.id })
                 .update({ last_cf_number: lastCfNumber.last_cf_number + 2 });
 
+            // ⚠️ Eliminar module_id antes de insertar
+            delete data.module_id;
+
             // Insertar en la base de datos
-            const result = await this.knex(this.tableName)
-                .insert(data);
+            const result = await this.knex(this.tableName).insert(data);
 
             res.status(201).json({
                 success: true,
@@ -59,6 +60,7 @@ class fieldsController extends BaseController {
         }
     }
 
+
     /*
     * Actualiza un campo en la base de datos.
     */
@@ -66,6 +68,8 @@ class fieldsController extends BaseController {
         try {
             const { id } = req.params;
             const data = req.body;
+
+            // Siempre eliminar module_id para no permitir cambiarlo
             delete data.module_id;
 
             // Actualizar en la base de datos
@@ -95,10 +99,10 @@ class fieldsController extends BaseController {
         const { id: module_id } = req.params;
 
         try {
-            // Verificar si el módulo existe
+            // 1️⃣ Obtener información del módulo (incluido parent_module_id)
             const module = await this.knex('modules')
                 .where({ id: module_id })
-                .select('id', 'name')
+                .select('id', 'name', 'parent_module_id')
                 .first();
 
             if (!module) {
@@ -108,12 +112,27 @@ class fieldsController extends BaseController {
                 });
             }
 
-            // Obtener los bloques asociados al módulo
-            const blocks = await this.knex('blocks')
+            // 2️⃣ Traer bloques propios del módulo
+            let blocks = await this.knex('blocks')
                 .where({ module_id })
                 .select('id', 'name', 'collapsible', 'display_mode');
 
-            // Para cada bloque, obtener sus campos asociados
+            // 3️⃣ Si el módulo tiene padre, traer bloques heredados
+            if (module.parent_module_id) {
+                const parentBlocks = await this.knex('blocks')
+                    .where({ module_id: module.parent_module_id })
+                    .select('id', 'name', 'collapsible', 'display_mode');
+
+                // Marcar bloques heredados y combinar
+                blocks = [
+                    ...parentBlocks.map(b => ({ ...b, inherited: true })),
+                    ...blocks.map(b => ({ ...b, inherited: false }))
+                ];
+            } else {
+                blocks = blocks.map(b => ({ ...b, inherited: false }));
+            }
+
+            // 4️⃣ Para cada bloque, traer campos (heredados también)
             const blocksWithFields = await Promise.all(
                 blocks.map(async (block) => {
                     let fields = await this.knex('fields')
@@ -128,7 +147,10 @@ class fieldsController extends BaseController {
                             const roles = await this.knex('roles').select('name');
                             field.options = roles.map(r => r.name); // ["Admin", "Manager", "User"]
                         }
-                        return field;
+                        return {
+                            ...field,
+                            inherited: block.inherited // campos heredan la propiedad del bloque
+                        };
                     }));
 
                     return {
@@ -136,6 +158,7 @@ class fieldsController extends BaseController {
                         block_name: block.name,
                         collapsible: block.collapsible,
                         display_mode: block.display_mode || 'edit',
+                        inherited: block.inherited,
                         fields: fields.map(field => ({
                             field_id: field.id,
                             name: field.name,
@@ -144,11 +167,13 @@ class fieldsController extends BaseController {
                             options: field.options,
                             required: field.required,
                             order_sequence: field.order_sequence,
+                            inherited: field.inherited
                         }))
                     };
                 })
             );
 
+            // 5️⃣ Responder con la estructura final
             res.json({
                 success: true,
                 module: {
@@ -157,6 +182,7 @@ class fieldsController extends BaseController {
                     blocks: blocksWithFields
                 }
             });
+
         } catch (error) {
             console.error("❌ Error al obtener campos del módulo:", error);
             res.status(500).json({
@@ -166,6 +192,8 @@ class fieldsController extends BaseController {
             });
         }
     }
+
+
 }
 
 module.exports = new fieldsController();
