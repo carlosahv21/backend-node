@@ -84,10 +84,19 @@ class RolePermissionsController extends BaseController {
             const roles = await db("roles as r")
                 .leftJoin("role_permissions as rp", "r.id", "rp.role_id")
                 .leftJoin("permissions as p", "rp.permission_id", "p.id")
+                .leftJoin("routes as ro", "p.route_id", "ro.id") // <-- join con la tabla de módulos
                 .select(
                     "r.id as role_id",
                     "r.name as role_name",
-                    db.raw("JSON_ARRAYAGG(JSON_OBJECT('id', p.id, 'name', p.name)) as permissions")
+                    db.raw(`
+                    JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'id', p.id,
+                            'name', p.name,
+                            'module', ro.name
+                        )
+                    ) as permissions
+                `)
                 )
                 .groupBy("r.id");
 
@@ -97,6 +106,7 @@ class RolePermissionsController extends BaseController {
             res.status(500).json({ message: "Error retrieving roles with permissions", error });
         }
     }
+
 }
 
 module.exports = new RolePermissionsController();
