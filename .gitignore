@@ -1,3 +1,11 @@
-.env
-storage/*
+# Dependencias de Node
 /node_modules
+
+# Archivos del sistema operativo
+.DS_Store
+
+# Archivos de configuración
+.env
+
+# Directorios de almacenamiento
+/storage

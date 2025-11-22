@@ -1,42 +1,42 @@
 // routes/users.js
 const express = require('express');
 const router = express.Router();
-const usersController = require('../controllers/usersController');
-const { authenticateToken, authorize } = require('../middlewares/authMiddleware'); 
+const userController = require('../controllers/userController');
+const { authenticateToken, authorize } = require('../middlewares/authMiddleware');
 
-// 1. OBTENER todos (users:view)
+// GET /api/users
 router.get("/",
     authenticateToken,
     authorize("users", "view"),
-    (req, res) => usersController.getAll(req, res)
+    (req, res, next) => userController.getAll(req, res, next) // Añadimos 'next'
 );
 
-// 2. OBTENER por ID (users:view)
+// GET /api/users/:id
 router.get("/:id",
     authenticateToken,
     authorize("users", "view"),
-    (req, res) => usersController.getById(req, res)
+    (req, res, next) => userController.getById(req, res, next) // Añadimos 'next'
 );
 
-// 3. CREAR (users:create)
+// POST /api/users
 router.post("/",
     authenticateToken,
     authorize("users", "create"),
-    (req, res) => usersController.create(req, res)
+    (req, res, next) => userController.create(req, res, next) // Añadimos 'next'
 );
 
-// 4. ACTUALIZAR (users:edit)
+// PUT /api/users/:id
 router.put("/:id",
     authenticateToken,
     authorize("users", "edit"),
-    (req, res) => usersController.update(req, res)
+    (req, res, next) => userController.update(req, res, next) // Añadimos 'next'
 );
 
-// 5. ELIMINAR (users:delete)
+// DELETE /api/users/:id
 router.delete("/:id",
     authenticateToken,
     authorize("users", "delete"),
-    (req, res) => usersController.delete(req, res)
+    (req, res, next) => userController.delete(req, res, next) // Añadimos 'next'
 );
 
 module.exports = router;

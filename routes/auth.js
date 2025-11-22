@@ -1,14 +1,23 @@
+// routes/auth.js
 const express = require("express");
-const { login, me } = require("../controllers/authController");
+const authController = require("../controllers/authController");
 const { authenticateToken } = require("../middlewares/authMiddleware");
-
 
 const router = express.Router();
 
-// Ruta de login
-router.post("/login", login);
+/**
+ * Rutas de Autenticación.
+ */
 
-// Ruta para obtener info del usuario con token
-router.get("/me", authenticateToken , me);
+// POST /api/auth/login
+router.post("/login", 
+    (req, res, next) => authController.login(req, res, next)
+);
+
+// GET /api/auth/me
+router.get("/me", 
+    authenticateToken, 
+    (req, res, next) => authController.me(req, res, next)
+);
 
 module.exports = router;

@@ -1,10 +1,28 @@
-// routes/role-permissions.js
+// routes/rolePermissions.js
 const express = require('express');
 const router = express.Router();
-const rolePermissionsRoute = require('../controllers/rolePermissionsController.js');
+const rolePermissionController = require('../controllers/rolePermissionController');
+const { authenticateToken, authorize } = require('../middlewares/authMiddleware');
 
-router.get('/', (req, res) => rolePermissionsRoute.getAllRolesWithPermissions(req, res));
-router.get('/:role_id', (req, res) => rolePermissionsRoute.getPermissionsByRole(req, res));
-router.post('/:role_id', (req, res) => rolePermissionsRoute.setPermissionsForRole(req, res));
+// GET /api/role-permissions/all
+router.get("/all", 
+    authenticateToken, 
+    authorize("roles", "view"), 
+    (req, res, next) => rolePermissionController.getAllRolesWithPermissions(req, res, next)
+);
+
+// GET /api/role-permissions/:role_id
+router.get("/:role_id", 
+    authenticateToken, 
+    authorize("roles", "view"), 
+    (req, res, next) => rolePermissionController.getPermissionsByRole(req, res, next)
+);
+
+// PUT /api/role-permissions/:role_id
+router.put("/:role_id", 
+    authenticateToken, 
+    authorize("roles", "edit"), 
+    (req, res, next) => rolePermissionController.setPermissionsForRole(req, res, next)
+);
 
 module.exports = router;

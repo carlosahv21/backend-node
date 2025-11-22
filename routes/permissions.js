@@ -1,13 +1,45 @@
-// routes/permissions.js    
+// routes/permissions.js
 const express = require('express');
 const router = express.Router();
-const permissionsController = require('../controllers/permissionsController.js');
+const permissionController = require('../controllers/permissionController');
+const { authenticateToken, authorize } = require('../middlewares/authMiddleware');
 
-// Rutas que utilizan los métodos genéricos de BaseController
-router.get('/', (req, res) => permissionsController.getAll(req, res)); // Obtener todos los perfiles
-router.get('/:id', (req, res) => permissionsController.getById(req, res)); // Obtener perfil por ID
-router.post('/', (req, res) => permissionsController.create(req, res)); // Crear perfil
-router.put('/:id', (req, res) => permissionsController.update(req, res)); // Actualizar perfil
-router.delete('/:id', (req, res) => permissionsController.delete(req, res)); // Eliminar perfil
+// Rutas CRUD Estándar
+// Se asume que la gestión de permisos es una acción privilegiada, por lo que requieren autenticación y autorización.
+
+// GET /api/permissions
+router.get("/", 
+    authenticateToken, 
+    authorize("permissions", "view"), 
+    (req, res, next) => permissionController.getAll(req, res, next)
+);
+
+// GET /api/permissions/:id
+router.get("/:id", 
+    authenticateToken, 
+    authorize("permissions", "view"), 
+    (req, res, next) => permissionController.getById(req, res, next)
+);
+
+// POST /api/permissions
+router.post("/", 
+    authenticateToken, 
+    authorize("permissions", "create"), 
+    (req, res, next) => permissionController.create(req, res, next)
+);
+
+// PUT /api/permissions/:id
+router.put("/:id", 
+    authenticateToken, 
+    authorize("permissions", "edit"), 
+    (req, res, next) => permissionController.update(req, res, next)
+);
+
+// DELETE /api/permissions/:id
+router.delete("/:id", 
+    authenticateToken, 
+    authorize("permissions", "delete"), 
+    (req, res, next) => permissionController.delete(req, res, next)
+);
 
 module.exports = router;

@@ -1,26 +1,21 @@
-const express = require("express");
-const { getSettings, updateSettings } = require("../controllers/settingController");
-
+// routes/settings.js
+const express = require('express');
 const router = express.Router();
+const settingController = require('../controllers/settingController');
+const { authenticateToken, authorize } = require('../middlewares/authMiddleware');
 
-router.get("/", async (req, res) => {
-    try {
-        const settings = await getSettings();
-        res.json(settings);
-    } catch (err) {
-        console.error("Error getting settings:", err);
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
+// GET /api/settings
+router.get("/", 
+    authenticateToken, 
+    authorize("settings", "view"), 
+    (req, res, next) => settingController.getSettings(req, res, next)
+);
 
-router.post('/', async (req, res) => {
-    try {
-        const settings = await updateSettings(req.body);  // Pasar req.body para la actualización
-        res.json(settings);  // Responder con los settings actualizados
-    } catch (err) {
-        console.error("Error updating settings:", err);
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
+// PUT /api/settings
+router.put("/", 
+    authenticateToken, 
+    authorize("settings", "edit"), 
+    (req, res, next) => settingController.updateSettings(req, res, next)
+);
 
 module.exports = router;

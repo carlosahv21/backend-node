@@ -1,13 +1,42 @@
 // routes/roles.js
 const express = require('express');
 const router = express.Router();
-const rolesController = require('../controllers/rolesController');
+const roleController = require('../controllers/roleController');
+const { authenticateToken, authorize } = require('../middlewares/authMiddleware');
 
-// Rutas que utilizan los métodos genéricos de BaseController
-router.get('/', (req, res) => rolesController.getAll(req, res)); // Obtener todas las clases
-router.get('/:id', (req, res) => rolesController.getById(req, res)); // Obtener clase por ID
-router.post('/', (req, res) => rolesController.create(req, res)); // Crear clase
-router.put('/:id', (req, res) => rolesController.update(req, res)); // Actualizar clase
-router.delete('/:id', (req, res) => rolesController.delete(req, res)); // Eliminar clase
+// GET /api/roles
+router.get("/", 
+    authenticateToken, 
+    authorize("roles", "view"), 
+    (req, res, next) => roleController.getAll(req, res, next)
+);
+
+// GET /api/roles/:id
+router.get("/:id", 
+    authenticateToken, 
+    authorize("roles", "view"), 
+    (req, res, next) => roleController.getById(req, res, next)
+);
+
+// POST /api/roles
+router.post("/", 
+    authenticateToken, 
+    authorize("roles", "create"), 
+    (req, res, next) => roleController.create(req, res, next)
+);
+
+// PUT /api/roles/:id
+router.put("/:id", 
+    authenticateToken, 
+    authorize("roles", "edit"), 
+    (req, res, next) => roleController.update(req, res, next)
+);
+
+// DELETE /api/roles/:id
+router.delete("/:id", 
+    authenticateToken, 
+    authorize("roles", "delete"), 
+    (req, res, next) => roleController.delete(req, res, next)
+);
 
 module.exports = router;

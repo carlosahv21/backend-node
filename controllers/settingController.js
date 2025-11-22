@@ -1,32 +1,39 @@
-const knex = require('../db/knex');
+// controllers/settingController.js
+const settingService = require('../services/settingService');
 const utilsCustomError = require('../utils/utilsCustomError');
 
-const getSettings = async () => {
-  try {
-    const settings = await knex('settings').first();
-    if (!settings) {
-      throw new utilsCustomError('Settings not found', 404, 'No settings available in the database');
-    }
-    return settings;
-  } catch (err) {
-    throw new utilsCustomError('Error fetching settings from the database', 500, err.message);
-  }
-};
+/**
+ * Clase controladora para Configuración (Settings). 
+ */
+class SettingController {
 
-const updateSettings = async (newSettings) => {
-  try {
-    const updated = await knex('settings').update(newSettings);
-    
-    // Verificar si la actualización fue exitosa
-    if (!updated) {
-      throw new utilsCustomError('Failed to update settings', 500, 'Database update failed');
+  /**
+   * Obtiene la configuración global.
+   */
+  async getSettings(req, res, next) {
+    try {
+      const settings = await settingService.getSettings();
+      res.status(200).json(settings);
+    } catch (error) {
+      next(new utilsCustomError(error.message, error.status || 500));
     }
-    
-    const updatedSettings = await getSettings();
-    return updatedSettings;
-  } catch (err) {
-    throw new utilsCustomError('Error updating settings in the database', 500, err.message);
   }
-};
 
-module.exports = { getSettings, updateSettings };
+  /**
+   * Actualiza la configuración global.
+   */
+  async updateSettings(req, res, next) {
+    try {
+      const updatedSettings = await settingService.updateSettings(req.body);
+      res.status(200).json({
+        success: true,
+        message: "Configuración actualizada correctamente",
+        data: updatedSettings
+      });
+    } catch (error) {
+      next(new utilsCustomError(error.message, error.status || 500));
+    }
+  }
+}
+
+module.exports = new SettingController();

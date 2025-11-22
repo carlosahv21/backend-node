@@ -1,13 +1,50 @@
 // routes/fields.js
 const express = require('express');
 const router = express.Router();
-const fieldsController = require('../controllers/fieldsController');
+const fieldController = require('../controllers/fieldController');
+const { authenticateToken, authorize } = require('../middlewares/authMiddleware');
 
-// La ruta debe capturar correctamente `module_id`
-router.get('/:id', (req, res) => fieldsController.getFieldsByModule(req, res)); // Obtener campo por ID
-router.post('/', (req, res) => fieldsController.create(req, res)); // Crear campo
-router.put('/:id', (req, res) => fieldsController.update(req, res)); // Actualizar campo
-router.delete('/:id', (req, res) => fieldsController.delete(req, res)); // Eliminar campo
+// GET /api/fields (Obtener todos los campos con paginación/filtros)
+router.get("/",
+    authenticateToken,
+    authorize("fields", "view"),
+    (req, res, next) => fieldController.getAll(req, res, next)
+);
 
+// GET /api/fields/:id
+router.get("/:id",
+    authenticateToken,
+    authorize("fields", "view"),
+    (req, res, next) => fieldController.getById(req, res, next)
+);
+
+// POST /api/fields
+router.post("/",
+    authenticateToken,
+    authorize("fields", "create"),
+    (req, res, next) => fieldController.create(req, res, next)
+);
+
+// PUT /api/fields/:id
+router.put("/:id",
+    authenticateToken,
+    authorize("fields", "edit"),
+    (req, res, next) => fieldController.update(req, res, next)
+);
+
+// DELETE /api/fields/:id
+router.delete("/:id",
+    authenticateToken,
+    authorize("fields", "delete"),
+    (req, res, next) => fieldController.delete(req, res, next)
+);
+
+
+// GET /api/fields/module/:id
+router.get("/module/:id",
+    authenticateToken,
+    authorize("fields", "view"),
+    (req, res, next) => fieldController.getFieldsByModule(req, res, next)
+);
 
 module.exports = router;
