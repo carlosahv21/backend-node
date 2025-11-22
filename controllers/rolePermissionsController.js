@@ -60,24 +60,6 @@ class RolePermissionsController extends BaseController {
         }
     }
 
-    // Eliminar permisos de un rol
-    async removePermissionFromRole(req, res) {
-        try {
-            const { role_id, permission_id } = req.params;
-
-            if (!role_id || !permission_id) {
-                return res.status(400).json({ message: "role_id and permission_id are required" });
-            }
-
-            await db("role_permissions").where({ role_id, permission_id }).del();
-
-            res.json({ message: "Permission removed successfully", role_id, permission_id });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: "Error removing permission from role", error });
-        }
-    }
-
     // Obtener todos los roles con sus permisos
     async getAllRolesWithPermissions(req, res) {
         try {

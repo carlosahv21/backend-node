@@ -5,56 +5,74 @@ const utilsCustomError = require("../utils/utilsCustomError");
 
 // Función común para obtener usuario + rol + permisos + rutas + settings
 async function getUserData(userId) {
-  // Obtener usuario
-  const user = await knex("users").where({ id: userId }).first();
-  if (!user) throw new utilsCustomError("User not found", 404);
+    // === 1. Obtener usuario y rol ===
+    const userRecord = await knex("users").where({ id: userId }).first();
+    if (!userRecord) throw new utilsCustomError("User not found", 404);
 
-  // Obtener rol del usuario
-  const userRoleRecord = await knex("user_roles").where({ user_id: user.id }).first();
-  if (!userRoleRecord) throw new utilsCustomError("User has no role assigned", 403);
+    // Hacemos una única consulta para obtener el rol y los datos de la academia
+    const roleData = await knex("user_roles")
+        .join("roles", "user_roles.role_id", "roles.id")
+        .where("user_roles.user_id", userId)
+        .select("roles.id as role_id", "roles.name as role_name")
+        .first();
 
-  const userRole = await knex("roles").where({ id: userRoleRecord.role_id }).first();
+    if (!roleData) throw new utilsCustomError("User has no role assigned", 403);
 
-  // Permisos del rol
-  const rolePermissions = await knex("role_permissions")
-    .where({ role_id: userRole.id })
-    .pluck("permission_id");
+    // === 2. Obtener Permisos y Rutas con UNA SOLA consulta JOIN ===
+    const rawPermissionsAndRoutes = await knex("role_permissions")
+        .join("permissions", "role_permissions.permission_id", "permissions.id")
+        .join("routes", "permissions.route_id", "routes.id")
+        .where("role_permissions.role_id", roleData.role_id)
+        .andWhere("routes.is_active", 1)
+        .orderBy("routes.order")
+        .select(
+            "permissions.name as action",
+            "routes.*" // Trae todos los campos de routes (id, name, parent_id, etc.)
+        );
+        
+    // === 3. Procesamiento en JavaScript ===
 
-  // Rutas permitidas
-  const permittedRouteIds = await knex("permissions")
-    .whereIn("id", rolePermissions)
-    .pluck("route_id");
+    // 3a. Generar el array plano de permisos para el Frontend: ['classes:view', 'students:create']
+    const permissionsList = [...new Set(rawPermissionsAndRoutes.map(p => 
+        `${p.name}:${p.action}` // Usamos routes.name y permissions.name (action)
+    ))];
+    
+    // 3b. Filtrar rutas únicas y obtener solo las rutas permitidas (las necesitamos para el Sidebar)
+    const uniqueRouteIds = [...new Set(rawPermissionsAndRoutes.map(r => r.id))];
+    
+    const uniqueRoutes = rawPermissionsAndRoutes
+        .filter((route, index, self) => index === self.findIndex(r => r.id === route.id))
+        .filter(route => uniqueRouteIds.includes(route.id));
 
-  const routes = await knex("routes")
-    .whereIn("id", permittedRouteIds)
-    .andWhere("is_active", 1)
-    .orderBy("order");
+    // 3c. Construir árbol de rutas (tu función original)
+    const buildRouteTree = (flatRoutes) => {
+        // ... [Mantener tu lógica original de buildRouteTree aquí] ...
+        // Ya que la tienes definida arriba, simplemente asegúrate de que esté accesible aquí.
+        const map = {};
+        const tree = [];
+        flatRoutes.forEach(r => { map[r.id] = { ...r, children: [] }; });
+        flatRoutes.forEach(r => {
+            if (r.parent_id && map[r.parent_id]) map[r.parent_id].children.push(map[r.id]);
+            else if (!r.parent_id) tree.push(map[r.id]);
+        });
+        return tree;
+    };
+    const routesTree = buildRouteTree(uniqueRoutes);
 
-  // Construir árbol de rutas
-  const buildRouteTree = (flatRoutes) => {
-    const map = {};
-    const tree = [];
-    flatRoutes.forEach(r => { map[r.id] = { ...r, children: [] }; });
-    flatRoutes.forEach(r => {
-      if (r.parent_id && map[r.parent_id]) map[r.parent_id].children.push(map[r.id]);
-      else if (!r.parent_id) tree.push(map[r.id]);
-    });
-    return tree;
-  };
-  const routesTree = buildRouteTree(routes);
+    // 4. Configuración de la academia (Se mantiene como estaba, es otra tabla)
+    const settings = await knex("settings").first(); // 1 consulta extra
 
-  // Configuración de la academia
-  const settings = await knex("settings").first();
-
-  return {
-    user: {
-      id: user.id,
-      email: user.email,
-      role: userRole.name,
-    },
-    routes: routesTree,
-    settings
-  };
+    return {
+        user: {
+            id: userRecord.id,
+            email: userRecord.email,
+            role: roleData.role_name,
+        },
+        routes: routesTree,
+        settings,
+        // ESTO ES CLAVE: Permisos fáciles de validar en el frontend
+        permissions: permissionsList, 
+    };
 }
 
 // Login

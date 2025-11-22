@@ -8,17 +8,19 @@ exports.up = async function (knex) {
             table.integer("permission_id").unsigned().notNullable().references("id").inTable("permissions").onDelete("CASCADE");
             table.timestamps(true, true);
         });
-
         console.log('Table "role_permissions" created successfully.');
     }
 
-    // Obtener roles y permisos reales
     const roles = await knex("roles").select();
-    const permissions = await knex("permissions").select();
-
     const roleMap = Object.fromEntries(roles.map(r => [r.name, r.id]));
 
-    // ---- Asignaciones dinámicas ----
+    const permissions = await knex("permissions")
+        .join("routes", "permissions.route_id", "routes.id")
+        .select(
+            "permissions.id",
+            "permissions.name as action",
+            "routes.name as resource"
+        );
 
     // ADMIN → todos los permisos
     const adminPermissions = permissions.map(p => ({
@@ -27,15 +29,10 @@ exports.up = async function (knex) {
     }));
 
     // RECEPTIONIST → permisos relacionados con estudiantes, pagos y asistencia
-    const receptionistModules = [
-        "students",
-        "payments",
-        "attendance",
-        "reports",
-    ];
+    const receptionistModules = ["students", "payments", "attendance", "reports", "classes"]; // Agregué classes para que puedan verlas
 
     const receptionistPermissions = permissions
-        .filter(p => receptionistModules.some(m => p.name.startsWith(`${m}.`)))
+        .filter(p => receptionistModules.includes(p.resource))
         .map(p => ({
             role_id: roleMap["receptionist"],
             permission_id: p.id,
@@ -46,17 +43,17 @@ exports.up = async function (knex) {
 
     const teacherPermissions = permissions
         .filter(p =>
-            teacherModules.some(m => p.name.startsWith(`${m}.`)) &&
-            (p.name.endsWith(".view") || p.name.endsWith(".attend"))
+            teacherModules.includes(p.resource) &&
+            (p.action === 'view' || p.resource === 'attendance')
         )
         .map(p => ({
             role_id: roleMap["teacher"],
             permission_id: p.id,
         }));
 
-    // STUDENT → permisos muy limitados
+    const studentModules = ["students", "attendance"];
     const studentPermissions = permissions
-        .filter(p => p.name.startsWith("students.self_") || p.name.startsWith("attendance.self_"))
+        .filter(p => studentModules.includes(p.resource) && p.action === 'view')
         .map(p => ({
             role_id: roleMap["student"],
             permission_id: p.id,
@@ -70,12 +67,13 @@ exports.up = async function (knex) {
         ...studentPermissions
     ];
 
-    // Insertar solo permisos válidos
-    const validInserts = inserts.filter(i => i.permission_id);
+    // Limpieza de duplicados o nulos por seguridad
+    const uniqueInserts = [...new Set(inserts.map(JSON.stringify))].map(JSON.parse);
 
-    await knex("role_permissions").insert(validInserts);
-
-    console.log("Role permissions inserted.");
+    if (uniqueInserts.length > 0) {
+        await knex("role_permissions").insert(uniqueInserts);
+        console.log(`Inserted ${uniqueInserts.length} role permissions.`);
+    }
 };
 
 exports.down = async function (knex) {
