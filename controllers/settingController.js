@@ -1,6 +1,6 @@
 // controllers/settingController.js
-const settingService = require('../services/settingService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import settingService from '../services/settingService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Configuración (Settings). 
@@ -36,4 +36,4 @@ class SettingController {
   }
 }
 
-module.exports = new SettingController();
+export default new SettingController();

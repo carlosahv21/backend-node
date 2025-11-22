@@ -1,6 +1,6 @@
 // services/roleService.js
-const roleModel = require('../models/roleModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import roleModel from '../models/roleModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 const getAllRoles = async (queryParams) => {
     return roleModel.findAll(queryParams); 
@@ -24,7 +24,7 @@ const deleteRole = async (id) => {
     return roleModel.delete(id);
 };
 
-module.exports = {
+export default {
     getAllRoles,
     getRoleById,
     createRole,

@@ -1,5 +1,5 @@
 // models/routeModel.js
-const BaseModel = require('./BaseModel');
+import BaseModel from './baseModel.js';
 
 class RouteModel extends BaseModel {
     constructor() {
@@ -33,4 +33,4 @@ class RouteModel extends BaseModel {
     }
 }
 
-module.exports = new RouteModel();
+export default new RouteModel();

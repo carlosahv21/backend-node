@@ -1,7 +1,6 @@
 // services/permissionService.js
-const permissionModel = require('../models/permissionModel');
-const utilsCustomError = require('../utils/utilsCustomError');
-
+import permissionModel from '../models/permissionModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 const getAllPermissions = async (queryParams) => {
     return permissionModel.findAll(queryParams); 
@@ -23,7 +22,7 @@ const deletePermission = async (id) => {
     return permissionModel.delete(id);
 };
 
-module.exports = {
+export default {
     getAllPermissions,
     getPermissionById,
     createPermission,

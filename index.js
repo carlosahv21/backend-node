@@ -1,28 +1,29 @@
 // index.js
-require('dotenv').config();
+import 'dotenv/config'; // Forma estándar de cargar .env en ES Modules
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
-const errorHandler = require('./middlewares/errorHandlerMiddleware');
-const knex = require('./config/knex');
-const utilsCustomError = require('./utils/utilsCustomError');
+// --- Importación de Archivos Locales (Añadida la extensión .js) ---
+import errorHandler from './middlewares/errorHandlerMiddleware.js';
+import knex from './config/knex.js';
+import utilsCustomError from './utils/utilsCustomError.js';
 
-// --- Importación de Rutas ---
-const authRoutes = require('./routes/auth');
-const usersRoutes = require('./routes/users');
-const blocksRoutes = require('./routes/blocks');
-const classesRoutes = require('./routes/classes');
-const fieldsRoutes = require('./routes/fields');
-const modulesRoutes = require('./routes/modules');
-const permissionsRoutes = require('./routes/permissions');
-const rolePermissionsRoutes = require('./routes/rolePermissions');
-const rolesRoutes = require('./routes/roles');
-const routeRoutes = require('./routes/route');
-const settingsRoutes = require('./routes/settings');
-const fileRoutes = require('./routes/file');
+// --- Importación de Rutas (Añadida la extensión .js) ---
+import authRoutes from './routes/authRoute.js';
+import usersRoutes from './routes/userRoute.js';
+import blocksRoutes from './routes/blockRoute.js';
+import classesRoutes from './routes/classRoute.js';
+import fieldsRoutes from './routes/fieldRoute.js';
+import modulesRoutes from './routes/moduleRoute.js';
+import permissionsRoutes from './routes/permissionRoute.js';
+import rolePermissionsRoutes from './routes/rolePermissionRoute.js';
+import rolesRoutes from './routes/roleRoute.js';
+import routeRoutes from './routes/routeRoute.js';
+import settingsRoutes from './routes/settingRoute.js';
+import fileRoutes from './routes/fileRoute.js';
 // ----------------------------------------------------
 
 const app = express();

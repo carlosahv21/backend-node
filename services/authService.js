@@ -1,8 +1,8 @@
 // services/authService.js
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const authModel = require('../models/authModel');
-const utilsCustomError = require("../utils/utilsCustomError");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import authModel from '../models/authModel.js';
+import utilsCustomError from "../utils/utilsCustomError.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "1h";
@@ -102,14 +102,14 @@ const authenticateUser = async ({ email, password }) => {
 };
 
 /**
- * 4. Lógica de negocio de /me
+ * Refrescar datos de usuario
  */
 const getAuthenticatedUser = async (userId) => {
     return getUserData(userId);
 };
 
 
-module.exports = {
+export default {
     authenticateUser,
     getAuthenticatedUser,
 };

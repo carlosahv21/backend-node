@@ -1,9 +1,7 @@
 // knexfile.js
-// Este archivo SOLO exporta la configuración que la CLI de Knex (npx knex...) necesita.
-// La conexión real se inicializa en config/knex.js
-require('dotenv').config(); // Aseguramos que se carguen las variables de entorno
+import 'dotenv/config'; // Importación para cargar variables de entorno en ES Modules
 
-module.exports = {
+export default {
 
     development: {
         client: 'mysql2',
@@ -16,14 +14,14 @@ module.exports = {
         },
         migrations: {
             tableName: 'knex_migrations',
-            directory: './db/migrations', 
+            directory: './db/migrations',
             extension: 'js'
         },
         seeds: {
-            directory: './db/seeds' 
+            directory: './db/seeds'
         }
     },
-    
+
     production: {
         client: 'mysql2',
         connection: {

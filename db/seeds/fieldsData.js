@@ -1,5 +1,5 @@
 // db/seeds/fieldsData.js
-const knex = require('../knex');
+import knex from '../../config/knex.js';
 
 async function getFieldsData() {
     const [classBlockInfo] = await knex('blocks')
@@ -139,4 +139,4 @@ async function getFieldsData() {
     return fieldsData;
 }
 
-module.exports = { getFieldsData };
+export default { getFieldsData };

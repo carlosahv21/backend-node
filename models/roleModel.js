@@ -1,5 +1,5 @@
 // models/roleModel.js
-const BaseModel = require('./BaseModel');
+import BaseModel from './baseModel.js';
 
 class RoleModel extends BaseModel {
     constructor() {
@@ -11,4 +11,4 @@ class RoleModel extends BaseModel {
     }
 }
 
-module.exports = new RoleModel();
+export default new RoleModel();

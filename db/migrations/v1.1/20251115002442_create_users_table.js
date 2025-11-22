@@ -1,4 +1,4 @@
-const bcrypt = require("bcryptjs");
+import bcrypt from 'bcryptjs';
 
 exports.up = async function (knex) {
     const exists = await knex.schema.hasTable("users");

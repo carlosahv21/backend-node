@@ -1,8 +1,8 @@
 // models/BaseModel.js (Anteriormente BaseController)
 
-const knex = require('../db/knex');
-const { validationHandlers } = require('../utils/utilsValidations');
-const utilsCustomError = require('../utils/utilsCustomError');
+import knex from '../config/knex.js';
+import { validationHandlers } from '../utils/utilsValidations.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 class BaseModel {
     constructor(tableName) {
@@ -202,4 +202,4 @@ class BaseModel {
     }
 }
 
-module.exports = BaseModel;
+export default BaseModel;

@@ -1,7 +1,6 @@
 // services/moduleService.js
-const moduleModel = require('../models/moduleModel');
-const utilsCustomError = require('../utils/utilsCustomError');
-
+import moduleModel from '../models/moduleModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 const getAllModules = async (queryParams) => {
     return moduleModel.findAll(queryParams); 
@@ -42,7 +41,7 @@ const toggleModuleStatus = async (id) => {
     return newStatus;
 };
 
-module.exports = {
+export default {
     getAllModules,
     getModuleById,
     createModule,

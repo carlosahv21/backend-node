@@ -1,6 +1,6 @@
 // models/authModel.js
-const knex = require('../db/knex');
-const utilsCustomError = require('../utils/utilsCustomError');
+import knex from '../config/knex.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 class AuthModel {
     constructor() {
@@ -56,4 +56,4 @@ class AuthModel {
     }
 }
 
-module.exports = new AuthModel();
+export default new AuthModel();

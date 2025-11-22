@@ -1,12 +1,10 @@
-// controllers/userController.js (Clase puramente delegada)
-const userService = require('../services/userService');
-const utilsCustomError = require('../utils/utilsCustomError');
-const userModel = require('../models/userModel'); // Se importa para el CRUD simple (findById)
+// controllers/userController.js
+import userService from '../services/userService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
+import userModel from '../models/userModel.js';
 
 /**
- * Clase controladora para Usuarios. 
- * Su única responsabilidad es manejar la interfaz HTTP (req, res, next) 
- * y delegar la lógica de negocio al servicio.
+ * Clase controladora para Usuarios.
  */
 class UserController {
 
@@ -19,7 +17,6 @@ class UserController {
 
             res.status(200).json(result);
         } catch (error) {
-            // Propaga el error de negocio al middleware de manejo de errores
             next(new utilsCustomError(error.message, error.status));
         }
     }
@@ -82,4 +79,4 @@ class UserController {
     }
 }
 
-module.exports = new UserController();
+export default new UserController();

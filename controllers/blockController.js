@@ -1,6 +1,6 @@
 // controllers/blockController.js
-const blockService = require('../services/blockService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import blockService from '../services/blockService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Bloques.
@@ -77,4 +77,4 @@ class BlockController {
     }
 }
 
-module.exports = new BlockController();
+export default new BlockController();

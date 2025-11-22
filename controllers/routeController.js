@@ -1,6 +1,6 @@
 // controllers/routeController.js
-const routeService = require('../services/routeService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import routeService from '../services/routeService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Rutas de Navegación. 
@@ -21,4 +21,4 @@ class RouteController {
     }
 }
 
-module.exports = new RouteController();
+export default new RouteController();

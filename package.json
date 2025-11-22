@@ -2,13 +2,15 @@
   "name": "backend-project",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "migrate": "npx knex migrate:latest",
     "rollback": "npx knex migrate:rollback",
-    "seed": "npx knex seed:run"
+    "seed": "npx knex seed:run",
+    "generate": "node scripts/generate.js"
   },
   "keywords": [],
   "author": "",

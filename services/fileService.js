@@ -1,8 +1,8 @@
 // services/fileService.js
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
-const utilsCustomError = require('../utils/utilsCustomError');
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 // Promisify fs functions for easier async/await usage
 const access = promisify(fs.access);
@@ -31,6 +31,6 @@ const deleteFileByPath = async (imageUrl) => {
     }
 };
 
-module.exports = {
+export default {
     deleteFileByPath
 };

@@ -1,6 +1,6 @@
 // services/routeService.js
-const RouteModel = require('../models/routeModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import RouteModel from '../models/routeModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Obtiene todas las rutas de navegación que pertenecen a módulos activos, 
@@ -16,6 +16,6 @@ const getActiveRoutesWithModuleInfo = async () => {
     }
 };
 
-module.exports = {
+export default {
     getActiveRoutesWithModuleInfo,
 };

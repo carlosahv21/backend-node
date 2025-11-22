@@ -1,5 +1,5 @@
 // models/classModel.js
-const BaseModel = require('./baseModel');
+import BaseModel from './baseModel.js';
 
 class ClassModel extends BaseModel {
     constructor() {
@@ -15,4 +15,4 @@ class ClassModel extends BaseModel {
     }
 }
 
-module.exports = new ClassModel();
+export default new ClassModel();

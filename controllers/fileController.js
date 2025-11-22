@@ -1,15 +1,22 @@
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const utilsCustomError = require('../utils/utilsCustomError'); // Importa utilsCustomError
+// controllers/fileController.js
+import fs from 'fs';
+import path from 'path';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
-// Mapeo de los nombres de los meses
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// ----------------------------------------------
+
 const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-// Función para generar la ruta dinámica basada en año/mes(letras)/semana
+/**
+ * Genera la ruta dinámica de almacenamiento basada en año/mes(letras)/semana.
+ */
 const generateStoragePath = () => {
     const currentDate = new Date();
     const year = currentDate.getFullYear();
@@ -19,7 +26,9 @@ const generateStoragePath = () => {
     return folderPath;
 };
 
-// Asegurar que la carpeta existe antes de guardar el archivo
+/**
+ * Asegurar que la carpeta existe antes de guardar el archivo.
+ */
 const ensureDirectoryExistence = (dir) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -49,17 +58,19 @@ const fileFilter = (req, file, cb) => {
     cb(null, true);
 };
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: { fileSize: 1024 * 1024 },
     fileFilter: fileFilter
 });
 
-// Función del controlador uploadLogo
-const uploadLogo = (req, res, next) => {
+/**
+ * Función del controlador para subir un logo.
+ */
+export const uploadLogo = (req, res, next) => {
     upload.single('logo')(req, res, (err) => {
         if (err) {
-            const error = err instanceof multer.MulterError 
+            const error = err instanceof multer.MulterError
                 ? new utilsCustomError("Multer error: " + err.message, 400)
                 : err;
             return next(error);
@@ -74,19 +85,22 @@ const uploadLogo = (req, res, next) => {
     });
 };
 
-const removeLogo = (req, res, next) => {
+/**
+ * Función del controlador para eliminar un logo.
+ */
+export const removeLogo = (req, res, next) => {
     const { imageUrl } = req.body;
+    const filePath = path.join(__dirname, '../', imageUrl);
 
     try {
-        const filePath = path.join(__dirname, '../', imageUrl);
-
         fs.access(filePath, fs.constants.F_OK, (err) => {
             if (err) {
-                return next(new utilsCustomError('File not found', 404));
+                return next(new utilsCustomError('File not found or access denied', 404));
             }
 
             fs.unlink(filePath, (err) => {
                 if (err) {
+                    console.error("Error unlinking file:", err);
                     return next(new utilsCustomError('Failed to delete image', 500));
                 }
                 res.json({ message: 'Image deleted successfully' });
@@ -97,4 +111,7 @@ const removeLogo = (req, res, next) => {
     }
 };
 
-module.exports = { uploadLogo, removeLogo };
+export default {
+    uploadLogo,
+    removeLogo
+};

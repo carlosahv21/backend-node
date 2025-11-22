@@ -1,10 +1,10 @@
 // config/uploadConfig.js
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const utilsCustomError = require('../utils/utilsCustomError');
+import fs from 'fs';
+import path from 'path';
+import multer from 'multer';
 
-// Mapeo de los nombres de los meses
+import utilsCustomError from '../utils/utilsCustomError.js';
+
 const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -17,21 +17,22 @@ const generateStoragePath = () => {
     const currentDate = new Date();
     const year = currentDate.getFullYear();
     const month = months[currentDate.getMonth()];
-    // Calcula la semana del mes (simplificado)
-    const week = Math.ceil(currentDate.getDate() / 7); 
-    // La ruta se define para que Multer la utilice: storage/2025/January/week1
+    const week = Math.ceil(currentDate.getDate() / 7);
     const folderPath = path.join('storage', year.toString(), month, `week${week}`);
     return folderPath;
 };
 
 /**
  * Asegura que la carpeta de destino exista, creándola recursivamente si es necesario.
- * @param {string} dir Ruta absoluta o relativa de la carpeta.
  */
 const ensureDirectoryExistence = (dir) => {
-    if (!fs.existsSync(dir)) {
-        // { recursive: true } asegura la creación de todos los directorios intermedios
-        fs.mkdirSync(dir, { recursive: true });
+    try {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    } catch (error) {
+        console.error("Error creating directory:", error);
+        throw new Error(`Failed to ensure directory existence for: ${dir}`);
     }
 };
 
@@ -39,12 +40,17 @@ const ensureDirectoryExistence = (dir) => {
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const folderPath = generateStoragePath();
-        ensureDirectoryExistence(folderPath); // Creamos la carpeta
-        cb(null, folderPath); // Multer usa esta ruta
+        try {
+            ensureDirectoryExistence(folderPath);
+            cb(null, folderPath);
+        } catch (error) {
+            cb(error);
+        }
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        const fileName = `${path.basename(file.originalname, ext)}-${Date.now()}${ext}`;
+        const baseName = path.basename(file.originalname, ext).replace(/\s+/g, '_'); // Reemplaza espacios con guiones bajos
+        const fileName = `${baseName}-${Date.now()}${ext}`;
         cb(null, fileName);
     }
 });
@@ -53,18 +59,18 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(file.mimetype)) {
-        return cb(new utilsCustomError('Tipo de archivo inválido. Solo se permiten JPEG y PNG.', 400), false);
+        const error = new utilsCustomError('Tipo de archivo inválido. Solo se permiten JPEG y PNG.', 400);
+        return cb(error, false);
     }
     cb(null, true);
 };
 
-// Instancia de Multer configurada
-const uploadMiddleware = multer({ 
+const uploadMiddleware = multer({
     storage: storage,
-    limits: { fileSize: 1024 * 1024 * 5 },
+    limits: { fileSize: 1024 * 1024 * 5 }, // Límite de 5MB
     fileFilter: fileFilter
 });
 
-module.exports = {
+export {
     uploadMiddleware
 };

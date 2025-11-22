@@ -1,6 +1,6 @@
 // services/fieldService.js
-const fieldModel = require('../models/fieldModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import fieldModel from '../models/fieldModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 const getAllFields = async (queryParams) => {
     return fieldModel.findAll(queryParams);
@@ -142,7 +142,7 @@ const getModuleFields = async (moduleId) => {
 };
 
 
-module.exports = {
+export default {
     getAllFields,
     getFieldById,
     createField,

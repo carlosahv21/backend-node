@@ -1,13 +1,21 @@
-const dotenv = require('dotenv');
-const knex = require('knex');
-const path = require('path');
-const fs = require('fs');
+// Importaciones de Módulos ES
+import dotenv from 'dotenv';
+import knexFactory from 'knex';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-// Cargar las variables de entorno
+// --- Corrección para __dirname en Módulos ES ---
+// Obtenemos la ruta del archivo actual y luego el directorio.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// --- Fin de corrección ---
+
+// Cargar las variables de entorno 
 dotenv.config();
 
-// Configuración de knex con MySQL
-const db = knex({
+// Configuración de knex con MySQL (Duplicada para uso programático)
+const db = knexFactory({
   client: 'mysql2',
   connection: {
     host: process.env.DB_HOST,
@@ -25,7 +33,7 @@ async function hasVersionTable() {
 
 // Función para crear la tabla database_version si no existe
 async function createVersionTable() {
-  return await db.schema.createTable('database_version', function(table) {
+  return await db.schema.createTable('database_version', function (table) {
     table.increments('id').primary();
     table.string('version', 10).notNullable();
     table.timestamp('updated_at').defaultTo(db.fn.now());
@@ -68,9 +76,17 @@ async function migrateDatabase() {
     const currentVersion = await getCurrentVersion();
     console.log(`Versión actual de la base de datos: ${currentVersion}`);
 
-    // Obtener todas las carpetas de migración
     const migrationsDir = path.resolve(__dirname, 'migrations');
-    const availableVersions = fs.readdirSync(migrationsDir).filter(file => fs.statSync(path.join(migrationsDir, file)).isDirectory());
+
+    let availableVersions = [];
+    try {
+      availableVersions = fs.readdirSync(migrationsDir)
+        .filter(file => fs.statSync(path.join(migrationsDir, file)).isDirectory());
+    } catch (e) {
+      console.warn(`Advertencia: No se encontró el directorio de migraciones en ${migrationsDir}.`);
+      return;
+    }
+
 
     // Ordenar las versiones de menor a mayor
     availableVersions.sort();
@@ -101,8 +117,7 @@ async function migrateDatabase() {
   } catch (err) {
     console.error('Error durante la migración:', err);
   } finally {
-    // Cerrar la conexión a la base de datos
-    db.destroy();
+    await db.destroy();
   }
 }
 

@@ -1,6 +1,6 @@
 // controllers/permissionController.js
-const permissionService = require('../services/permissionService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import permissionService from '../services/permissionService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Permisos (Permissions). 
@@ -60,4 +60,4 @@ class PermissionController {
     }
 }
 
-module.exports = new PermissionController();
+export default new PermissionController();

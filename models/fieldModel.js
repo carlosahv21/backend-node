@@ -1,5 +1,5 @@
 // models/fieldModel.js
-const BaseModel = require('./BaseModel');
+import BaseModel from './baseModel.js';
 
 class FieldModel extends BaseModel {
     constructor() {
@@ -70,4 +70,4 @@ class FieldModel extends BaseModel {
     }
 }
 
-module.exports = new FieldModel();
+export default new FieldModel();

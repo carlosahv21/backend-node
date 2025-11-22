@@ -1,6 +1,6 @@
 // controllers/authController.js (Clase puramente delegada)
-const authService = require('../services/authService');
-const utilsCustomError = require("../utils/utilsCustomError");
+import authService from "../services/authService.js";
+import utilsCustomError from "../utils/utilsCustomError.js";
 
 /**
  * Clase controladora para la autenticación.
@@ -42,4 +42,4 @@ class AuthController {
     }
 }
 
-module.exports = new AuthController();
+export default new AuthController();

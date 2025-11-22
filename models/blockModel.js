@@ -1,5 +1,5 @@
 // models/blockModel.js
-const BaseModel = require('./baseModel');
+import BaseModel from './baseModel.js';
 
 class BlockModel extends BaseModel {
     constructor() {
@@ -21,4 +21,4 @@ class BlockModel extends BaseModel {
     }
 }
 
-module.exports = new BlockModel();
+export default new BlockModel();

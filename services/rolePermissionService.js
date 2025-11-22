@@ -1,7 +1,7 @@
 // services/rolePermissionService.js
-const rolePermissionModel = require('../models/rolePermissionModel');
-const utilsCustomError = require('../utils/utilsCustomError');
-const knex = require('../db/knex'); // Necesitamos Knex para la transacción y raw queries
+import rolePermissionModel from '../models/rolePermissionModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
+import knex from '../config/knex.js'; // Necesitamos Knex para la transacción y raw queries
 
 /**
  * Obtiene los detalles de los permisos asociados a un rol.
@@ -98,7 +98,7 @@ const getAllRolesWithPermissions = async () => {
     }
 };
 
-module.exports = {
+export default {
     getPermissionsByRole,
     setPermissionsForRole,
     getAllRolesWithPermissions,

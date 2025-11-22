@@ -1,5 +1,5 @@
 // models/settingModel.js
-const BaseModel = require('./BaseModel');
+import BaseModel from './baseModel.js';
 
 class SettingModel extends BaseModel {
     constructor() {
@@ -24,4 +24,4 @@ class SettingModel extends BaseModel {
     }
 }
 
-module.exports = new SettingModel();
+export default new SettingModel();

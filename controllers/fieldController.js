@@ -1,6 +1,6 @@
 // controllers/fieldController.js
-const fieldService = require('../services/fieldService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import fieldService from '../services/fieldService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Campos (Fields).
@@ -99,4 +99,4 @@ class FieldController {
     }
 }
 
-module.exports = new FieldController();
+export default new FieldController();

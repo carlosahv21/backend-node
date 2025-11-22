@@ -6,4 +6,4 @@ class utilsCustomError extends Error {
     }
 }
 
-module.exports = utilsCustomError;
+export default utilsCustomError;

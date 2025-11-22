@@ -1,4 +1,4 @@
-const { getFieldsData } = require('../../db/seeds/fieldsData');
+import { getFieldsData } from '../../seeds/fieldsData.js';
 
 exports.up = async function (knex) {
     await knex.schema.createTable('fields', (table) => {

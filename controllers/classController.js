@@ -1,6 +1,6 @@
 // controllers/classController.js
-const classService = require('../services/classService');
-const utilsCustomError = require('../utils/utilsCustomError'); 
+import classService from '../services/classService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Clases.
@@ -77,4 +77,4 @@ class ClassController {
     }
 }
 
-module.exports = new ClassController();
+export default new ClassController();

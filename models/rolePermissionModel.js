@@ -1,5 +1,5 @@
 // models/rolePermissionModel.js
-const BaseModel = require('./BaseModel');
+import BaseModel from './baseModel.js';
 
 class RolePermissionModel extends BaseModel {
     constructor() {
@@ -35,4 +35,4 @@ class RolePermissionModel extends BaseModel {
     }
 }
 
-module.exports = new RolePermissionModel();
+export default new RolePermissionModel();

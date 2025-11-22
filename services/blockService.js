@@ -1,6 +1,6 @@
 // services/blockService.js
-const blockModel = require('../models/blockModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import blockModel from '../models/blockModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Obtiene todos los bloques (con paginación, búsqueda, filtros).
@@ -58,7 +58,7 @@ const deleteBlock = async (id) => {
 };
 
 
-module.exports = {
+export default {
     getAllBlocks,
     createBlock,
     getBlockById,

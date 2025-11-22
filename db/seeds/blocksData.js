@@ -49,4 +49,4 @@ async function getBlocksData(knex) {
     ];
 }
 
-module.exports = { getBlocksData };
+export default { getBlocksData };

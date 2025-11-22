@@ -1,10 +1,10 @@
 // config/knex.js
-// Inicializador de la conexión a la base de datos para Express.
-const knexfile = require('../knexfile'); // Carga la configuración del archivo de la raíz
+import knexfile from '../knexfile.js';
+import knexFactory from 'knex';
+
 const environment = process.env.NODE_ENV || 'development';
 const config = knexfile[environment];
 
-// Crea y exporta el objeto Knex ya conectado
-const knex = require('knex')(config);
+const knex = knexFactory(config);
 
-module.exports = knex;
+export default knex;

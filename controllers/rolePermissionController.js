@@ -1,6 +1,6 @@
 // controllers/rolePermissionController.js
-const rolePermissionService = require('../services/rolePermissionService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import rolePermissionService from '../services/rolePermissionService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para la gestión de relaciones Rol-Permiso.
@@ -58,4 +58,4 @@ class RolePermissionController {
     }
 }
 
-module.exports = new RolePermissionController();
+export default new RolePermissionController();

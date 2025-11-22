@@ -1,6 +1,6 @@
 // services/settingService.js
-const settingModel = require('../models/settingModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import settingModel from '../models/settingModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Obtiene la configuración global de la aplicación.
@@ -48,4 +48,4 @@ const updateSettings = async (newSettings) => {
     }
 };
 
-module.exports = { getSettings, updateSettings };
+export default { getSettings, updateSettings };

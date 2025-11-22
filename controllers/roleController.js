@@ -1,6 +1,7 @@
 // controllers/roleController.js
-const roleService = require('../services/roleService');
-const utilsCustomError = require('../utils/utilsCustomError');
+import e from 'cors';
+import roleService from '../services/roleService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Clase controladora para Roles.
@@ -60,4 +61,4 @@ class RoleController {
     }
 }
 
-module.exports = new RoleController();
+export default new RoleController();

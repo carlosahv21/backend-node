@@ -1,4 +1,4 @@
-const { getBlocksData } = require('../../seeds/blocksData');
+import { getBlocksData } from '../../seeds/blocksData.js';
 
 exports.up = async function (knex) {
     await knex.schema.createTable('blocks', (table) => {
@@ -19,7 +19,7 @@ exports.up = async function (knex) {
 
     console.log("Table 'blocks' created successfully.");
 
-    const blocksData = await getBlocksData(knex); // <-- PASAS knex AQUÍ
+    const blocksData = await getBlocksData(knex);
     await knex('blocks').insert(blocksData);
 };
 

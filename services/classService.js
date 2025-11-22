@@ -1,6 +1,6 @@
 // services/classService.js
-const classModel = require('../models/classModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import classModel from '../models/classModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Obtiene todas las clases (con paginación, búsqueda, filtros).
@@ -46,7 +46,7 @@ const deleteClass = async (id) => {
 };
 
 
-module.exports = {
+export default {
     getAllClasses,
     createClass,
     getClassById,

@@ -1,7 +1,7 @@
 // services/userService.js
-const bcrypt = require('bcryptjs');
-const userModel = require('../models/userModel');
-const utilsCustomError = require('../utils/utilsCustomError');
+import bcrypt from 'bcryptjs';
+import userModel from '../models/userModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 const SALT_ROUNDS = 10;
 
@@ -66,7 +66,7 @@ const deleteUser = async (id) => {
 };
 
 
-module.exports = {
+export default {
     getAllUsers,
     createUser,
     updateUser,
