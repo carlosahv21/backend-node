@@ -13,27 +13,40 @@ import { baseModel } from '../baseModel.js';
 
 /*
     * Capa de Acceso a Datos (DAL) para la entidad ${entityPlural}.
-    * Extiende de baseModel para obtener la conexión Knex y métodos CRUD básicos.
+    * Extiende de baseModel.
 */
 
 export class ${entitySingular}Model extends baseModel {
     constructor() {
         super('${entityPlural.toLowerCase()}');
-        // Define aquí los joins y campos de selección específicos si son necesarios.
         this.joins = [];
         this.selectFields = ['${entityPlural.toLowerCase()}.*'];
         this.searchFields = ['${entityPlural.toLowerCase()}.nombre'];
     }
     
-    // NOTA: Los métodos findAll, findById, create, update, y delete de esta clase 
-    // se heredan automáticamente de baseModel, o puedes sobrescribirlos aquí.
-    
-    /**
-     * Ejemplo de método adicional, si fuera necesario.
-     */
-    async findActive() {
-        return this.knex(this.tableName).where({ activo: true }).select(this.selectFields.join(', '));
+    // Sobreescribe findById para lanzar un error con etiqueta de 404
+    async findById(id) {
+        const ${entitySingular.toLowerCase()} = await this.knex(this.tableName).where({ id }).first();
+
+        if (!${entitySingular.toLowerCase()}) {
+            // ERROR CRÍTICO: Usamos una etiqueta para que los controladores puedan identificarlo.
+            throw new Error('NOT_FOUND: El ${entitySingular.toLowerCase()} no existe.');
+        }
+
+        return ${entitySingular.toLowerCase()};
     }
+
+    // Sobreescribe delete para lanzar un error con etiqueta de 404
+    async delete(id) {
+        // En un escenario real, baseModel podría tener un método 'delete' que haga esto.
+        const numDeleted = await this.knex(this.tableName).where({ id }).del();
+        if (numDeleted === 0) {
+            throw new Error('NOT_FOUND: El ${entitySingular.toLowerCase()} no existe para eliminar.');
+        }
+        return numDeleted;
+    }
+
+    // El resto de métodos (findAll, create, update) se heredan o se implementan aquí.
 }
 export default new ${entitySingular}Model();
 `},
@@ -45,9 +58,7 @@ import ${entitySingular}Model from '../models/${entityPlural}Model.js';
 
 export const getAll${entityPlural} = async () => {
     try {
-        // Llama al método findAll del modelo (heredado o implementado)
-        const ${entityPlural.toLowerCase()} = await ${entitySingular}Model.findAll();
-        return ${entityPlural.toLowerCase()};
+        return await ${entitySingular}Model.findAll();
     } catch (error) {
         throw new Error(\`Error al obtener ${entityPlural.toLowerCase()}: \${error.message}\`);
     }
@@ -55,47 +66,54 @@ export const getAll${entityPlural} = async () => {
 
 export const get${entitySingular}ById = async (id) => {
     try {
-        // Llama al método findById del modelo, que ya maneja si no se encuentra
-        const ${entitySingular.toLowerCase()} = await ${entitySingular}Model.findById(id);
-        return ${entitySingular.toLowerCase()};
+        return await ${entitySingular}Model.findById(id);
     } catch (error) {
-        throw new Error(\`Error al obtener la ${entitySingular.toLowerCase()} con ID \${id}: \${error.message}\`);
+        // Propaga el error de NOT_FOUND del modelo
+        throw new Error(\`Error al obtener la ${entitySingular.toLowerCase()} con ID \${id}. \${error.message}\`);
     }
 };
 
 export const create${entitySingular} = async (data) => {
     try {
-        // El método create en el modelo devuelve el ID del nuevo registro
+        // Lógica de Validación (ejemplo)
+        if (!data.nombre || data.nombre.length < 3) {
+            // ERROR CRÍTICO: Usamos una etiqueta para que los controladores puedan identificar un 400
+            throw new Error('BAD_REQUEST: El campo "nombre" es obligatorio y debe tener al menos 3 caracteres.');
+        }
+        
         const newId = await ${entitySingular}Model.create(data);
         return { id: newId[0], ...data };
     } catch (error) {
-        throw new Error(\`Error al crear el ${entitySingular.toLowerCase()}: \${error.message}\`);
+        // Si el error ya es BAD_REQUEST, lo propagamos. Si no, es un 500.
+        throw new Error(\`Error al crear el ${entitySingular.toLowerCase()}. \${error.message}\`);
     }
 };
 
 export const update${entitySingular} = async (id, data) => {
     try {
-        // Asume que update es un método que devuelve el número de filas afectadas (0 o 1)
+        // Antes de actualizar, podemos verificar si existe usando el mismo findById (que lanzará NOT_FOUND si no)
+        await ${entitySingular}Model.findById(id); 
+
+        // Lógica de Validación (ejemplo, omitida para simplicidad)
+        
         const result = await ${entitySingular}Model.update(id, data);
         if (result === 0) {
-            throw new Error('${entitySingular} no encontrada para actualizar');
+            // Aunque findById ya lo verificaría, esta es una doble verificación.
+            throw new Error('NOT_FOUND: ${entitySingular} no encontrada para actualizar');
         }
         return { id, ...data };
     } catch (error) {
-        throw new Error(\`Error al actualizar la ${entitySingular.toLowerCase()} con ID \${id}: \${error.message}\`);
+        throw new Error(\`Error al actualizar la ${entitySingular.toLowerCase()} con ID \${id}. \${error.message}\`);
     }
 };
 
 export const delete${entitySingular} = async (id) => {
     try {
-        // Asume que delete es un método que devuelve el número de filas afectadas (0 o 1)
-        const result = await ${entitySingular}Model.delete(id);
-        if (result === 0) {
-            throw new Error('${entitySingular} no encontrada para eliminar');
-        }
+        await ${entitySingular}Model.delete(id);
         return { deleted: true, id };
     } catch (error) {
-        throw new Error(\`Error al eliminar la ${entitySingular.toLowerCase()} con ID \${id}: \${error.message}\`);
+        // Propaga el error de NOT_FOUND del modelo
+        throw new Error(\`Error al eliminar la ${entitySingular.toLowerCase()} con ID \${id}. \${error.message}\`);
     }
 };
 `},
@@ -103,7 +121,16 @@ export const delete${entitySingular} = async (id) => {
         dir: 'controllers', suffix: 'Controller', template: (entitySingular, entityPlural) => `
 import * as ${entityPlural.toLowerCase()}Service from '../services/${entityPlural}Service.js';
 
-// Controlador para manejar las solicitudes HTTP de la entidad ${entityPlural}
+// Función auxiliar para determinar el código de estado HTTP basado en el mensaje de error
+const getStatusFromError = (errorMessage) => {
+    if (errorMessage.includes('NOT_FOUND')) {
+        return 404;
+    }
+    if (errorMessage.includes('BAD_REQUEST') || errorMessage.includes('violates')) {
+        return 400; // 400 para errores de validación de negocio o de base de datos (e.g., violación de restricción)
+    }
+    return 500; // Por defecto, error interno del servidor
+};
 
 // GET /api/${entityPlural.toLowerCase()}
 export const get${entityPlural} = async (req, res) => {
@@ -111,8 +138,9 @@ export const get${entityPlural} = async (req, res) => {
         const data = await ${entityPlural.toLowerCase()}Service.getAll${entityPlural}();
         res.status(200).json(data);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message });
+        console.error('Error en get${entityPlural}:', error.message);
+        const status = getStatusFromError(error.message);
+        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
     }
 };
 
@@ -123,9 +151,9 @@ export const get${entitySingular} = async (req, res) => {
         const data = await ${entityPlural.toLowerCase()}Service.get${entitySingular}ById(id);
         res.status(200).json(data);
     } catch (error) {
-        // Manejo de errores 404 basados en los mensajes del servicio/modelo
-        const status = error.message.includes('no existe') || error.message.includes('no encontrada') ? 404 : 500;
-        res.status(status).json({ message: error.message });
+        console.error('Error en get${entitySingular}:', error.message);
+        const status = getStatusFromError(error.message);
+        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
     }
 };
 
@@ -133,11 +161,11 @@ export const get${entitySingular} = async (req, res) => {
 export const create${entitySingular} = async (req, res) => {
     try {
         const data = await ${entityPlural.toLowerCase()}Service.create${entitySingular}(req.body);
-        // Respuesta 201 Created y el nuevo recurso
         res.status(201).json(data); 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message });
+        console.error('Error en create${entitySingular}:', error.message);
+        const status = getStatusFromError(error.message);
+        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
     }
 };
 
@@ -146,11 +174,11 @@ export const update${entitySingular} = async (req, res) => {
     try {
         const id = req.params.id;
         const data = await ${entityPlural.toLowerCase()}Service.update${entitySingular}(id, req.body);
-        // Respuesta 200 OK y los datos actualizados
         res.status(200).json(data);
     } catch (error) {
-        const status = error.message.includes('no encontrada') ? 404 : 500;
-        res.status(status).json({ message: error.message });
+        console.error('Error en update${entitySingular}:', error.message);
+        const status = getStatusFromError(error.message);
+        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
     }
 };
 
@@ -159,11 +187,11 @@ export const delete${entitySingular} = async (req, res) => {
     try {
         const id = req.params.id;
         await ${entityPlural.toLowerCase()}Service.delete${entitySingular}(id);
-        // Respuesta 204 No Content
         res.status(204).send();
     } catch (error) {
-        const status = error.message.includes('no encontrada') ? 404 : 500;
-        res.status(status).json({ message: error.message });
+        console.error('Error en delete${entitySingular}:', error.message);
+        const status = getStatusFromError(error.message);
+        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
     }
 };
 `},
@@ -214,28 +242,21 @@ async function generateModule() {
         entitySingular = capitalize(entityPlural);
     }
 
-    // CORRECCIÓN DE RUTA: Usamos '.' (directorio actual) en lugar de 'src'
     const baseDir = '.';
 
     console.log(`\n✨ Iniciando generación para la entidad: ${entityPlural}`);
-    console.log(`   - Nombre singular (Clase/Modelo): ${entitySingular}\n`);
+    console.log(`  - Nombre singular (Clase/Modelo): ${entitySingular}\n`);
 
     for (const fileDef of files) {
         const { dir, suffix, template } = fileDef;
 
-        // Esto creará paths como './models', './services', etc.
         const fullDirPath = path.join(baseDir, dir);
         const fileName = `${entityPlural}${suffix}.js`;
         const fullFilePath = path.join(fullDirPath, fileName);
 
         try {
-            // 1. Crear el directorio si no existe
             await fs.mkdir(fullDirPath, { recursive: true });
-
-            // 2. Generar el contenido del archivo
             const content = template(entitySingular, entityPlural);
-
-            // 3. Escribir el archivo
             await fs.writeFile(fullFilePath, content.trim());
             console.log(`✅ Creado: ${fullFilePath}`);
 
@@ -246,7 +267,7 @@ async function generateModule() {
 
     console.log('\n🎉 ¡Generación de módulo completa!');
     console.log('💡 Recuerda:');
-    console.log('  1. Completar la implementación de la clase Model con los campos de la tabla.');
+    console.log('  1. Implementar la validación completa en el servicio o un middleware.');
     console.log('  2. Importar el nuevo router en tu archivo principal (ej. server.js).');
 }
 

@@ -23,7 +23,7 @@ import rolePermissionsRoutes from './routes/rolePermissionRoute.js';
 import rolesRoutes from './routes/roleRoute.js';
 import routeRoutes from './routes/routeRoute.js';
 import settingsRoutes from './routes/settingRoute.js';
-import fileRoutes from './routes/fileRoute.js';
+import fileRoutes from './routes/fileRoute.js'; 
 // ----------------------------------------------------
 
 const app = express();
@@ -70,16 +70,13 @@ app.use("/api/routes", routeRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/file", fileRoutes);
 
-
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {
   next(new utilsCustomError(`Ruta no encontrada: ${req.originalUrl}`, 404));
 });
 
-
 // --- Middleware Centralizado de Manejo de Errores ---
 app.use(errorHandler);
-
 
 // --- Inicialización del Servidor ---
 app.listen(PORT, () => {
