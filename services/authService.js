@@ -19,13 +19,17 @@ const buildRouteTree = (flatRoutes) => {
         map[r.id] = {
             id: r.id,
             name: r.name,
+            label: r.label,
             path: r.path,
+            full_path: r.full_path,
             parent_id: r.parent_id,
             icon: r.icon,
             order: r.order,
+            is_menu: r.is_menu,
             children: []
         };
     });
+
 
     flatRoutes.forEach(r => {
         if (r.parent_id && map[r.parent_id]) {

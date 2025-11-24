@@ -13,8 +13,8 @@ const getAllClasses = async (queryParams) => {
  * Crea una nueva clase. 
  */
 const createClass = async (data) => {
-    if (!data.name || !data.date || !data.start_time || !data.teacher_id) {
-        throw new utilsCustomError('Faltan campos obligatorios para crear la clase (name, date, start_time, teacher_id)', 400);
+    if (!data.name || !data.date) {
+        throw new utilsCustomError('Faltan campos obligatorios para crear la clase (name, date)', 400);
     }
 
     const newClass = await classModel.create(data);

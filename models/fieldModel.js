@@ -55,7 +55,7 @@ class FieldModel extends BaseModel {
      */
     async findFieldsByBlockId(blockId) {
         return this.knex('fields')
-            .where({ block_id })
+            .where({ block_id: blockId })
             .select(
                 'id', 'block_id', 'name', 'label', 'type', 'options', 'required', 'order_sequence'
             )

@@ -5,24 +5,24 @@ import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-// GET /api/role_permissions/all
-router.get("/all",
+// GET /api/role_permissions
+router.get("/",
     authMiddleware.authenticateToken,
-    authMiddleware.authorize("roles", "view"),
+    authMiddleware.authorize("settings.permissions", "view"),
     (req, res, next) => rolePermissionController.getAllRolesWithPermissions(req, res, next)
 );
 
 // GET /api/role_permissions/:role_id
 router.get("/:role_id",
     authMiddleware.authenticateToken,
-    authMiddleware.authorize("roles", "view"),
+    authMiddleware.authorize("settings.permissions", "view"),
     (req, res, next) => rolePermissionController.getPermissionsByRole(req, res, next)
 );
 
-// PUT /api/role_permissions/:role_id
-router.put("/:role_id",
+// POST /api/:role_id
+router.post("/:role_id",
     authMiddleware.authenticateToken,
-    authMiddleware.authorize("roles", "edit"),
+    authMiddleware.authorize("settings.permissions", "edit"),
     (req, res, next) => rolePermissionController.setPermissionsForRole(req, res, next)
 );
 

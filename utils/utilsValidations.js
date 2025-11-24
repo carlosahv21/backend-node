@@ -15,7 +15,7 @@ export const validationHandlers = {
         const { date, hour, duration, id } = data;
 
         if (!date || !hour || !duration) return null;
-        
+
         // Parseamos la hora "HH:mm"
         const [h, m] = hour.split(":").map(Number);
         const startTime = h * 60 + m;
@@ -30,7 +30,7 @@ export const validationHandlers = {
             const [clsStartH, clsStartM] = cls.hour.split(":").map(Number);
             const clsStart = clsStartH * 60 + clsStartM;
             const clsEnd = clsStart + parseInt(cls.duration, 10);
-            
+
             return (
                 (startTime >= clsStart && startTime < clsEnd) ||
                 (endTime > clsStart && endTime <= clsEnd) ||
@@ -40,7 +40,7 @@ export const validationHandlers = {
 
         if (overlap) {
             const [clsStartH, clsStartM] = overlap.hour.split(":").map(Number);
-            const clsEndH = Math.floor((clsStartH * 60 + clsStartM + parseInt(overlap.duration, 10)) / 60);
+            const clsEndH = Math.floor((clsStartH * 60 + clsStartM + parseInt(overlap.duration, 10)) / 60) % 24;
             const clsEndM = (clsStartH * 60 + clsStartM + parseInt(overlap.duration, 10)) % 60;
 
             const formatTime = (h, m) => `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;

@@ -23,14 +23,14 @@ const createField = async (data) => {
         data.required = false;
     }
     if (data.options && Array.isArray(data.options)) {
-        data.options = JSON.stringify(data.options); 
+        data.options = JSON.stringify(data.options);
     }
 
     const lastCounter = await fieldModel.findCustomFieldCounter();
     const nextCfNumber = lastCounter.last_cf_number + 1;
 
     data.name = `cf_${nextCfNumber}`;
-    await fieldModel.updateCustomFieldCounter(lastCounter.id, nextCfNumber + 1); 
+    await fieldModel.updateCustomFieldCounter(lastCounter.id, nextCfNumber + 1);
 
     delete data.module_id;
 

@@ -1,4 +1,4 @@
-// models/BaseModel.js (Anteriormente BaseController)
+// models/BaseModel.js
 
 import knex from '../config/knex.js';
 import { validationHandlers } from '../utils/utilsValidations.js';
@@ -18,7 +18,12 @@ class BaseModel {
 
             if (typeof handler !== "function") continue;
 
-            const message = await handler(data, rule.config || {});
+            const message = await handler(
+                this.knex, 
+                this.tableName, 
+                data, 
+                rule.config || {}
+            );
 
             if (message) {
                 throw new utilsCustomError(message, 409);
@@ -151,6 +156,8 @@ class BaseModel {
             record[fv.field_name] = fv.value;
         });
 
+        console.log(record);
+        
         return record;
     }
 
