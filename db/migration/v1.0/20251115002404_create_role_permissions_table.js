@@ -1,4 +1,4 @@
-exports.up = async function (knex) {
+export async function up(knex) {
     const exists = await knex.schema.hasTable("role_permissions");
 
     if (!exists) {
@@ -15,11 +15,11 @@ exports.up = async function (knex) {
     const roleMap = Object.fromEntries(roles.map(r => [r.name, r.id]));
 
     const permissions = await knex("permissions")
-        .join("routes", "permissions.route_id", "routes.id")
+        .join("modules", "permissions.module_id", "modules.id")
         .select(
             "permissions.id",
-            "permissions.name as action",
-            "routes.name as resource"
+            "permissions.name as action",   // create, edit, delete, view
+            "modules.name as resource"      // nombre del módulo
         );
 
     // ADMIN → todos los permisos
@@ -76,7 +76,7 @@ exports.up = async function (knex) {
     }
 };
 
-exports.down = async function (knex) {
+export async function down(knex) {
     await knex("role_permissions").del();
     console.log("Role permissions deleted.");
 };

@@ -1,4 +1,4 @@
-exports.up = async function (knex) {
+export async function up(knex) {
     const exists = await knex.schema.hasTable("user_roles");
 
     if (!exists) {
@@ -37,7 +37,7 @@ exports.up = async function (knex) {
     }
 };
 
-exports.down = async function (knex) {
+export async function down(knex) {
     await knex.schema.dropTableIfExists("user_roles");
     console.log('Table "user_roles" dropped successfully.');
 };

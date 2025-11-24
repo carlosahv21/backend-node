@@ -1,4 +1,4 @@
-exports.up = async function (knex) {
+export async function up(knex) {
     // Crear tabla modules
     await knex.schema.createTable("modules", function (table) {
         table.increments("id").primary();
@@ -18,11 +18,10 @@ exports.up = async function (knex) {
         { name: "roles", description: "Gestión de roles", has_custom_fields: false },
         { name: "permissions", description: "Gestión de permisos", has_custom_fields: false },
         { name: "classes", description: "Gestión de clases", has_custom_fields: true },
-        { name: "assistants", description: "Gestión de asistentes", has_custom_fields: true },
+        { name: "assistants", description: "Gestión de asistentes", has_custom_fields: false },
         { name: "fields", description: "Campos personalizados", has_custom_fields: false },
         { name: "modules", description: "Gestión de módulos", has_custom_fields: false },
-        { name: "blocks", description: "Bloques (estructura de clases)", has_custom_fields: false },
-        { name: "routes", description: "Gestión de rutas", has_custom_fields: false },
+        { name: "blocks", description: "Bloques (estructura de clases)", has_custom_fields: false }
     ]);
 
     // Obtener ID real del módulo users
@@ -35,6 +34,6 @@ exports.up = async function (knex) {
     ]);
 };
 
-exports.down = function (knex) {
+export async function down(knex) {
     return knex.schema.dropTableIfExists("modules");
 };

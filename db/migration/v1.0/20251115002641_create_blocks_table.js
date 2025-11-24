@@ -1,6 +1,9 @@
-import { getBlocksData } from '../../seeds/blocksData.js';
 
-exports.up = async function (knex) {
+import blocksModule from '../../seeds/blocksData.js';
+
+const { getBlocksData } = blocksModule;
+
+export async function up(knex) {
     await knex.schema.createTable('blocks', (table) => {
         table.increments('id').primary();
         table
@@ -23,6 +26,6 @@ exports.up = async function (knex) {
     await knex('blocks').insert(blocksData);
 };
 
-exports.down = function (knex) {
+export async function down(knex) {
     return knex.schema.dropTableIfExists('blocks');
 };

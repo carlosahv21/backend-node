@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "migrate": "npx knex migrate:latest",
+    "migrate": "node db/migration/migrate.js",
     "rollback": "npx knex migrate:rollback",
     "seed": "npx knex seed:run",
     "generate": "node scripts/generate.js"

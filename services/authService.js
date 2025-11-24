@@ -8,63 +8,21 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "1h";
 
 /**
- * Construye el árbol de rutas jerárquico a partir de rutas planas.
- */
-const buildRouteTree = (flatRoutes) => {
-    const map = {};
-    const tree = [];
-    
-    flatRoutes.forEach(r => {
-        
-        map[r.id] = {
-            id: r.id,
-            name: r.name,
-            label: r.label,
-            path: r.path,
-            full_path: r.full_path,
-            parent_id: r.parent_id,
-            icon: r.icon,
-            order: r.order,
-            is_menu: r.is_menu,
-            children: []
-        };
-    });
-
-
-    flatRoutes.forEach(r => {
-        if (r.parent_id && map[r.parent_id]) {
-            map[r.parent_id].children.push(map[r.id]);
-        } else if (!r.parent_id) {
-            tree.push(map[r.id]);
-        }
-    });
-
-    tree.sort((a, b) => a.order - b.order);
-
-    return tree;
-};
-
-
-/**
  * Función común para obtener usuario + rol + permisos + rutas + settings
  */
 const getUserData = async (userId) => {
 
     const userRecord = await authModel.knex("users").where({ id: userId }).first();
+    
     if (!userRecord) throw new utilsCustomError("User not found", 404);
 
     const roleData = await authModel.findRoleByUserId(userId);
 
-    const rawPermissionsAndRoutes = await authModel.findPermissionsAndRoutes(roleData.role_id);
-
-    const permissionsList = [...new Set(rawPermissionsAndRoutes.map(p =>
-        `${p.name}:${p.action}`
+    const rawPermissions = await authModel.findPermissions(roleData.role_id);
+    
+    const permissionsList = [...new Set(rawPermissions.map(p =>
+        `${p.moduleName}:${p.action}`
     ))];
-
-    const uniqueRoutes = rawPermissionsAndRoutes
-        .filter((route, index, self) => index === self.findIndex(r => r.id === route.id));
-
-    const routesTree = buildRouteTree(uniqueRoutes);
 
     const settings = await authModel.findSettings();
 
@@ -74,7 +32,6 @@ const getUserData = async (userId) => {
             email: userRecord.email,
             role: roleData.role_name,
         },
-        routes: routesTree,
         settings,
         permissions: permissionsList,
     };

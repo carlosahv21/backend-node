@@ -1,4 +1,4 @@
-exports.up = async function (knex) {
+export async function up(knex) {
     await knex.schema.createTable('field_values', (table) => {
         table.increments('id').primary();
 
@@ -33,7 +33,7 @@ exports.up = async function (knex) {
     await knex('custom_field_counters').insert({ last_cf_number: 1000 });
 };
 
-exports.down = async function (knex) {
+export async function down(knex) {
     await knex.schema.dropTableIfExists('field_values');
     await knex.schema.dropTableIfExists('custom_field_counters');
 };

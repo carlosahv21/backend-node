@@ -31,21 +31,19 @@ class AuthModel {
     }
 
     /**
-     * Obtiene permisos y rutas en una sola consulta JOIN.
+     * Obtiene permisos
      */
-    async findPermissionsAndRoutes(roleId) {
-        const rawPermissionsAndRoutes = await this.knex("role_permissions")
+    async findPermissions(roleId) {
+        const rawPermissions = await this.knex("role_permissions")
             .join("permissions", "role_permissions.permission_id", "permissions.id")
-            .join("routes", "permissions.route_id", "routes.id")
+            .join("modules", "permissions.module_id", "modules.id")
             .where("role_permissions.role_id", roleId)
-            .andWhere("routes.is_active", 1)
-            .orderBy("routes.order")
             .select(
                 "permissions.name as action",
-                "routes.*" // Trae todos los campos de routes
+                "modules.name as moduleName"
             );
 
-        return rawPermissionsAndRoutes;
+        return rawPermissions;
     }
 
     /**

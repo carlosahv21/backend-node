@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-exports.up = async function (knex) {
+export async function up(knex) {
     const exists = await knex.schema.hasTable("users");
 
     if (!exists) {
@@ -41,7 +41,7 @@ exports.up = async function (knex) {
     }
 };
 
-exports.down = function (knex) {
+export async function down(knex) {
     return knex.schema
         .dropTableIfExists("users")
         .then(() => {

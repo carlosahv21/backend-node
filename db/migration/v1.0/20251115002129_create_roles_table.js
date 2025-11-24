@@ -1,4 +1,4 @@
-exports.up = async function (knex) {
+export async function up(knex) {
 
     const exists = await knex.schema.hasTable("roles");
 
@@ -23,9 +23,9 @@ exports.up = async function (knex) {
         console.log("Default roles inserted.");
 
     }
-};
+}
 
-exports.down = async function (knex) {
+export async function down(knex) {
     await knex.schema.dropTableIfExists("roles");
     console.log('Table "roles" dropped successfully.');
-};
+}

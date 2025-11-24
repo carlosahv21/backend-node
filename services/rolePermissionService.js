@@ -52,7 +52,7 @@ const getAllRolesWithPermissions = async () => {
         const roles = await knex("roles as r")
             .leftJoin("role_permissions as rp", "r.id", "rp.role_id")
             .leftJoin("permissions as p", "rp.permission_id", "p.id")
-            .leftJoin("routes as ro", "p.route_id", "ro.id")
+            .leftJoin("modules as m", "p.module_id", "m.id")
             .select(
                 "r.id as role_id",
                 "r.name as role_name",
@@ -61,7 +61,7 @@ const getAllRolesWithPermissions = async () => {
                         JSON_OBJECT(
                             'id', p.id,
                             'name', p.name,
-                            'module', ro.name
+                            'module', m.name 
                         )
                     ) as permissions
                 `)

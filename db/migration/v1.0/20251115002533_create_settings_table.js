@@ -1,4 +1,4 @@
-exports.up = async function (knex) {
+export async function up(knex) {
     const exists = await knex.schema.hasTable("settings");
 
     if (!exists) {
@@ -39,6 +39,6 @@ exports.up = async function (knex) {
     console.log("Table 'settings' created successfully.");
 };
 
-exports.down = function (knex) {
+export async function down(knex) {
     return knex.schema.dropTable("settings");
 };

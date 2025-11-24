@@ -1,14 +1,14 @@
-exports.up = async function (knex) {
+export async function up(knex) {
     const exists = await knex.schema.hasTable("permissions");
 
     if (!exists) {
         await knex.schema.createTable("permissions", function (table) {
             table.increments("id").primary();
-            table.integer("route_id").unsigned().references("id").inTable("routes").onDelete("CASCADE"); // Asociar permiso a ruta
+            table.integer("module_id").unsigned().references("id").inTable("modules").onDelete("CASCADE"); // Asociar permiso a ruta
             table.string("name", 50).notNullable(); // Nombre del permiso (create, edit, etc.)
             table.string("description", 255).nullable(); // Descripción del permiso
             table.timestamps(true, true);
-            table.unique(["route_id", "name"]); // Un permiso único por ruta
+            table.unique(["module_id", "name"]); // Un permiso único por ruta
         });
 
         console.log('Table "permissions" created successfully.');
@@ -17,26 +17,26 @@ exports.up = async function (knex) {
     // ============================
     // Insertar permisos asociados a módulos
     // ============================
-    const routes = await knex("routes").select(); // Traemos todas las rutas
+    const modules = await knex("modules").select(); // Traemos todas las rutas
     const permissionsTemplate = ["create", "edit", "delete", "view"];
 
     const permissionsToInsert = [];
 
-    routes.forEach(route => {
+    modules.forEach(module => {
         permissionsTemplate.forEach(name => {
             permissionsToInsert.push({
-                route_id: route.id,
+                module_id: module.id,
                 name,
-                description: `${name} permission for ${route.label}`
+                description: `${name} permission for ${module.name}`
             });
         });
     });
 
     await knex("permissions").insert(permissionsToInsert);
-    console.log("Permissions for all routes inserted successfully.");
+    console.log("Permissions for all modules inserted successfully.");
 };
 
-exports.down = async function (knex) {
+export async function down(knex) {
     await knex.schema.dropTableIfExists("permissions");
     console.log('Table "permissions" dropped successfully.');
 };
