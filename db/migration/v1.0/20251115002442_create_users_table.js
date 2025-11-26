@@ -12,16 +12,22 @@ export async function up(knex) {
             table.string("password", 255).notNullable(); // Encrypted password
             table.boolean("email_verified").defaultTo(false); // Whether the email is verified
             table.timestamp("last_login").nullable(); // Last login timestamp
+            table.integer("role_id").unsigned().notNullable().references("id").inTable("roles").onDelete("CASCADE"); // Role
             table.timestamps(true, true); // timestamps: created_at, updated_at
         });
 
+        const adminRole = await knex("roles").select("id").where("name", "admin").first();
+        const studentRole = await knex("roles").select("id").where("name", "student").first();
+        const teacherRole = await knex("roles").select("id").where("name", "teacher").first();
+        const receptionistRole = await knex("roles").select("id").where("name", "receptionist").first();
+
         // Insertar usuario admin y algunos usuarios de prueba
         const users = [
-            { first_name: "Admin", last_name: "Prueba", email: "admin@example.com", password: "admin123" },
-            { first_name: "Alumno1", last_name: "Prueba", email: "student1@example.com", password: "student123" },
-            { first_name: "Alumno2", last_name: "Prueba", email: "student2@example.com", password: "student123" },
-            { first_name: "Profesor1", last_name: "Prueba", email: "teacher1@example.com", password: "teacher123" },
-            { first_name: "Recepcionista", last_name: "Prueba", email: "receptionist@example.com", password: "recep123" },
+            { first_name: "Admin", last_name: "Prueba", email: "admin@example.com", password: "admin123", role_id: adminRole.id },
+            { first_name: "Alumno1", last_name: "Prueba", email: "student1@example.com", password: "student123", role_id: studentRole.id },
+            { first_name: "Alumno2", last_name: "Prueba", email: "student2@example.com", password: "student123", role_id: studentRole.id },
+            { first_name: "Profesor1", last_name: "Prueba", email: "teacher1@example.com", password: "teacher123", role_id: teacherRole.id },
+            { first_name: "Recepcionista", last_name: "Prueba", email: "receptionist@example.com", password: "recep123", role_id: receptionistRole.id },
         ];
 
         // Hashear contraseñas

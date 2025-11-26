@@ -6,12 +6,20 @@ class UserModel extends BaseModel {
         super('users');
 
         this.joins = [
-            { table: "user_roles", alias: "ur", on: ["users.id", "ur.user_id"] },
-            { table: "roles", alias: "r", on: ["ur.role_id", "r.id"] }
+            { table: "roles", alias: "r", on: ["users.role_id", "r.id"] }
         ];
 
         this.selectFields = ["users.*", "r.name as role_name"];
         this.searchFields = ["users.first_name", "users.last_name", "users.email", "r.name"];
+        
+        this.filterMapping = { 'role': 'r.name' };
+
+        this.relationMaps = {
+            'default': { 
+                joins: this.joins,  
+                column_map: this.filterMapping 
+            }
+        };
     }
 
     // --- Método para obtener todos los usuarios con un filtro opcional por rol ---
@@ -57,11 +65,7 @@ class UserModel extends BaseModel {
     }
 
     async assignRole(userId, roleId) {
-        await this.knex('user_roles').where({ user_id: userId }).del();
-        await this.knex('user_roles').insert({
-            user_id: userId,
-            role_id: roleId
-        });
+        await this.knex('users').where({ id: userId }).update({ role_id: roleId });
     }
 
     async updateRole(userId, roleName) {

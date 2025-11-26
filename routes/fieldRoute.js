@@ -41,4 +41,10 @@ router.get("/module/:id",
     (req, res, next) => fieldController.getFieldsByModule(req, res, next)
 );
 
+// GET /api/fields/relation
+router.post("/relation",
+    authMiddleware.authenticateToken,
+    (req, res, next) => fieldController.getRelationField(req, res, next)
+);
+
 export default router;

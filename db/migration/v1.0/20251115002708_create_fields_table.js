@@ -15,6 +15,7 @@ export async function up(knex) {
         table.string('label').notNullable(); // Nombre visible para el usuario
         table.string('type').notNullable(); // Tipo de campo (texto, número, fecha, opción, etc.)
         table.json('options'); // Solo si el tipo es select, radio o similar
+        table.json('relation_config'); // Configuración de relaciones
         table.boolean('required').defaultTo(false); // Si es obligatorio
         table.integer('order_sequence').defaultTo(0); // Orden dentro del bloque
         table.timestamps(true, true);

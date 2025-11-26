@@ -19,9 +19,9 @@ class BaseModel {
             if (typeof handler !== "function") continue;
 
             const message = await handler(
-                this.knex, 
-                this.tableName, 
-                data, 
+                this.knex,
+                this.tableName,
+                data,
                 rule.config || {}
             );
 
@@ -157,7 +157,7 @@ class BaseModel {
         });
 
         console.log(record);
-        
+
         return record;
     }
 

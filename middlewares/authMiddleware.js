@@ -7,8 +7,8 @@ import knex from '../config/knex.js';
  */
 async function getPermissionsForMiddleware(userId) {
   const rawPermissions = await knex('users')
-    .join('user_roles', 'users.id', 'user_roles.user_id')
-    .join('role_permissions', 'user_roles.role_id', 'role_permissions.role_id')
+    .join('roles', 'users.role_id', 'roles.id')
+    .join('role_permissions', 'roles.id', 'role_permissions.role_id')
     .join('permissions', 'role_permissions.permission_id', 'permissions.id')
     .join('modules', 'permissions.module_id', 'modules.id')
     .where('users.id', userId)
@@ -20,7 +20,6 @@ async function getPermissionsForMiddleware(userId) {
   const permissionsList = rawPermissions.map(p =>
     `${p.resource}:${p.action}`
   );
-  console.log(permissionsList);
 
   return [...new Set(permissionsList)];
 }

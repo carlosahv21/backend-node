@@ -65,6 +65,26 @@ async function getFieldsData() {
             order_sequence: 2,
             block_id: blockDetails.id,
         },
+        {
+            name: "relation_config",
+            type: "relation",
+            label: "Relation Configuration",
+            required: false,
+            order_sequence: 3,
+            relation_config: JSON.stringify({
+                "table": "users",
+                "value_field": "users.id",
+                "display_field": "CONCAT(`users`.`first_name`, ' ', `users`.`last_name`)",
+                "display_alias": "full_name", 
+                "filters": {
+                    "role": "teacher"
+                },
+                "multiple": false,
+                "search": true,
+                "limit": 20
+            }),
+            block_id: blockDetails.id,
+        },
 
         // 📅 Horario
         {
@@ -127,7 +147,7 @@ async function getFieldsData() {
             block_id: usersBlockInfo.id,
         },
         {
-            name: "role",
+            name: "role_id",
             type: "select",
             label: "Role",
             required: true,

@@ -1,4 +1,3 @@
-// services/fieldService.js
 import fieldModel from '../models/fieldModel.js';
 import utilsCustomError from '../utils/utilsCustomError.js';
 
@@ -126,6 +125,7 @@ const getModuleFields = async (moduleId) => {
                     label: field.label,
                     type: field.type,
                     options: field.options,
+                    relation_config: field.relation_config,
                     required: field.required,
                     order_sequence: field.order_sequence,
                     inherited: field.inherited
@@ -141,6 +141,18 @@ const getModuleFields = async (moduleId) => {
     };
 };
 
+/**
+ * Obtiene las opciones de una relación, aplicando los filtros y la búsqueda.
+ */
+const getRelationField = async (config, searchQuery) => {
+    try {
+        const options = await fieldModel.findRelationField(config, searchQuery);
+        return options;
+    } catch (error) {
+        console.error('Error al obtener opciones de relación:', error);
+        throw new utilsCustomError('Error de base de datos al buscar opciones de relación.', 500);
+    }
+};
 
 export default {
     getAllFields,
@@ -149,4 +161,5 @@ export default {
     updateField,
     deleteField,
     getModuleFields,
+    getRelationField
 };

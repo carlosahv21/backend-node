@@ -18,9 +18,9 @@ class AuthModel {
      * Busca los datos del rol asociado a un usuario.
      */
     async findRoleByUserId(userId) {
-        const roleData = await this.knex("user_roles")
-            .join("roles", "user_roles.role_id", "roles.id")
-            .where("user_roles.user_id", userId)
+        const roleData = await this.knex("users")
+            .join("roles", "users.role_id", "roles.id")
+            .where("users.id", userId)
             .select("roles.id as role_id", "roles.name as role_name")
             .first();
 

@@ -9,8 +9,11 @@ export async function up(knex) {
         table.string('date');
         table.string('hour');
         table.integer('capacity');
+        table.integer('teacher_id').unsigned().references('id').inTable('users');
         table.timestamps(true, true);
     });
+
+    const teacherId = await knex('users').join('roles', 'users.role_id', 'roles.id').where({ 'roles.name': 'teacher' }).select('users.id').first();
 
     // Las clases deben ser los generos de baile ejemplo : Salsa en linea, Salsa Casino, Bachata, etc.
     await knex('classes').insert([
@@ -22,7 +25,8 @@ export async function up(knex) {
             duration: 60,
             date: "Monday",
             hour: "10:00",
-            capacity: 10
+            capacity: 10,
+            teacher_id: teacherId.id
         },
         {
             name: "Salsa Casino",
@@ -32,7 +36,8 @@ export async function up(knex) {
             duration: 60,
             date: "Tuesday",
             hour: "10:00",
-            capacity: 10
+            capacity: 10,
+            teacher_id: teacherId.id
         },
         {
             name: "Bachata",
@@ -42,7 +47,8 @@ export async function up(knex) {
             duration: 60,
             date: "Wednesday",
             hour: "10:00",
-            capacity: 10
+            capacity: 10,
+            teacher_id: teacherId.id
         }
     ]);
     console.log("Table 'classes' created successfully.");

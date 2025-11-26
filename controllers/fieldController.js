@@ -1,4 +1,3 @@
-// controllers/fieldController.js
 import fieldService from '../services/fieldService.js';
 import utilsCustomError from '../utils/utilsCustomError.js';
 
@@ -31,7 +30,6 @@ class FieldController {
             next(new utilsCustomError(error.message, error.status));
         }
     }
-
 
     /**
      * Crea un nuevo campo (delegando la lógica compleja de cf_X al servicio).
@@ -85,16 +83,43 @@ class FieldController {
         const { id: moduleId } = req.params;
 
         try {
-            // Delega la compleja composición de datos al servicio
             const data = await fieldService.getModuleFields(moduleId);
-
             res.status(200).json({
                 success: true,
                 module: data
             });
         } catch (error) {
-            // Maneja el error 404 de módulo no encontrado o errores 500
             next(new utilsCustomError(error.message, error.status || 500));
+        }
+    }
+
+    /**
+     * Obtiene las opciones dinámicas de una relación (campo tipo relación).
+     */
+    async getRelationField(req, res, next) {
+        try {
+            const { relation_config, search } = req.body;
+
+            if (!relation_config) {
+                throw new utilsCustomError(
+                    "El parámetro 'relation_config' es obligatorio para obtener opciones de relación.",
+                    400
+                );
+            }
+            
+            const options = await fieldService.getRelationField(relation_config, search || "");
+
+            res.status(200).json({
+                success: true,
+                options
+            });
+
+        } catch (error) {
+            if (error instanceof SyntaxError && error.message.includes('JSON')) {
+                next(new utilsCustomError("El parámetro 'relation_config' no tiene un formato JSON válido.", 400));
+            } else {
+                next(new utilsCustomError(error.message, error.status || 500));
+            }
         }
     }
 }
