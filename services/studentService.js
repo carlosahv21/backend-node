@@ -1,35 +1,55 @@
 // services/student.service.js
 import studentModel from '../models/studentModel.js';
-import { CustomError } from '../utils/custom-error.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
- * Capa de Lógica de Negocio (Business Logic) para Student.
- * Se encarga de las validaciones y transformaciones de datos.
+ * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
  */
-class StudentService {
-    
-    getAll() {
-        // Aquí iría lógica de filtrado o permisos antes de la llamada al Model
-        return studentModel.findAll();
+const getAllStudents = async (queryParams) => {
+    return studentModel.findAll(queryParams);
+};
+
+/**
+ * Obtiene un estudiante por ID.
+ */
+const getStudentById = async (id) => {
+    return studentModel.findById(id);
+};
+
+/**
+ * Crea un nuevo estudiante.
+ */
+const createStudent = async (data) => {
+    const { name } = data;
+
+    if (!name) {
+        throw new utilsCustomError('El campo "name" es requerido.', 400);
     }
 
-    getById(id) {
-        const item = studentModel.findById(id);
-        if (!item) {
-            throw new CustomError(`Elemento Student con ID ${id} no encontrado.`, 404);
-        }
-        return item;
-    }
+    const newStudent = await studentModel.create(data);
 
-    create(data) {
-        // Validaciones: por ejemplo, que el nombre sea obligatorio
-        if (!data.name) {
-            throw new CustomError('El campo "name" es requerido.', 400);
-        }
+    return newStudent;
+};
 
-        const newItem = studentModel.create(data);
-        return newItem;
-    }
-}
+/**
+ * Actualiza un estudiante existente.
+ */
+const updateStudent = async (id, data) => {
+    return studentModel.update(id, data);
+};
 
-export default new StudentService();
+/**
+ * Elimina un estudiante por ID.
+ */
+const deleteStudent = async (id) => {
+    return studentModel.delete(id);
+};
+
+
+export default {
+    getAllStudents,
+    getStudentById,
+    createStudent,
+    updateStudent,
+    deleteStudent
+};

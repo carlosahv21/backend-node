@@ -21,7 +21,8 @@ export async function up(knex) {
         { name: "assistants", description: "Gestión de asistentes", has_custom_fields: false },
         { name: "fields", description: "Campos personalizados", has_custom_fields: false },
         { name: "modules", description: "Gestión de módulos", has_custom_fields: false },
-        { name: "blocks", description: "Bloques (estructura de clases)", has_custom_fields: false }
+        { name: "blocks", description: "Bloques (estructura de clases)", has_custom_fields: false },
+        { name: "plans", description: "Gestión de planes", has_custom_fields: true }
     ]);
 
     // Obtener ID real del módulo users

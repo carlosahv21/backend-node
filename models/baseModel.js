@@ -156,8 +156,6 @@ class BaseModel {
             record[fv.field_name] = fv.value;
         });
 
-        console.log(record);
-
         return record;
     }
 

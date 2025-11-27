@@ -9,7 +9,6 @@ const getFieldById = async (id) => {
     return fieldModel.findById(id);
 };
 
-
 /**
  * Crea un nuevo campo, manejando el nombre 'cf_X' y el contador.
  */

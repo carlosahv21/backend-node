@@ -24,6 +24,7 @@ import rolesRoutes from './routes/roleRoute.js';
 import routeRoutes from './routes/routeRoute.js';
 import settingsRoutes from './routes/settingRoute.js';
 import fileRoutes from './routes/fileRoute.js'; 
+import planRoutes from './routes/planRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -69,6 +70,7 @@ app.use("/api/roles", rolesRoutes);
 app.use("/api/routes", routeRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/file", fileRoutes);
+app.use("/api/plans", planRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {

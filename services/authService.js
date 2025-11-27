@@ -30,6 +30,7 @@ const getUserData = async (userId) => {
         user: {
             id: userRecord.id,
             email: userRecord.email,
+            name: userRecord.first_name + " " + userRecord.last_name,
             role: roleData.role_name,
         },
         settings,

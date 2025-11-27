@@ -1,0 +1,55 @@
+// services/student.service.js
+import planModel from '../models/planModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
+
+/**
+ * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
+ */
+const getAllPlans = async (queryParams) => {
+    return planModel.findAll(queryParams);
+};
+
+/**
+ * Obtiene un estudiante por ID.
+ */
+const getPlanById = async (id) => {
+    return planModel.findById(id);
+};
+
+/**
+ * Crea un nuevo estudiante.
+ */
+const createPlan = async (data) => {
+    const { name } = data;
+
+    if (!name) {
+        throw new utilsCustomError('El campo "name" es requerido.', 400);
+    }
+
+    const newPlan = await planModel.create(data);
+
+    return newPlan;
+};
+
+/**
+ * Actualiza un estudiante existente.
+ */
+const updatePlan = async (id, data) => {
+    return planModel.update(id, data);
+};
+
+/**
+ * Elimina un estudiante por ID.
+ */
+const deletePlan = async (id) => {
+    return planModel.delete(id);
+};
+
+
+export default {
+    getAllPlans,
+    getPlanById,
+    createPlan,
+    updatePlan,
+    deletePlan
+};

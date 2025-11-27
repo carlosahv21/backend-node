@@ -18,6 +18,9 @@ async function getFieldsData() {
         .where({ name: 'Schedule', module_id: 6 })
         .select('id');
 
+    const [plansBlockInfo] = await knex('blocks')
+        .where({ name: 'Basic Information', module_id: 11 })
+        .select('id');
 
     const fieldsData = [
         // 🧩 Información general (Clases)
@@ -66,9 +69,9 @@ async function getFieldsData() {
             block_id: blockDetails.id,
         },
         {
-            name: "relation_config",
+            name: "teacher_id",
             type: "relation",
-            label: "Relation Configuration",
+            label: "Teacher",
             required: false,
             order_sequence: 3,
             relation_config: JSON.stringify({
@@ -153,6 +156,58 @@ async function getFieldsData() {
             required: true,
             order_sequence: 4,
             block_id: usersBlockInfo.id,
+        },
+
+        // 🧩 Información Planes
+        {
+            name: "name",
+            type: "text",
+            label: "Name",
+            required: true,
+            order_sequence: 1,
+            block_id: plansBlockInfo.id,
+        },
+        {
+            name: "description",
+            type: "textarea",
+            label: "Description",
+            required: true,
+            order_sequence: 2,
+            block_id: plansBlockInfo.id,
+        },
+        {
+            name: "price",
+            type: "number",
+            label: "Price",
+            required: true,
+            order_sequence: 3,
+            block_id: plansBlockInfo.id,
+        },
+        {
+            name: "type",
+            type: "select",
+            label: "Type",
+            required: true,
+            options: JSON.stringify(["monthly", "package"]),
+            order_sequence: 4,
+            block_id: plansBlockInfo.id,
+        },
+        {
+            name: "max_sessions",
+            type: "select",
+            label: "Max Sessions",
+            required: true,
+            options: JSON.stringify(["Ilimitadas", "4", "8", "16"]),
+            order_sequence: 7,
+            block_id: plansBlockInfo.id,
+        },
+        {
+            name: "trial_period_days",
+            type: "number",
+            label: "Trial Period Days",
+            required: true,
+            order_sequence: 8,
+            block_id: plansBlockInfo.id,
         }
     ];
 
