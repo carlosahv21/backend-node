@@ -13,12 +13,15 @@ class RegistrationModel extends BaseModel {
         this.selectFields = [
             "class_user.*",
             "c.name as class_name",
+            "c.hour as class_hour",
+            "c.date as class_date",
+            "c.level as class_level",
+            "c.genre as class_genre",
             "u.first_name as user_first_name",
             "u.last_name as user_last_name",
-            "u.email as user_email"
         ];
 
-        this.searchFields = ["c.name", "u.first_name", "u.last_name", "u.email"];
+        this.searchFields = ["c.name", "c.hour", "c.date", "u.first_name", "u.last_name"];
 
         this.filterMapping = {
             'class_id': 'class_user.class_id',
@@ -30,6 +33,25 @@ class RegistrationModel extends BaseModel {
                 joins: this.joins,
                 column_map: this.filterMapping
             }
+        };
+    }
+
+    async findAllClassesByStudentId(studentId, queryParams = {}) {
+        const { page = 1, limit = 10, ...filters } = queryParams;
+
+        const queryBase = this._buildQuery(filters);
+
+        const results = await queryBase.clone().limit(limit).offset((page - 1) * limit);
+
+        const totalQueryBase = this._buildQuery({ ...filters, isCount: true });
+
+        const totalRes = await totalQueryBase.count("* as count").first();
+
+        return {
+            data: results,
+            total: parseInt(totalRes.count),
+            page: parseInt(page),
+            limit: parseInt(limit)
         };
     }
 

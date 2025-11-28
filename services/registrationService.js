@@ -14,12 +14,12 @@ class RegistrationService {
         }
 
         // Crear inscripción
-        const [id] = await RegistrationModel.create(data);
-        return { id, ...data };
+        const newRegistration = await RegistrationModel.create(data);
+        return newRegistration;
     }
 
-    async list(filters) {
-        return await RegistrationModel.findAll(filters);
+    async list(user_id, queryParams) {
+        return await RegistrationModel.findAllClassesByStudentId(user_id, queryParams);
     }
 
     async delete(id) {
@@ -27,8 +27,7 @@ class RegistrationService {
         if (!registration) {
             throw new utilsCustomError('Inscripción no encontrada.', 404);
         }
-        await RegistrationModel.delete(id);
-        return { message: 'Inscripción eliminada correctamente.' };
+        return RegistrationModel.delete(id);
     }
 
     async getAvailableClasses(userId, filters = {}) {

@@ -3,28 +3,34 @@ import knex from '../../config/knex.js';
 
 async function getFieldsData() {
     const [classBlockInfo] = await knex('blocks')
-        .where({ name: 'Basic Information', module_id: 6 })
-        .select('id');
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Basic Information', 'modules.name': 'classes' })
+        .select('blocks.id');
 
     const [usersBlockInfo] = await knex('blocks')
-        .where({ name: 'Basic Information', module_id: 3 })
-        .select('id');
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Basic Information', 'modules.name': 'users' })
+        .select('blocks.id');
 
     const [blockDetails] = await knex('blocks')
-        .where({ name: 'Class Details', module_id: 6 })
-        .select('id');
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Class Details', 'modules.name': 'classes' })
+        .select('blocks.id');
 
     const [blockSchedule] = await knex('blocks')
-        .where({ name: 'Schedule', module_id: 6 })
-        .select('id');
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Schedule', 'modules.name': 'classes' })
+        .select('blocks.id');
 
     const [plansBlockInfo] = await knex('blocks')
-        .where({ name: 'Basic Information', module_id: 11 })
-        .select('id');
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Basic Information', 'modules.name': 'plans' })
+        .select('blocks.id');
 
     const [studentsBlockInfo] = await knex('blocks')
-        .where({ name: 'Class Details', module_id: 12 })
-        .select('id');
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Class Details', 'modules.name': 'students' })
+        .select('blocks.id');
 
     const fieldsData = [
         // 🧩 Información general (Clases)
