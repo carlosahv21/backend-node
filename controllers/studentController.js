@@ -1,33 +1,30 @@
-// controllers/student.controller.js
-import studentService from '../services/student.service.js';
+import studentService from '../services/studentService.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Capa de Controlador (Controller) para Student.
- * Maneja la entrada/salida de la petición HTTP y delega la lógica al Servicio.
- * Usa 'next(error)' para pasar errores al middleware centralizado.
  */
 class StudentController {
 
     async getAll(req, res, next) {
         try {
-            const items = studentService.getAll();
-            res.status(200).json({
-                message: "Lista de Student obtenida.",
-                data: items
-            });
+            const result = await studentService.getAllStudents();
+            res.status(200).json(result);
         } catch (error) {
-            next(error); 
+            next(error);
         }
     }
 
     async getById(req, res, next) {
         try {
             const { id } = req.params;
-            const item = studentService.getById(id);
-            res.status(200).json({
-                message: "Student obtenido.",
-                data: item
-            });
+            const student = await studentService.getStudentById(id);
+
+            if (!student) {
+                return res.status(404).json({ message: "Registro de estudiante no encontrado." });
+            }
+
+            res.status(200).json(student);
         } catch (error) {
             next(error);
         }
@@ -35,10 +32,10 @@ class StudentController {
 
     async create(req, res, next) {
         try {
-            const newItem = studentService.create(req.body);
+            const newStudent = await studentService.createStudent(req.body);
             res.status(201).json({
                 message: "Student creado exitosamente.",
-                data: newItem
+                data: newStudent
             });
         } catch (error) {
             next(error);
@@ -48,10 +45,33 @@ class StudentController {
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            const item = studentService.update(id, req.body);
+            const updatedStudent = await studentService.updateStudent(id, req.body);
+
+            if (!updatedStudent) {
+                return res.status(404).json({ message: "Registro de estudiante no encontrado para actualizar." });
+            }
+
             res.status(200).json({
                 message: "Student actualizado exitosamente.",
-                data: item
+                data: updatedStudent
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async delete(req, res, next) {
+        try {
+            const { id } = req.params;
+            const deletedStudent = await studentService.deleteStudent(id);
+
+            if (!deletedStudent) {
+                return res.status(404).json({ message: "Registro de estudiante no encontrado para eliminar." });
+            }
+
+            res.status(200).json({
+                message: "Student eliminado exitosamente.",
+                data: deletedStudent
             });
         } catch (error) {
             next(error);

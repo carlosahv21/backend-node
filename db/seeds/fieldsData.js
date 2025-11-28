@@ -22,6 +22,10 @@ async function getFieldsData() {
         .where({ name: 'Basic Information', module_id: 11 })
         .select('id');
 
+    const [studentsBlockInfo] = await knex('blocks')
+        .where({ name: 'Class Details', module_id: 12 })
+        .select('id');
+
     const fieldsData = [
         // 🧩 Información general (Clases)
         {
@@ -208,7 +212,27 @@ async function getFieldsData() {
             required: true,
             order_sequence: 8,
             block_id: plansBlockInfo.id,
-        }
+        },
+
+        // Detalles del estudiante
+        {
+            name: "plan_id",
+            type: "relation",
+            label: "Plan",
+            required: true,
+            order_sequence: 1,
+            relation_config: JSON.stringify({
+                "table": "plans",
+                "value_field": "plans.id",
+                "display_field": "plans.name",
+                "display_alias": "plan_name",
+                "filters": {},
+                "multiple": false,
+                "search": true,
+                "limit": 20
+            }),
+            block_id: studentsBlockInfo.id,
+        },
     ];
 
     return fieldsData;

@@ -11,13 +11,13 @@ class UserModel extends BaseModel {
 
         this.selectFields = ["users.*", "r.name as role_name"];
         this.searchFields = ["users.first_name", "users.last_name", "users.email", "r.name"];
-        
+
         this.filterMapping = { 'role': 'r.name' };
 
         this.relationMaps = {
-            'default': { 
-                joins: this.joins,  
-                column_map: this.filterMapping 
+            'default': {
+                joins: this.joins,
+                column_map: this.filterMapping
             }
         };
     }
@@ -80,4 +80,5 @@ class UserModel extends BaseModel {
     }
 }
 
+export { UserModel };
 export default new UserModel();

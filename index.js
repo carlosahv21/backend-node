@@ -25,6 +25,7 @@ import routeRoutes from './routes/routeRoute.js';
 import settingsRoutes from './routes/settingRoute.js';
 import fileRoutes from './routes/fileRoute.js'; 
 import planRoutes from './routes/planRoute.js';
+import studentsRoutes from './routes/studentRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -69,6 +70,7 @@ app.use("/api/rolePermissions", rolePermissionsRoutes);
 app.use("/api/roles", rolesRoutes);
 app.use("/api/routes", routeRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/students", studentsRoutes);
 app.use("/api/file", fileRoutes);
 app.use("/api/plans", planRoutes);
 

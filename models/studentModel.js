@@ -1,28 +1,21 @@
-// models/student.model.js
-import BaseModel from './baseModel';
+// models/studentModel.js
+import { UserModel } from './userModel.js';
 
 /**
  * Capa de Acceso a Datos (DAL) para la entidad Student.
  */
-class StudentModel extends BaseModel {
+class StudentModel extends UserModel {
     constructor() {
-        super('students');
-        this.searchFields = [];
+        super();
     }
 
-    findAll() {
-        return this.collection;
-    }
-
-    findById(id) {
-        const itemId = parseInt(id, 10); 
-        return this.collection.find(item => item.id === itemId);
-    }
-
-    create(data) {
-        const newItem = { id: this.nextId++, ...data };
-        this.collection.push(newItem);
-        return newItem;
+    /**
+     * Obtiene todos los estudiantes.
+     * Fuerza el filtro por rol 'student'.
+     */
+    async findAll(queryParams = {}) {
+        // Forzamos el rol 'student'
+        return super.findAllByRole({ ...queryParams, role: 'student' });
     }
 }
 

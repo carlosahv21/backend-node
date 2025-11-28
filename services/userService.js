@@ -13,7 +13,6 @@ const getAllUsers = async (queryParams) => {
     return userModel.findAllByRole(queryParams);
 };
 
-
 /**
  * Crea un nuevo usuario. (Maneja el HASHING y la ASIGNACIÓN DE ROL)
  */

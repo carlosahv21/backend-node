@@ -1,4 +1,4 @@
-// services/student.service.js
+// services/studentService.js
 import studentModel from '../models/studentModel.js';
 import utilsCustomError from '../utils/utilsCustomError.js';
 
@@ -20,12 +20,6 @@ const getStudentById = async (id) => {
  * Crea un nuevo estudiante.
  */
 const createStudent = async (data) => {
-    const { name } = data;
-
-    if (!name) {
-        throw new utilsCustomError('El campo "name" es requerido.', 400);
-    }
-
     const newStudent = await studentModel.create(data);
 
     return newStudent;
