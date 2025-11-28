@@ -23,10 +23,11 @@ import rolePermissionsRoutes from './routes/rolePermissionRoute.js';
 import rolesRoutes from './routes/roleRoute.js';
 import routeRoutes from './routes/routeRoute.js';
 import settingsRoutes from './routes/settingRoute.js';
-import fileRoutes from './routes/fileRoute.js'; 
+import fileRoutes from './routes/fileRoute.js';
 import planRoutes from './routes/planRoute.js';
 import studentsRoutes from './routes/studentRoute.js';
 import teachersRoutes from './routes/teacherRoute.js';
+import registrationRoutes from './routes/registrationRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -75,6 +76,7 @@ app.use("/api/students", studentsRoutes);
 app.use("/api/file", fileRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/teachers", teachersRoutes);
+app.use("/api/registrations", registrationRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {

@@ -1,0 +1,67 @@
+// services/registrationService.js
+import RegistrationModel from '../models/registrationModel.js';
+import utilsCustomError from '../utils/utilsCustomError.js';
+import knex from '../config/knex.js';
+
+class RegistrationService {
+    async create(data) {
+        const { user_id, class_id } = data;
+
+        // Validar si ya existe la inscripción
+        const isRegistered = await RegistrationModel.isRegistered(user_id, class_id);
+        if (isRegistered) {
+            throw new utilsCustomError('El usuario ya está inscrito en esta clase.', 400);
+        }
+
+        // Crear inscripción
+        const [id] = await RegistrationModel.create(data);
+        return { id, ...data };
+    }
+
+    async list(filters) {
+        return await RegistrationModel.findAll(filters);
+    }
+
+    async delete(id) {
+        const registration = await RegistrationModel.findById(id);
+        if (!registration) {
+            throw new utilsCustomError('Inscripción no encontrada.', 404);
+        }
+        await RegistrationModel.delete(id);
+        return { message: 'Inscripción eliminada correctamente.' };
+    }
+
+    async getAvailableClasses(userId, filters = {}) {
+        // Obtener clases en las que el usuario NO está inscrito
+        // Esto requiere una query personalizada o usar el modelo de clases
+
+        const subquery = knex('class_user')
+            .select('class_id')
+            .where('user_id', userId);
+
+        const query = knex('classes')
+            .whereNotIn('id', subquery)
+            .andWhere('is_active', true); // Asumiendo que classes tiene is_active
+
+        // Aplicar filtros básicos si es necesario (e.g. búsqueda por nombre)
+        if (filters.search) {
+            query.where('name', 'like', `%${filters.search}%`);
+        }
+
+        const limit = parseInt(filters.limit || 10);
+        const page = parseInt(filters.page || 1);
+
+        const results = await query.clone().limit(limit).offset((page - 1) * limit);
+
+        const totalRes = await query.clone().count("* as count").first();
+
+        return {
+            data: results,
+            total: parseInt(totalRes.count),
+            page: page,
+            limit: limit
+        };
+    }
+}
+
+export default new RegistrationService();

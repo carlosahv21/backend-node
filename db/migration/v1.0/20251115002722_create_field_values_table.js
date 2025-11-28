@@ -1,36 +1,43 @@
 export async function up(knex) {
-    await knex.schema.createTable('field_values', (table) => {
-        table.increments('id').primary();
+    const exists = await knex.schema.hasTable('field_values');
 
-        // Relación con la tabla fields
-        table
-            .integer('field_id')
-            .unsigned()
-            .references('id')
-            .inTable('fields')
-            .onDelete('CASCADE')
-            .index();
+    if (!exists) {
+        await knex.schema.createTable('field_values', (table) => {
+            table.increments('id').primary();
 
-        // ID del registro al que pertenece el valor (ej. usuario, cliente, producto, etc.)
-        table.integer('record_id').notNullable().index();
+            // Relación con la tabla fields
+            table
+                .integer('field_id')
+                .unsigned()
+                .references('id')
+                .inTable('fields')
+                .onDelete('CASCADE')
+                .index();
 
-        // Valor almacenado (puede ser texto, número, booleano, JSON según tu uso)
-        table.text('value').notNullable();
+            // ID del registro al que pertenece el valor (ej. usuario, cliente, producto, etc.)
+            table.integer('record_id').notNullable().index();
 
-        table.timestamps(true, true);
-    });
+            // Valor almacenado (puede ser texto, número, booleano, JSON según tu uso)
+            table.text('value').notNullable();
 
-    console.log("Table 'field_values' created successfully.");
+            table.timestamps(true, true);
+        });
 
-    await knex.schema.createTable('custom_field_counters', (table) => {
-        table.increments('id').primary();
-        table.integer('last_cf_number').notNullable().defaultTo(1000);
-    });
+        console.log("Table 'field_values' created successfully.");
+    }
 
-    console.log("Table 'custom_field_counters' created successfully.");
+    const existsCounters = await knex.schema.hasTable('custom_field_counters');
 
+    if (!existsCounters) {
+        await knex.schema.createTable('custom_field_counters', (table) => {
+            table.increments('id').primary();
+            table.integer('last_cf_number').notNullable().defaultTo(1000);
+        });
 
-    await knex('custom_field_counters').insert({ last_cf_number: 1000 });
+        console.log("Table 'custom_field_counters' created successfully.");
+
+        await knex('custom_field_counters').insert({ last_cf_number: 1000 });
+    }
 };
 
 export async function down(knex) {
