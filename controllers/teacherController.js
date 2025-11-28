@@ -22,6 +22,11 @@ class TeacherController {
         try {
             const { id } = req.params;
             const teacher = await teacherService.getTeacherById(id);
+
+            if (!teacher) {
+                return res.status(404).json({ message: "Profesor no encontrado." });
+            }
+
             res.status(200).json(teacher);
         } catch (error) {
             next(new utilsCustomError(error.message, error.status));
@@ -33,7 +38,7 @@ class TeacherController {
             const newTeacher = await teacherService.createTeacher(req.body);
             res.status(201).json({
                 message: "Teacher creado correctamente",
-                teacher: newTeacher
+                data: newTeacher
             });
         } catch (error) {
             next(new utilsCustomError(error.message, error.status));
@@ -44,9 +49,14 @@ class TeacherController {
         try {
             const { id } = req.params;
             const teacher = await teacherService.updateTeacher(id, req.body);
+
+            if (!teacher) {
+                return res.status(404).json({ message: "Profesor no encontrado para actualizar." });
+            }
+
             res.status(200).json({
                 message: "Teacher actualizado correctamente",
-                teacher: teacher
+                data: teacher
             });
         } catch (error) {
             next(new utilsCustomError(error.message, error.status));
@@ -56,8 +66,16 @@ class TeacherController {
     async delete(req, res, next) {
         try {
             const { id } = req.params;
-            await teacherService.deleteTeacher(id);
-            res.status(204).send();
+            const deletedTeacher = await teacherService.deleteTeacher(id);
+
+            if (!deletedTeacher) {
+                return res.status(404).json({ message: "Profesor no encontrado para eliminar." });
+            }
+
+            res.status(200).json({
+                message: "Teacher eliminado correctamente",
+                data: deletedTeacher
+            });
         } catch (error) {
             next(new utilsCustomError(error.message, error.status));
         }

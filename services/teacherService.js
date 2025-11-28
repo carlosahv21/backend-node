@@ -13,14 +13,8 @@ const getAllTeachers = async (queryParams) => {
  * Crea un nuevo profesor, delegando al modelo.
  */
 const createTeacher = async (data) => {
-    const { nombre } = data;
-
-    if (!nombre) {
-        throw new utilsCustomError('El campo "nombre" es requerido.', 400);
-    }
-
+    // Validación de campos requeridos delegada al modelo o manejada por base de datos/controlador
     const newTeacher = await teacherModel.create(data);
-
     return newTeacher;
 };
 
@@ -35,9 +29,7 @@ const getTeacherById = async (id) => {
  * Actualiza un profesor existente, delegando al modelo.
  */
 const updateTeacher = async (id, data) => {
-    const updatedTeacher = await teacherModel.update(id, data);
-
-    return updatedTeacher;
+    return teacherModel.update(id, data);
 };
 
 /**

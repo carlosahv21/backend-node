@@ -1,46 +1,22 @@
 // models/teacherModel.js
-import BaseModel from './baseModel';
+import { UserModel } from './userModel.js';
 
 /**
- * Capa de Acceso a Datos (DAL) para la entidad Student.
+ * Capa de Acceso a Datos (DAL) para la entidad Teacher.
+ * Extiende de UserModel para heredar funcionalidad de usuarios.
  */
-
-class TeacherModel extends BaseModel {
+class TeacherModel extends UserModel {
     constructor() {
-        super('teacher');
-
-        this.joins = [];
-        this.selectFields = ['teacher.*'];
-        this.searchFields = ['teacher.nombre'];
+        super();
+        // Override searchFields if needed
     }
 
     /**
      * Obtiene todos los profesores.
+     * Fuerza el filtro por rol 'teacher'.
      */
-    async findAll() {
-        return this.knex(this.tableName).select('*');
-    }
-
-    /**
-     * Obtiene un profesor por ID.
-     */
-    async findById(id) {
-        const teacher = await this.knex(this.tableName).where({ id }).first();
-
-        if (!teacher) {
-            throw new Error('El profesor no existe');
-        }
-
-        return teacher;
-    }
-
-    /**
-     * Crea un nuevo profesor.
-     */
-    async create(data) {
-        const newTeacher = await this.knex(this.tableName).insert(data);
-
-        return newTeacher;
+    async findAll(queryParams = {}) {
+        return super.findAllByRole({ ...queryParams, role: 'teacher' });
     }
 }
 

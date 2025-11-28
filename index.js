@@ -26,6 +26,7 @@ import settingsRoutes from './routes/settingRoute.js';
 import fileRoutes from './routes/fileRoute.js'; 
 import planRoutes from './routes/planRoute.js';
 import studentsRoutes from './routes/studentRoute.js';
+import teachersRoutes from './routes/teacherRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -73,6 +74,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/students", studentsRoutes);
 app.use("/api/file", fileRoutes);
 app.use("/api/plans", planRoutes);
+app.use("/api/teachers", teachersRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {
