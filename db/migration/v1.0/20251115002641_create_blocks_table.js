@@ -1,5 +1,5 @@
 
-import blocksModule from '../../seeds/blocksData.js';
+import blocksModule from '../../data/blocksData.js';
 
 const { getBlocksData } = blocksModule;
 

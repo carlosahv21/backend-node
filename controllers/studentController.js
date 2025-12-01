@@ -8,7 +8,7 @@ class StudentController {
 
     async getAll(req, res, next) {
         try {
-            const result = await studentService.getAllStudents();
+            const result = await studentService.getAllStudents(req.query);
             res.status(200).json(result);
         } catch (error) {
             next(error);

@@ -27,32 +27,28 @@ class UserModel extends BaseModel {
     async findAllByRole(queryParams = {}) {
         const { role, ...filters } = queryParams;
 
-        // Construir la query base usando la configuración de joins/selects de este modelo
         let query = this._buildQuery(filters);
 
-        // Aplicar el filtro específico por rol
         if (role) {
             query = query.where('r.name', role);
         }
 
-        // Obtener resultados y conteo total, usando la lógica del BaseModel
+        let totalCountQuery = this._buildQuery({ ...filters, isCount: true });
+
+        if (role) {
+            totalCountQuery = totalCountQuery.where('r.name', role);
+        }
+        const totalRes = await totalCountQuery.count("* as count").first();
+        const totalCount = parseInt(totalRes.count || 0);
+
         const limit = parseInt(filters.limit || 10);
         const page = parseInt(filters.page || 1);
 
         const results = await query.clone().limit(limit).offset((page - 1) * limit);
 
-        // Conteo total considerando el filtro de rol
-        const totalQuery = this._buildQuery({ ...filters, isCount: true });
-        let totalCountQuery = totalQuery;
-        if (role) {
-            totalCountQuery = totalCountQuery.where('r.name', role);
-        }
-
-        const totalRes = await totalCountQuery.count("* as count").first();
-
         return {
             data: results,
-            total: parseInt(totalRes.count),
+            total: totalCount,
             page: page,
             limit: limit
         };

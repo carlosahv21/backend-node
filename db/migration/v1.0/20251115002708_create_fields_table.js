@@ -1,4 +1,4 @@
-import fieldsModule from '../../seeds/fieldsData.js';
+import fieldsModule from '../../data/fieldsData.js';
 
 const { getFieldsData } = fieldsModule;
 

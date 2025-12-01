@@ -1,4 +1,3 @@
-// models/registrationModel.js
 import BaseModel from './baseModel.js';
 
 class RegistrationModel extends BaseModel {
@@ -36,22 +35,36 @@ class RegistrationModel extends BaseModel {
         };
     }
 
+    /**
+     * Obtiene todas las clases inscritas por un estudiante específico, con paginación y filtros.
+     */
     async findAllClassesByStudentId(studentId, queryParams = {}) {
         const { page = 1, limit = 10, ...filters } = queryParams;
 
-        const queryBase = this._buildQuery(filters);
+        const parsedPage = parseInt(page);
+        const parsedLimit = parseInt(limit);
 
-        const results = await queryBase.clone().limit(limit).offset((page - 1) * limit);
+        let queryBase = this._buildQuery(filters);
 
-        const totalQueryBase = this._buildQuery({ ...filters, isCount: true });
+        queryBase = queryBase.where('class_user.user_id', studentId);
+
+        let totalQueryBase = this._buildQuery({ ...filters, isCount: true });
+
+        totalQueryBase = totalQueryBase.where('class_user.user_id', studentId);
 
         const totalRes = await totalQueryBase.count("* as count").first();
+        const totalCount = parseInt(totalRes.count || 0);
+
+        const results = await queryBase
+            .clone()
+            .limit(parsedLimit)
+            .offset((parsedPage - 1) * parsedLimit);
 
         return {
             data: results,
-            total: parseInt(totalRes.count),
-            page: parseInt(page),
-            limit: parseInt(limit)
+            total: totalCount,
+            page: parsedPage,
+            limit: parsedLimit
         };
     }
 
