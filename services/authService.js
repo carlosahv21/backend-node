@@ -13,13 +13,18 @@ const JWT_EXPIRES_IN = "1h";
 const getUserData = async (userId) => {
 
     const userRecord = await authModel.knex("users").where({ id: userId }).first();
-    
+
     if (!userRecord) throw new utilsCustomError("User not found", 404);
 
     const roleData = await authModel.findRoleByUserId(userId);
 
+    let planData = null;
+    if (roleData.role_name == "student") {
+        planData = await authModel.findPlanByUserId(userId);
+    }
+
     const rawPermissions = await authModel.findPermissions(roleData.role_id);
-    
+
     const permissionsList = [...new Set(rawPermissions.map(p =>
         `${p.moduleName}:${p.action}`
     ))];
@@ -32,6 +37,7 @@ const getUserData = async (userId) => {
             email: userRecord.email,
             name: userRecord.first_name + " " + userRecord.last_name,
             role: roleData.role_name,
+            plan: planData,
         },
         settings,
         permissions: permissionsList,

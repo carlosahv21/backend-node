@@ -39,7 +39,7 @@ export async function up(knex) {
         }));
 
     // TEACHER → solo ver + asistencia
-    const teacherModules = ["dashboard", "students", "classes", "attendance"];
+    const teacherModules = ["dashboard", "classes", "attendance"];
 
     const teacherPermissions = permissions
         .filter(p =>
@@ -51,7 +51,7 @@ export async function up(knex) {
             permission_id: p.id,
         }));
 
-    const studentModules = ["dashboard", "students", "classes", "registrations"];
+    const studentModules = ["dashboard", "classes", "registrations"];
     const studentPermissions = permissions
         .filter(p => studentModules.includes(p.resource) && p.action === 'view')
         .map(p => ({

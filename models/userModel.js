@@ -1,5 +1,6 @@
 // models/userModel.js
 import BaseModel from './baseModel.js';
+import bcrypt from 'bcryptjs';
 
 class UserModel extends BaseModel {
     constructor() {
@@ -52,6 +53,30 @@ class UserModel extends BaseModel {
             page: page,
             limit: limit
         };
+    }
+
+    async create(userData) {
+        console.log("userData", userData);
+        
+        const { password, ...user } = userData;
+
+        if (password) {
+            console.log("password", password);
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+        }
+        return super.create(user);
+    }
+
+    async update(id, userData) {
+        console.log("userData", userData);
+        
+        const { password, ...user } = userData;
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+        }
+        return super.update(id, user);
     }
 
     // --- Métodos de Relación Específicos para Roles (Acceso a datos) ---

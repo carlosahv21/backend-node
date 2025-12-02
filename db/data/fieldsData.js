@@ -255,12 +255,20 @@ async function getFieldsData() {
             block_id: studentsBlockInfo.id,
         },
         {
-            name: "plan_classes_status",
+            name: "plan_classes_used",
+            type: "number",
+            label: "Plan Classes Used",
+            required: true,
+            order_sequence: 2,
+            block_id: studentsBlockInfo.id,
+        },
+        {
+            name: "plan_status",
             type: "select",
-            label: "Plan Classes Status",
+            label: "Plan Status",
             required: true,
             options: JSON.stringify(["active", "expired", "paused"]),
-            order_sequence: 2,
+            order_sequence: 3,
             block_id: studentsBlockInfo.id,
         },
     ];

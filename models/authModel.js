@@ -47,6 +47,22 @@ class AuthModel {
     }
 
     /**
+     * Obtiene el plan asociado a un usuario.
+     */
+    async findPlanByUserId(userId) {
+        const planData = await this.knex("users")
+            .join("plans", "users.plan_id", "plans.id")
+            .where("users.id", userId)
+            .select("plans.max_sessions", "users.plan_classes_used", "users.plan_status", "users.plan_start_date", "users.plan_end_date")
+            .first();
+
+        if (!planData) {
+            throw new utilsCustomError("User has no plan assigned", 403);
+        }
+        return planData;
+    }
+
+    /**
      * Obtiene la configuración global de la academia.
      */
     async findSettings() {
