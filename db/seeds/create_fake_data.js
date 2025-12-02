@@ -1,4 +1,4 @@
-// DataBase/2025..._create_fake_data.js
+// seeds/create_fake_data.js
 
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
@@ -7,14 +7,12 @@ import bcrypt from 'bcryptjs';
 const NUM_PROFESSORS = 10;
 const NUM_STUDENTS = 100;
 const NUM_CLASSES = 50;
+const NUM_FAVORITE_CLASSES = 10;
 const MAX_REGISTRATIONS_PER_STUDENT = 10;
 const PROFESSOR_ROLE_ID = 3;
 const STUDENT_ROLE_ID = 2;
 
-// Días de la semana para clases (1=Lun, 6=Sáb). Domingo (7) excluido.
 const CLASS_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-// --- Funciones Auxiliares para Datos ---
 
 const createRandomUser = (roleId) => {
   const firstName = faker.person.firstName();
@@ -50,7 +48,8 @@ const createRandomClass = (teacherIds) => {
   const genre = faker.helpers.arrayElement(['Salsa', 'Bachata']);
   const days = faker.helpers.arrayElement(CLASS_DAYS).toString();
   const randomHour = faker.number.int({ min: 8, max: 22 }).toString().padStart(2, '0');
-  const randomMinute = (faker.number.int({ min: 0, max: 11 }) * 5).toString().padStart(2, '0');
+  const randomMinute = faker.helpers.arrayElement([0, 30]).toString().padStart(2, '0');
+
   const classHour = `${randomHour}:${randomMinute}`;
 
   return {
@@ -66,6 +65,8 @@ const createRandomClass = (teacherIds) => {
     teacher_id: faker.helpers.arrayElement(teacherIds),
     created_at: faker.date.past({ years: 0.5 }),
     updated_at: faker.date.recent({ days: 1 }),
+    // is_favorites se asignará más tarde para controlar el conteo
+    is_favorites: false,
   };
 };
 
@@ -102,7 +103,20 @@ export async function seed(knex) {
     console.error("¡ERROR! No hay profesores para asignar las clases.");
     return;
   }
-  const classRecords = faker.helpers.multiple(() => createRandomClass(professorIds), { count: NUM_CLASSES });
+
+  let classRecords = faker.helpers.multiple(() => createRandomClass(professorIds), { count: NUM_CLASSES });
+
+  // 💡 LÓGICA DE FAVORITOS: Aseguramos que solo las primeras NUM_FAVORITE_CLASSES sean favoritas
+  if (NUM_FAVORITE_CLASSES <= NUM_CLASSES) {
+    for (let i = 0; i < NUM_FAVORITE_CLASSES; i++) {
+      classRecords[i].is_favorites = true;
+    }
+    console.log(`- Marcando ${NUM_FAVORITE_CLASSES} clases como favoritas.`);
+  } else {
+    console.warn(`Advertencia: NUM_FAVORITE_CLASSES (${NUM_FAVORITE_CLASSES}) es mayor que NUM_CLASSES (${NUM_CLASSES}). Todas las clases serán favoritas.`);
+  }
+
+
   console.log(`- Insertando ${NUM_CLASSES} Clases (asignadas a un profesor).`);
   await knex('classes').insert(classRecords);
 

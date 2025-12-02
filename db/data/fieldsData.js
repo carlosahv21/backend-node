@@ -60,6 +60,14 @@ async function getFieldsData() {
             options: JSON.stringify(["Salsa", "Bachata", "Reggaeton", "Cumbia"]),
             block_id: classBlockInfo.id,
         },
+        {
+            name: "is_favorites",
+            type: "boolean",
+            label: "Favorites",
+            required: false,
+            order_sequence: 4,
+            block_id: classBlockInfo.id,
+        },
 
         // 📄 Detalles
         {
