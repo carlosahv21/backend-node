@@ -36,7 +36,6 @@ const createRandomUser = (roleId) => {
     user.plan_id = faker.number.int({ min: 1, max: 4 }); // Ajustado a 4 planes
     user.plan_start_date = faker.date.recent({ days: 90 });
     user.plan_end_date = faker.date.soon({ days: 60, refDate: user.plan_start_date });
-    user.plan_classes_used = faker.number.int({ min: 0, max: 20 });
     user.plan_status = faker.helpers.arrayElement(['active', 'expired', 'paused']);
   }
 

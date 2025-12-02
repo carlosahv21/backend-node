@@ -68,6 +68,45 @@ class RegistrationModel extends BaseModel {
         };
     }
 
+    // Check if a class has reached the maximum number of students
+    async maxUserPerClass(class_id) {
+        const result = await this.knex(this.tableName)
+            .where({ class_id: class_id })
+            .count("* as count")
+            .first();
+
+        const classes = await this.knex("classes")
+            .select("classes.capacity")
+            .where("classes.id", class_id)
+            .first();
+
+        console.log(result.count);
+        console.log(classes.capacity);
+
+        return parseInt(result.count) >= parseInt(classes.capacity);
+    }
+
+    // Check if a user registered in max_classes
+    async isRegisteredInMaxClasses(userId) {
+        const result = await this.knex(this.tableName)
+            .where({ user_id: userId })
+            .count("* as count")
+            .first();
+
+        const plan = await this.knex("users")
+            .join("plans", "users.plan_id", "plans.id")
+            .where("users.id", userId)
+            .select("plans.max_classes")
+            .first();
+
+        // Tiene clase
+        if (plan.max_classes == 0) {
+            return false;
+        }
+
+        return parseInt(result.count) > parseInt(plan.max_classes);
+    }
+
     // Check if a user is already registered in a class
     async isRegistered(userId, classId) {
         const result = await this.knex(this.tableName)

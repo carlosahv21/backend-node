@@ -13,6 +13,17 @@ class RegistrationService {
             throw new utilsCustomError('El usuario ya está inscrito en esta clase.', 400);
         }
 
+        const isRegisteredInMaxClasses = await RegistrationModel.isRegisteredInMaxClasses(user_id);
+
+        if (isRegisteredInMaxClasses) {
+            throw new utilsCustomError('El usuario ha alcanzado el número máximo de clases permitidas.', 400);
+        }
+
+        const maxUsersPerPlan = await RegistrationModel.maxUserPerClass(class_id);
+        if (maxUsersPerPlan) {
+            throw new utilsCustomError('La clase ha alcanzado el número máximo de estudiantes permitidos.', 400);
+        }
+
         // Crear inscripción
         const newRegistration = await RegistrationModel.create(data);
         return newRegistration;

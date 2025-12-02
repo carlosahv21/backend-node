@@ -11,6 +11,7 @@ export async function up(knex) {
 
             table.enum('type', ['monthly', 'package']).notNullable();
             table.integer('max_sessions').defaultTo(0).nullable();
+            table.integer('max_classes').defaultTo(0).nullable();
 
             table.integer('trial_period_days').defaultTo(0);
 
@@ -26,6 +27,7 @@ export async function up(knex) {
                 price: 30,
                 type: "monthly",
                 max_sessions: 0,
+                max_classes: 0,
                 trial_period_days: 0,
             },
             {
@@ -34,6 +36,7 @@ export async function up(knex) {
                 price: 12,
                 type: "package",
                 max_sessions: 4,
+                max_classes: 1,
                 trial_period_days: 0,
             },
             {
@@ -42,6 +45,7 @@ export async function up(knex) {
                 price: 20,
                 type: "package",
                 max_sessions: 8,
+                max_classes: 2,
                 trial_period_days: 0,
             },
             {
@@ -50,6 +54,7 @@ export async function up(knex) {
                 price: 30,
                 type: "package",
                 max_sessions: 16,
+                max_classes: 4,
                 trial_period_days: 0,
             }
         ]);

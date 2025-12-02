@@ -29,29 +29,29 @@ export async function up(knex) {
     }));
 
     // RECEPTIONIST → permisos relacionados con estudiantes, pagos y asistencia
-    const receptionistModules = ["students", "payments", "attendance", "reports", "classes"]; // Agregué classes para que puedan verlas
+    const receptionistModules = ["students", "settings", "dashboard", "users", "roles", "classes", "assistants", "fields", "blocks", "plans", "registrations", "students", "teachers"];
 
     const receptionistPermissions = permissions
-        .filter(p => receptionistModules.includes(p.resource))
+        .filter(p => receptionistModules.includes(p.resource) && (p.action === 'view' || p.action === 'create' || p.action === 'edit'))
         .map(p => ({
             role_id: roleMap["receptionist"],
             permission_id: p.id,
         }));
 
     // TEACHER → solo ver + asistencia
-    const teacherModules = ["attendance", "classes"];
+    const teacherModules = ["dashboard", "students", "classes", "attendance"];
 
     const teacherPermissions = permissions
         .filter(p =>
             teacherModules.includes(p.resource) &&
-            (p.action === 'view' || p.resource === 'attendance')
+            (p.action === 'view' || p.action === 'create')
         )
         .map(p => ({
             role_id: roleMap["teacher"],
             permission_id: p.id,
         }));
 
-    const studentModules = ["students", "attendance"];
+    const studentModules = ["dashboard", "students", "classes", "registrations"];
     const studentPermissions = permissions
         .filter(p => studentModules.includes(p.resource) && p.action === 'view')
         .map(p => ({
