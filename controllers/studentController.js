@@ -60,6 +60,21 @@ class StudentController {
         }
     }
 
+    async getByIdDetails(req, res, next) {
+        try {
+            const { id } = req.params;
+            const student = await studentService.getStudentByIdDetails(id);
+
+            if (!student) {
+                return res.status(404).json({ message: "Registro de estudiante no encontrado." });
+            }
+
+            res.status(200).json(student);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async delete(req, res, next) {
         try {
             const { id } = req.params;

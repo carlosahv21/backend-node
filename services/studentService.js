@@ -16,6 +16,10 @@ const getStudentById = async (id) => {
     return studentModel.findById(id);
 };
 
+const getStudentByIdDetails = async (id) => {
+    return studentModel.findByIdDetails(id);
+};
+
 /**
  * Crea un nuevo estudiante.
  */
@@ -43,6 +47,7 @@ const deleteStudent = async (id) => {
 export default {
     getAllStudents,
     getStudentById,
+    getStudentByIdDetails,
     createStudent,
     updateStudent,
     deleteStudent

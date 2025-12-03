@@ -17,6 +17,13 @@ const getPlanById = async (id) => {
 };
 
 /**
+ * Obtiene un estudiante por ID con detalles.
+ */
+const getPlanByIdDetails = async (id) => {
+    return planModel.findByIdDetails(id);
+};
+
+/**
  * Crea un nuevo estudiante.
  */
 const createPlan = async (data) => {
@@ -49,6 +56,7 @@ const deletePlan = async (id) => {
 export default {
     getAllPlans,
     getPlanById,
+    getPlanByIdDetails,
     createPlan,
     updatePlan,
     deletePlan

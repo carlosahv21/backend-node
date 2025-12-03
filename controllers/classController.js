@@ -32,6 +32,18 @@ class ClassController {
         }
     }
 
+    /**
+     * Obtiene una clase por ID con detalles.
+     */
+    async getByIdDetails(req, res, next) {
+        try {
+            const { id } = req.params;
+            const classRecord = await classService.getClassByIdDetails(id); 
+            res.status(200).json(classRecord);
+        } catch (error) {
+            next(new utilsCustomError(error.message, error.status));
+        }
+    }
 
     /**
      * Crea una nueva clase.

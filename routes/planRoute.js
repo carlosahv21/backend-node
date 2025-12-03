@@ -11,6 +11,13 @@ router.get('/',
     planController.getAll
 );
 
+// GET /api/plans/details/:id
+router.get("/details/:id",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("plans", "view"),
+    planController.getByIdDetails
+);
+
 // POST /api/plans
 router.post('/',
     authMiddleware.authenticateToken,

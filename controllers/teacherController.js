@@ -33,6 +33,21 @@ class TeacherController {
         }
     }
 
+    async getByIdDetails(req, res, next) {
+        try {
+            const { id } = req.params;
+            const teacher = await teacherService.getTeacherByIdDetails(id);
+
+            if (!teacher) {
+                return res.status(404).json({ message: "Profesor no encontrado." });
+            }
+
+            res.status(200).json(teacher);
+        } catch (error) {
+            next(new utilsCustomError(error.message, error.status));
+        }
+    }
+
     async create(req, res, next) {
         try {
             const newTeacher = await teacherService.createTeacher(req.body);

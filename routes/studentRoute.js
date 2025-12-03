@@ -18,6 +18,13 @@ router.get("/:id",
     (req, res, next) => studentController.getById(req, res, next) // Añadimos 'next'
 );
 
+// GET /api/students/details/:id
+router.get("/details/:id",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("students", "view"),
+    (req, res, next) => studentController.getByIdDetails(req, res, next) // Añadimos 'next'
+);
+
 // POST /api/students
 router.post("/",
     authMiddleware.authenticateToken,

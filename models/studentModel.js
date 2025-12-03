@@ -74,7 +74,7 @@ class StudentModel extends UserModel {
                     ],
                 },
                 {
-                    label: "Registro y Cuenta",
+                    label: "Registro de Tiempos",
                     items: [
                         { name: "Email Verificado", value: formatValue('email_verified', apiData.email_verified) },
                         { name: "Último Login", value: apiData.last_login },
@@ -89,7 +89,7 @@ class StudentModel extends UserModel {
     /**
      * Método principal para obtener el detalle y transformarlo.
      */
-    async findById(id) {
+    async findByIdDetails(id) {
         const apiData = await this._getStudentData(id);
         return this._transformToViewModel(apiData);
     }

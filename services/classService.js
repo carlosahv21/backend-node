@@ -30,6 +30,13 @@ const getClassById = async (id) => {
 };
 
 /**
+ * Obtiene una clase por ID con detalles.
+ */
+const getClassByIdDetails = async (id) => {
+    return classModel.findByIdDetails(id);
+};
+
+/**
  * Actualiza una clase existente.
  */
 const updateClass = async (id, data) => {
@@ -50,6 +57,7 @@ export default {
     getAllClasses,
     createClass,
     getClassById,
+    getClassByIdDetails,
     updateClass,
     deleteClass,
 };

@@ -19,6 +19,13 @@ router.get("/:id",
     (req, res, next) => teacherController.getById(req, res, next)
 );
 
+// GET /api/teachers/details/:id
+router.get("/details/:id",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("teachers", "view"),
+    (req, res, next) => teacherController.getByIdDetails(req, res, next)
+);
+
 // POST /api/teachers
 router.post("/",
     authMiddleware.authenticateToken,

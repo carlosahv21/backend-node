@@ -26,6 +26,13 @@ const getTeacherById = async (id) => {
 };
 
 /**
+ * Obtiene un profesor por ID con detalles.
+ */
+const getTeacherByIdDetails = async (id) => {
+    return teacherModel.findByIdDetails(id);
+};
+
+/**
  * Actualiza un profesor existente, delegando al modelo.
  */
 const updateTeacher = async (id, data) => {
@@ -44,6 +51,7 @@ export default {
     getAllTeachers,
     createTeacher,
     getTeacherById,
+    getTeacherByIdDetails,
     updateTeacher,
     deleteTeacher,
 };
