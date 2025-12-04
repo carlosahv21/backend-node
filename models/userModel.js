@@ -56,12 +56,9 @@ class UserModel extends BaseModel {
     }
 
     async create(userData) {
-        console.log("userData", userData);
-        
         const { password, ...user } = userData;
 
         if (password) {
-            console.log("password", password);
             const hashedPassword = await bcrypt.hash(password, 10);
             user.password = hashedPassword;
         }
@@ -69,8 +66,6 @@ class UserModel extends BaseModel {
     }
 
     async update(id, userData) {
-        console.log("userData", userData);
-        
         const { password, ...user } = userData;
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);

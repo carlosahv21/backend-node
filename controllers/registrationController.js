@@ -12,8 +12,8 @@ export const createRegistration = async (req, res, next) => {
 
 export const listRegistrations = async (req, res, next) => {
     try {
-        const { user_id, ...queryParams } = req.query;
-        const result = await RegistrationService.list(user_id, queryParams);
+        const queryParams = req.query;
+        const result = await RegistrationService.list(queryParams);
         res.status(200).json(result);
     } catch (error) {
         next(error);

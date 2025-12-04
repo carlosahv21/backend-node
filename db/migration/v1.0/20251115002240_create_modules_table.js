@@ -21,7 +21,7 @@ export async function up(knex) {
             { name: "roles", description: "Gestión de roles", has_custom_fields: false },
             { name: "permissions", description: "Gestión de permisos", has_custom_fields: false },
             { name: "classes", description: "Gestión de clases", has_custom_fields: true },
-            { name: "assistants", description: "Gestión de asistentes", has_custom_fields: false },
+            { name: "attendance", description: "Gestión de asistencia", has_custom_fields: false },
             { name: "fields", description: "Campos personalizados", has_custom_fields: false },
             { name: "modules", description: "Gestión de módulos", has_custom_fields: false },
             { name: "blocks", description: "Bloques (estructura de clases)", has_custom_fields: false },

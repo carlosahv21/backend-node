@@ -48,7 +48,6 @@ class BaseModel {
                 : query.select(`${this.tableName}.*`);
         }
 
-
         if (search && Array.isArray(this.searchFields) && this.searchFields.length > 0) {
             query = query.where(builder => {
                 this.searchFields.forEach((field, index) => {
@@ -66,7 +65,14 @@ class BaseModel {
             if (value === "true") value = true;
             if (value === "false") value = false;
 
-            query = query.where(`${this.tableName}.${key}`, value);
+            let columnName = key;
+            if (this.filterMapping && this.filterMapping[key]) {
+                columnName = this.filterMapping[key];
+            } else {
+                columnName = `${this.tableName}.${key}`;
+            }
+
+            query = query.where(columnName, value);
         });
 
         return query;

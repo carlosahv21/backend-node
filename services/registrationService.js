@@ -29,8 +29,8 @@ class RegistrationService {
         return newRegistration;
     }
 
-    async list(user_id, queryParams) {
-        return await RegistrationModel.findAllClassesByStudentId(user_id, queryParams);
+    async list(queryParams) {
+        return await RegistrationModel.findAll(queryParams);
     }
 
     async delete(id) {
