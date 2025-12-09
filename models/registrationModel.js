@@ -27,10 +27,16 @@ class RegistrationModel extends BaseModel {
             'user_id': 'class_user.user_id'
         };
 
+        this.orderMapping = {
+            'user_first_name': 'u.first_name',
+            'user_last_name': 'u.last_name'
+        };
+
         this.relationMaps = {
             'default': {
                 joins: this.joins,
-                column_map: this.filterMapping
+                column_map: this.filterMapping,
+                order_map: this.orderMapping
             }
         };
     }

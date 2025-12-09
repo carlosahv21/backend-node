@@ -33,7 +33,7 @@ class BaseModel {
     }
 
     // Función auxiliar para construir la query base con filtros y búsqueda
-    _buildQuery({ search, isCount = false, ...queryParams }) {
+    _buildQuery({ search, isCount = false, order_by, order_direction = 'asc', ...queryParams }) {
         let query = this.knex(this.tableName);
 
         if (this.joins && Array.isArray(this.joins)) {
@@ -58,7 +58,7 @@ class BaseModel {
         }
 
         Object.keys(queryParams).forEach(key => {
-            if (["search", "page", "limit"].includes(key)) return;
+            if (["search", "page", "limit", "order_by", "order_direction"].includes(key)) return;
 
             let value = queryParams[key];
 
@@ -74,6 +74,18 @@ class BaseModel {
 
             query = query.where(columnName, value);
         });
+
+        if (!isCount && order_by) {
+            let orderByColumn = order_by;
+            // Map the field if it exists in filterMapping
+            if (this.filterMapping && this.filterMapping[order_by]) {
+                orderByColumn = this.filterMapping[order_by];
+            } else if (!order_by.includes('.')) {
+                // Default to table.field if no dot notation
+                orderByColumn = `${this.tableName}.${order_by}`;
+            }
+            query = query.orderBy(orderByColumn, order_direction);
+        }
 
         return query;
     }
