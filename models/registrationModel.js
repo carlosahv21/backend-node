@@ -69,7 +69,7 @@ class RegistrationModel extends BaseModel {
             return false;
         }
 
-        return parseInt(result.count) > parseInt(plan.max_classes);
+        return parseInt(result.count) >= parseInt(plan.max_classes);
     }
 
     // Check if a user is already registered in a class
@@ -77,7 +77,23 @@ class RegistrationModel extends BaseModel {
         const result = await this.knex(this.tableName)
             .where({ user_id: userId, class_id: classId })
             .first();
-        return !!result;
+        const response = {
+            isRegistered: !!result,
+            name: `${result.first_name} ${result.last_name}`
+        }
+        return response;
+    }
+
+    async isActive(userId) {
+        const result = await this.knex("users")
+            .where({ id: userId })
+            .select("plan_status", "first_name", "last_name")
+            .first();
+        const response = {
+            plan_status: result.plan_status,
+            name: `${result.first_name} ${result.last_name}`
+        }
+        return response;
     }
 }
 
