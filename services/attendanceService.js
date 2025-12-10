@@ -11,8 +11,8 @@ class AttendanceService {
         // This is a basic validation, could be optimized for bulk
         for (const record of records) {
             const isRegistered = await registrationModel.isRegistered(record.student_id, record.class_id);
-            if (!isRegistered.isRegistered) {
-                throw new Error(`El estudiante ${isRegistered.name} no esta registrado en la clase ${record.class_id}`);
+            if (!isRegistered) {
+                throw new Error(`El estudiante no esta registrado en la clase ${record.class_id}`);
             }
         }
 

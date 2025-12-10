@@ -83,11 +83,7 @@ class RegistrationModel extends BaseModel {
         const result = await this.knex(this.tableName)
             .where({ user_id: userId, class_id: classId })
             .first();
-        const response = {
-            isRegistered: !!result,
-            name: `${result.first_name} ${result.last_name}`
-        }
-        return response;
+        return !!result;
     }
 
     async isActive(userId) {
