@@ -1,8 +1,8 @@
 export async function up(knex) {
-    const exists = await knex.schema.hasTable('class_user');
+    const exists = await knex.schema.hasTable('user_class');
 
     if (!exists) {
-        await knex.schema.createTable('class_user', function (table) {
+        await knex.schema.createTable('user_class', function (table) {
             table.increments('id').primary();
 
             table.integer('class_id').unsigned().notNullable()
@@ -21,11 +21,11 @@ export async function up(knex) {
             table.timestamp('updated_at').defaultTo(knex.fn.now());
         });
 
-        console.log("Table 'class_user' created successfully.");
+        console.log("Table 'user_class' created successfully.");
     }
 };
 
 export async function down(knex) {
-    await knex.schema.dropTable('class_user');
-    console.log("Table 'class_user' dropped successfully.");
+    await knex.schema.dropTable('user_class');
+    console.log("Table 'user_class' dropped successfully.");
 };

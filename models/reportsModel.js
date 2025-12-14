@@ -74,7 +74,7 @@ class ReportsModel extends BaseModel {
      */
     async getClassOccupancy() {
         const report = this.knex('classes as c')
-            .leftJoin('class_user as cu', 'c.id', 'cu.class_id')
+            .leftJoin('user_class as cu', 'c.id', 'cu.class_id')
             .leftJoin('users as u', 'cu.user_id', 'u.id')
             .select(
                 'c.name',

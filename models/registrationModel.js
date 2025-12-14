@@ -2,15 +2,15 @@ import BaseModel from './baseModel.js';
 
 class RegistrationModel extends BaseModel {
     constructor() {
-        super('class_user');
+        super('user_class');
 
         this.joins = [
-            { table: "classes", alias: "c", on: ["class_user.class_id", "c.id"] },
-            { table: "users", alias: "u", on: ["class_user.user_id", "u.id"] }
+            { table: "classes", alias: "c", on: ["user_class.class_id", "c.id"] },
+            { table: "users", alias: "u", on: ["user_class.user_id", "u.id"] }
         ];
 
         this.selectFields = [
-            "class_user.*",
+            "user_class.*",
             "c.name as class_name",
             "c.hour as class_hour",
             "c.date as class_date",
@@ -23,8 +23,8 @@ class RegistrationModel extends BaseModel {
         this.searchFields = ["c.name", "c.hour", "c.date", "u.first_name", "u.last_name"];
 
         this.filterMapping = {
-            'class_id': 'class_user.class_id',
-            'user_id': 'class_user.user_id'
+            'class_id': 'user_class.class_id',
+            'user_id': 'user_class.user_id'
         };
 
         this.orderMapping = {

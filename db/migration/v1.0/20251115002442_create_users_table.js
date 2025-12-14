@@ -13,11 +13,7 @@ export async function up(knex) {
             table.boolean("email_verified").defaultTo(false); // Whether the email is verified
             table.timestamp("last_login").nullable(); // Last login timestamp
             table.integer("role_id").unsigned().notNullable().references("id").inTable("roles").onDelete("CASCADE"); // Role
-            table.integer("plan_id").unsigned().nullable().references("id").inTable("plans").onDelete("SET NULL"); // Plan
-            table.date("plan_start_date").nullable(); // Plan start date
-            table.date("plan_end_date").nullable(); // Plan end date
-            table.integer("plan_classes_used").defaultTo(0); // Plan classes used
-            table.string("plan_status").defaultTo("active"); // Plan status
+            table.boolean("deleted").defaultTo(false); // Indica si el usuario está eliminado
             table.timestamps(true, true); // timestamps: created_at, updated_at
         });
 

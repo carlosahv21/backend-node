@@ -45,7 +45,7 @@ class RegistrationService {
         // Obtener clases en las que el usuario NO está inscrito
         // Esto requiere una query personalizada o usar el modelo de clases
 
-        const subquery = knex('class_user')
+        const subquery = knex('user_class')
             .select('class_id')
             .where('user_id', userId);
 

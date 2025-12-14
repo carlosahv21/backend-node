@@ -14,6 +14,7 @@ export async function up(knex) {
             table.integer('capacity');
             table.integer('teacher_id').unsigned().references('id').inTable('users');
             table.boolean('is_favorites').defaultTo(false);
+            table.boolean('deleted').defaultTo(false);
             table.timestamps(true, true);
         });
     }
