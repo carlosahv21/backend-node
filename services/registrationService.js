@@ -7,6 +7,11 @@ class RegistrationService {
     async create(data) {
         const { user_id, class_id } = data;
 
+        const havePlan = await RegistrationModel.havePlan(user_id);
+        if (!havePlan) {
+            throw new utilsCustomError('El usuario no tiene un plan registrado.', 400);
+        }
+
         // Validar si ya existe la inscripción
         const isRegistered = await RegistrationModel.isRegistered(user_id, class_id);
         if (isRegistered) {

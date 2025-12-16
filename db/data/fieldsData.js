@@ -32,6 +32,11 @@ async function getFieldsData() {
         .where({ 'blocks.name': 'Class Details', 'modules.name': 'students' })
         .select('blocks.id');
 
+    const [paymentsBlockInfo] = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Basic Information', 'modules.name': 'payments' })
+        .select('blocks.id');
+
     const fieldsData = [
         // 🧩 Información general (Clases)
         {
@@ -96,7 +101,7 @@ async function getFieldsData() {
                 "table": "users",
                 "value_field": "users.id",
                 "display_field": "CONCAT(`users`.`first_name`, ' ', `users`.`last_name`)",
-                "display_alias": "full_name", 
+                "display_alias": "full_name",
                 "filters": {
                     "role": "teacher"
                 },
@@ -234,42 +239,117 @@ async function getFieldsData() {
             order_sequence: 7,
             block_id: plansBlockInfo.id,
         },
-
-        // Detalles del estudiante
+        // 💰 Campos de Payments
+        {
+            name: "user_id",
+            type: "relation",
+            label: "Student",
+            required: true,
+            order_sequence: 1,
+            relation_config: JSON.stringify({
+                "table": "users",
+                "value_field": "users.id",
+                "display_field": "CONCAT(`users`.`first_name`, ' ', `users`.`last_name`)",
+                "display_alias": "student_name",
+                "filters": { "role_id": 2 },
+                "multiple": false,
+                "search": true,
+                "limit": 20
+            }),
+            block_id: paymentsBlockInfo.id,
+        },
         {
             name: "plan_id",
             type: "relation",
             label: "Plan",
             required: true,
-            order_sequence: 1,
+            order_sequence: 2,
             relation_config: JSON.stringify({
                 "table": "plans",
                 "value_field": "plans.id",
                 "display_field": "plans.name",
                 "display_alias": "plan_name",
-                "filters": {},
+                "filters": { "active": 1 },
                 "multiple": false,
                 "search": true,
                 "limit": 20
             }),
-            block_id: studentsBlockInfo.id,
+            block_id: paymentsBlockInfo.id,
         },
         {
-            name: "plan_classes_used",
+            name: "original_amount",
             type: "number",
-            label: "Plan Classes Used",
+            label: "Original Amount",
             required: true,
-            order_sequence: 2,
-            block_id: studentsBlockInfo.id,
+            order_sequence: 3,
+            block_id: paymentsBlockInfo.id,
         },
         {
-            name: "plan_status",
-            type: "select",
-            label: "Plan Status",
+            name: "amount",
+            type: "number",
+            label: "Amount",
             required: true,
-            options: JSON.stringify(["active", "expired", "paused"]),
-            order_sequence: 3,
-            block_id: studentsBlockInfo.id,
+            order_sequence: 4,
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "discount_type",
+            type: "select",
+            label: "Discount Type",
+            required: false,
+            order_sequence: 5,
+            options: JSON.stringify(["percentage", "fixed"]),
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "discount_value",
+            type: "number",
+            label: "Discount Value",
+            required: false,
+            order_sequence: 6,
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "discount_notes",
+            type: "textarea",
+            label: "Discount Notes",
+            required: false,
+            order_sequence: 7,
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "payment_method",
+            type: "select",
+            label: "Payment Method",
+            required: true,
+            order_sequence: 8,
+            options: JSON.stringify(["cash", "card", "transfer"]),
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "payment_date",
+            type: "date",
+            label: "Date",
+            required: true,
+            order_sequence: 9,
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "status",
+            type: "select",
+            label: "Status",
+            required: true,
+            order_sequence: 10,
+            options: JSON.stringify(["pending", "completed", "failed", "refunded"]),
+            block_id: paymentsBlockInfo.id,
+        },
+        {
+            name: "notes",
+            type: "textarea",
+            label: "Notes",
+            required: false,
+            order_sequence: 11,
+            block_id: paymentsBlockInfo.id,
         },
     ];
 

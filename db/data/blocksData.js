@@ -18,6 +18,10 @@ async function getBlocksData(knex) {
         .where('name', 'students')
         .select('id');
 
+    const [paymentsModule] = await knex('modules')
+        .where('name', 'payments')
+        .select('id');
+
     return [
         // Bloques para Class
         {
@@ -70,6 +74,16 @@ async function getBlocksData(knex) {
             module_id: studentsModule.id,
             name: "Class Details",
             description: "Class details block",
+            order: 1,
+            collapsible: true,
+            display_mode: "edit",
+        },
+
+        // Bloques para Payments
+        {
+            module_id: paymentsModule.id,
+            name: "Basic Information",
+            description: "Basic payment information",
             order: 1,
             collapsible: true,
             display_mode: "edit",

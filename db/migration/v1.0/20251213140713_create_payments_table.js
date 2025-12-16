@@ -32,10 +32,10 @@ export async function up(knex) {
         table.timestamp('updated_at').defaultTo(knex.fn.now());
     });
 
-    console.log('Tabla payments creada exitosamente');
+    console.log("Tabla 'payments' creada exitosamente");
 };
 
 export async function down(knex) {
     await knex.schema.dropTable('payments');
-    console.log('Tabla payments eliminada exitosamente');
+    console.log("Tabla 'payments' eliminada exitosamente");
 };

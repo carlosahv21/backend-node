@@ -29,7 +29,7 @@ export async function up(knex) {
     }));
 
     // RECEPTIONIST → permisos relacionados con estudiantes, pagos y asistencia
-    const receptionistModules = ["students", "settings", "dashboard", "users", "roles", "classes", "attendance", "fields", "blocks", "plans", "registrations", "students", "teachers"];
+    const receptionistModules = ["students", "settings", "dashboard", "users", "roles", "classes", "attendance", "payments", "fields", "blocks", "plans", "registrations", "students", "teachers"];
 
     const receptionistPermissions = permissions
         .filter(p => receptionistModules.includes(p.resource) && (p.action === 'view' || p.action === 'create' || p.action === 'edit'))

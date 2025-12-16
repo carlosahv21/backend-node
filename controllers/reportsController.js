@@ -48,15 +48,6 @@ class ReportsController {
         }
     }
 
-    async getPlanProfitability(req, res, next) {
-        try {
-            const data = await ReportsService.getPlanProfitability();
-            res.status(200).json({ success: true, data });
-        } catch (error) {
-            next(error);
-        }
-    }
-
 }
 
 export default new ReportsController();

@@ -20,16 +20,11 @@ const getAttendanceRate = async () => {
     return ReportsModel.getAttendanceRate();
 }
 
-const getPlanProfitability = async () => {
-    return ReportsModel.getPlanProfitability();
-}
-
 
 export default {
     getAttendanceRate,
     getClassOccupancy,
     getTeachersParticipation,
     getUserDistribution,
-    getKpiData,
-    getPlanProfitability
+    getKpiData
 };

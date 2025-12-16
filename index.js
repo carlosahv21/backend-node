@@ -30,6 +30,7 @@ import teachersRoutes from './routes/teacherRoute.js';
 import registrationRoutes from './routes/registrationRoute.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import reportsRoutes from './routes/reportsRoute.js';
+import paymentRoutes from './routes/paymentRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -81,6 +82,7 @@ app.use("/api/teachers", teachersRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {

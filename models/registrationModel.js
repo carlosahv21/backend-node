@@ -41,6 +41,16 @@ class RegistrationModel extends BaseModel {
         };
     }
 
+    async havePlan(userId) {
+        const result = await this.knex("user_plan")
+            .join("users", "user_plan.user_id", "users.id")
+            .where({ "users.id": userId })
+            .select("user_plan.plan_id")
+            .first();
+        
+        return !!result;
+    }
+
     // Check if a class has reached the maximum number of students
     async maxUserPerClass(class_id) {
         const result = await this.knex(this.tableName)
@@ -65,9 +75,9 @@ class RegistrationModel extends BaseModel {
             .first();
 
         const plan = await this.knex("users")
-            .join("plans", "users.plan_id", "plans.id")
+            .join("user_plan", "users.id", "user_plan.user_id")
+            .join("plans", "user_plan.plan_id", "plans.id")
             .where("users.id", userId)
-            .select("plans.max_classes")
             .first();
 
         // Tiene clase

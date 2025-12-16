@@ -54,6 +54,10 @@ class AttendanceModel extends BaseModel {
      * Crea o actualiza registros de asistencia de forma masiva y gestiona el uso de planes de usuario,
      * incluyendo la reversión (resta) del uso si se cambia el estado de 'present' a otro.
      */
+    /**
+     * Crea o actualiza registros de asistencia de forma masiva y gestiona el uso de planes de usuario,
+     * incluyendo la reversión (resta) del uso si se cambia el estado de 'present' a otro.
+     */
     async bulkCreateOrUpdate(attendanceRecords) {
         if (!attendanceRecords || attendanceRecords.length === 0) {
             return { success: true, message: "No records provided" };
@@ -65,10 +69,18 @@ class AttendanceModel extends BaseModel {
 
             // --- Validation Block Start ---
             const studentIds = [...new Set(attendanceRecords.map(r => r.student_id))];
-            const students = await trx('users')
-                .select('id', 'first_name', 'last_name', 'plan_status')
-                .whereIn('id', studentIds);
-            const studentMap = new Map(students.map(s => [s.id, s]));
+
+            // Obtener el plan ACTIVO de cada estudiante
+            const activePlans = await trx('user_plan')
+                .select('user_id', 'id as user_plan_id', 'status', 'classes_remaining', 'classes_used')
+                .whereIn('user_id', studentIds)
+                .andWhere('status', 'active');
+
+            const studentPlanMap = new Map(activePlans.map(p => [p.user_id, p]));
+
+            // También obtenemos info básica del usuario para mensajes de error si no tiene plan
+            const usersInfo = await trx('users').select('id', 'first_name', 'last_name').whereIn('id', studentIds);
+            const userMap = new Map(usersInfo.map(u => [u.id, u]));
             // --- Validation Block End ---
 
             for (const newRecord of attendanceRecords) {
@@ -77,10 +89,17 @@ class AttendanceModel extends BaseModel {
 
                 // Validate student plan status if trying to mark as present
                 if (newStatus === 'present') {
-                    const student = studentMap.get(student_id);
-                    // Check if student exists and strict check for 'active' status
-                    if (student && student.plan_status !== 'active') {
-                        throw new Error(`El estudiante ${student.first_name} ${student.last_name} no tiene un plan activo (Estado: ${student.plan_status}). No se puede registrar asistencia.`);
+                    const userPlan = studentPlanMap.get(student_id);
+                    const user = userMap.get(student_id);
+
+                    if (!userPlan) {
+                        throw new Error(`El estudiante ${user ? user.first_name + ' ' + user.last_name : student_id} no tiene un plan activo. No se puede registrar asistencia.`);
+                    }
+
+                    // Validar si tiene clases disponibles (si no es ilimitado - asumimos 0 o numero muy alto como ilimitado, 
+                    // pero en paymentService guardamos 9999 si era 0. Si classes_remaining es > 0, puede entrar).
+                    if (userPlan.classes_remaining <= 0) {
+                        throw new Error(`El estudiante ${user.first_name} ${user.last_name} ha agotado sus clases disponibles.`);
                     }
                 }
 
@@ -95,9 +114,9 @@ class AttendanceModel extends BaseModel {
                     const existingStatus = existingRecord.status?.toLowerCase();
 
                     if (existingStatus === 'present' && newStatus !== 'present') {
-                        usageChange = -1;
+                        usageChange = -1; // Restar uso (devolver clase)
                     } else if (existingStatus !== 'present' && newStatus === 'present') {
-                        usageChange = 1;
+                        usageChange = 1; // Sumar uso (gastar clase)
                     }
                 } else if (newStatus === 'present') {
                     usageChange = 1;
@@ -114,42 +133,49 @@ class AttendanceModel extends BaseModel {
                 });
             }
 
-            await trx(this.tableName)
-                .insert(recordsToUpdate)
-                .onConflict(['class_id', 'student_id', 'date'])
-                .merge(['status', 'updated_at']);
+            // Upsert asistencias
+            if (recordsToUpdate.length > 0) {
+                await trx(this.tableName)
+                    .insert(recordsToUpdate)
+                    .onConflict(['class_id', 'student_id', 'date'])
+                    .merge(['status', 'updated_at']);
+            }
 
+            // Actualizar planes de usuario
             for (const [studentId, change] of userUsageUpdates.entries()) {
                 if (change !== 0) {
-                    await trx("users")
-                        .where({ id: studentId })
+                    const userPlan = studentPlanMap.get(studentId);
+                    if (!userPlan) continue; // Should not happen given validation above but safe check
+
+                    // Actualizar contadores
+                    await trx("user_plan")
+                        .where({ id: userPlan.user_plan_id })
                         .update({
-                            plan_classes_used: this.knex.raw(`plan_classes_used ${change > 0 ? '+' : '-'} ${Math.abs(change)}`),
+                            classes_used: this.knex.raw(`classes_used + ?`, [change]),
+                            classes_remaining: this.knex.raw(`classes_remaining - ?`, [change]), // Si change es 1, resta 1. Si es -1, suma 1.
                             updated_at: new Date()
                         });
 
-                    const user = await trx("users as u")
-                        .leftJoin("plans as p", "u.plan_id", "p.id")
-                        .select("u.plan_classes_used", "u.plan_status", "p.max_sessions as plan_limit")
-                        .where("u.id", studentId)
+                    // Verificar si se agotó el plan despues del update
+                    // Volvemos a consultar para tener el valor actualizado exacto o calculamos en memoria
+                    const updatedPlan = await trx("user_plan")
+                        .select('classes_remaining', 'status', 'max_classes') // max_classes para saber si es ilimitado (aunque remaining alto ya lo cubre)
+                        .where({ id: userPlan.user_plan_id })
                         .first();
 
-                    if (user && user.plan_limit !== null) {
-                        if (change > 0 && user.plan_classes_used >= user.plan_limit && user.plan_status !== 'finished') {
-                            await trx("users")
-                                .where({ id: studentId })
-                                .update({
-                                    plan_status: 'finished',
-                                    updated_at: new Date()
-                                });
+                    if (updatedPlan) {
+                        // Si llego a 0 y NO es ilimitado (asumimos logicamente que si remaining llega a 0 es porque no es ilimitado o se acabaron las 9999)
+                        // Logica: si remaining <= 0, plan finished.
+                        if (updatedPlan.classes_remaining <= 0 && updatedPlan.status === 'active') {
+                            await trx("user_plan")
+                                .where({ id: userPlan.user_plan_id })
+                                .update({ status: 'expired', updated_at: new Date() }); // 'expired' or 'finished'
                         }
-                        else if (change < 0 && user.plan_classes_used < user.plan_limit && user.plan_status === 'finished') {
-                            await trx("users")
-                                .where({ id: studentId })
-                                .update({
-                                    plan_status: 'active',
-                                    updated_at: new Date()
-                                });
+                        // Si devolvimos clases y el plan estaba expired, lo reactivamos?
+                        else if (change < 0 && updatedPlan.classes_remaining > 0 && updatedPlan.status === 'expired') {
+                            await trx("user_plan")
+                                .where({ id: userPlan.user_plan_id })
+                                .update({ status: 'active', updated_at: new Date() });
                         }
                     }
                 }

@@ -22,10 +22,10 @@ export async function up(knex) {
         table.timestamp('created_at').defaultTo(knex.fn.now());
         table.timestamp('updated_at').defaultTo(knex.fn.now());
     });
-    console.log('Tabla user_plan creada exitosamente');
+    console.log("Tabla 'user_plan' creada exitosamente");
 };
 
 export async function down(knex) {
     await knex.schema.dropTable('user_plan');
-    console.log('Tabla user_plan eliminada exitosamente');
+    console.log("Tabla 'user_plan' eliminada exitosamente");
 };
