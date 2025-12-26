@@ -46,4 +46,10 @@ router.delete('/:id',
     planController.delete
 );
 
+router.get('/student/:student_id',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("plans", "view"),
+    planController.getStudentPlan
+);
+
 export default router;

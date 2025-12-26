@@ -16,6 +16,9 @@ class AttendanceController {
     }
 
     async getAll(req, res) {
+        console.log("getAll");
+        console.log(req.params);
+        console.log(req.query);
         try {
             const result = await attendanceService.getAttendance(req.query);
             res.status(200).json(result);
@@ -25,6 +28,9 @@ class AttendanceController {
     }
 
     async getByClassAndDate(req, res) {
+        console.log("getByClassAndDate");
+        console.log(req.params);
+        console.log(req.query);
         try {
             const { class_id, date } = req.query;
             if (!class_id || !date) {

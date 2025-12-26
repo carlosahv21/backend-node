@@ -69,16 +69,6 @@ async function getBlocksData(knex) {
             display_mode: "edit",
         },
 
-        // Bloques para Students
-        {
-            module_id: studentsModule.id,
-            name: "Class Details",
-            description: "Class details block",
-            order: 1,
-            collapsible: true,
-            display_mode: "edit",
-        },
-
         // Bloques para Payments
         {
             module_id: paymentsModule.id,

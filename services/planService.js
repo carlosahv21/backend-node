@@ -52,6 +52,12 @@ const deletePlan = async (id) => {
     return planModel.delete(id);
 };
 
+/**
+ * Obtiene el plan actual de un estudiante.
+ */
+const getStudentPlan = async (student_id) => {
+    return planModel.getStudentPlan(student_id);
+};
 
 export default {
     getAllPlans,
@@ -59,5 +65,6 @@ export default {
     getPlanByIdDetails,
     createPlan,
     updatePlan,
-    deletePlan
+    deletePlan,
+    getStudentPlan
 };

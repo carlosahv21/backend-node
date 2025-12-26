@@ -91,6 +91,19 @@ class PlanController {
             next(new utilsCustomError(error.message, error.status));
         }
     }
+
+    /**
+     * Obtiene el plan actual de un estudiante.
+     */
+    async getStudentPlan(req, res, next) {
+        try {
+            const { student_id } = req.params;
+            const plan = await planService.getStudentPlan(student_id);
+            res.status(200).json(plan);
+        } catch (error) {
+            next(new utilsCustomError(error.message, error.status));
+        }
+    }
 }
 
 export default new PlanController();

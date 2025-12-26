@@ -31,6 +31,16 @@ class PlanModel extends BaseModel {
         return plan;
     }
 
+    async getStudentPlan(student_id) {
+        const plan = await this.knex('user_plan as up')
+            .join('plans as p', 'up.plan_id', 'p.id')
+            .select('p.name', 'p.description', 'p.type', 'p.price', 'up.status', 'up.start_date', 'up.end_date', 'up.classes_remaining', 'up.max_classes')
+            .where('up.user_id', student_id)
+            .first();
+
+        return plan;
+    }
+
     // --- Lógica del View Model para el Drawer ---
 
     async findByIdDetails(id) {
