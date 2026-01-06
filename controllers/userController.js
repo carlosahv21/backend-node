@@ -40,6 +40,13 @@ class UserController {
      */
     async create(req, res, next) {
         try {
+            const { email } = req.body;
+
+            const user = await userModel.findByEmail(email);
+            if (user) {
+                throw new utilsCustomError("Ya existe un usuario con el correo electrónico proporcionado", 400);
+            }
+
             const newUser = await userService.createUser(req.body);
 
             res.status(201).json({
@@ -72,7 +79,9 @@ class UserController {
     async delete(req, res, next) {
         try {
             await userService.deleteUser(req.params.id);
-            res.status(204).send();
+            res.status(200).json({
+                message: "Usuario eliminado correctamente"
+            });
         } catch (error) {
             next(new utilsCustomError(error.message, error.status));
         }

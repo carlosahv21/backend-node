@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import planController from '../controllers/planController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import validateSchema from '../middlewares/validationMiddleware.js';
+import { createPlanSchema } from '../validators/Schemas.js';
 
 const router = Router();
 
@@ -22,6 +24,7 @@ router.get("/details/:id",
 router.post('/',
     authMiddleware.authenticateToken,
     authMiddleware.authorize("plans", "create"),
+    validateSchema(createPlanSchema),
     planController.create
 );
 

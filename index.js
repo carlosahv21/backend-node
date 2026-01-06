@@ -96,4 +96,4 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Servidor Express corriendo en http://localhost:${PORT}`);
   console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
-});
+});// Trigger restart

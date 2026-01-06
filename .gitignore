@@ -1,5 +1,5 @@
 # Dependencias de Node
-/node_modules
+node_modules
 
 # Archivos del sistema operativo
 .DS_Store
@@ -8,4 +8,7 @@
 .env
 
 # Directorios de almacenamiento
-/storage
+storage
+
+# Bruno (Opcional: ignorar solo los datos de sesión/tokens)
+api_test/Backend Node Project/environments/*.bru

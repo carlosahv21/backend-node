@@ -1,6 +1,5 @@
 // models/paymentModel.js
 import BaseModel from './baseModel.js';
-import knex from '../config/knex.js';
 
 /**
  * Capa de Acceso a Datos (DAL) para la entidad Payment.
@@ -8,6 +7,22 @@ import knex from '../config/knex.js';
 class PaymentModel extends BaseModel {
     constructor() {
         super('payments');
+        
+        this.joins = [
+            { table: "users", alias: "u", on: ["payments.user_id", "u.id"] },
+            { table: "plans", alias: "p", on: ["payments.plan_id", "p.id"] }
+        ];
+
+        this.selectFields = [
+            "payments.*",
+            "p.name as plan_name",
+            "u.first_name as user_first_name",
+            "u.last_name as user_last_name",
+            "u.email as user_email"
+        ];
+
+        this.searchFields = ["p.name", "u.first_name", "u.last_name"];
+
     }
 
     /**
