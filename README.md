@@ -1,134 +1,97 @@
+# 🚀 Backend Node Project
 
+Este es el backend de la aplicación, construido con **Node.js** y **Express**, siguiendo una arquitectura estructurada yescalable.
 
-🏗 Arquitectura del Proyecto
+## 📋 Requisitos Previos
 
-El corazón de la aplicación se divide en las siguientes capas l📦 Layered API - Arquitectura por Capas con Node.js y Express
+Antes de empezar, asegúrate de tener instalado lo siguiente:
 
-Este proyecto implementa una API RESTful utilizando Node.js y el framework Express, siguiendo una estricta Arquitectura por Capas (Layered Architecture). Este patrón promueve la separación de responsabilidades, facilitando la mantenibilidad, la escalabilidad y la realización de pruebas unitarias. ógicas, cada una con una responsabilidad única:
+- **[Node.js](https://nodejs.org/)** (v18 o superior)
+- **[Laragon](https://laragon.org/)** (Recomendado para manejar MySQL en Windows) o MySQL instalado aparte.
+- **[DBeaver](https://dbeaver.io/)** (Para gestionar visualmente la base de datos).
+- **[Bruno](https://www.usebruno.com/)** (Para ejecutar las pruebas de la API).
 
-routes/ (Rutas): Define los endpoints HTTP y delega la lógica al controlador. Es la puerta de entrada de las peticiones.
+## ⚡ Instalación Rápida
 
-controllers/ (Controladores): Maneja la petición HTTP, extrae datos (cuerpo, parámetros, query) y pasa esta información al Servicio. No contiene lógica de negocio.
+Sigue estos pasos para levantar el entorno de desarrollo:
 
-services/ (Servicios): Contiene la Lógica de Negocio. Aquí se realizan validaciones, transformaciones de datos y orquestación de operaciones de la base de datos (Modelos).
+1.  **Clonar el repositorio:**
 
-models/ (Modelos): Representa la capa de acceso a datos (DAL). Interactúa directamente con la base de datos (o la simula en este caso, con un arreglo/objeto). Contiene las operaciones CRUD (Crear, Leer, Actualizar, Borrar).
+    ```bash
+    git clone https://github.com/carlosahv21/backend-node.git
+    cd backend-node
+    ```
 
-utils/ (Utilidades): Módulos auxiliares, como la clase CustomError para el manejo centralizado de errores.
+2.  **Instalar dependencias:**
 
-middlewares/: Funciones de Express que se ejecutan antes de los controladores (por ejemplo, manejo de errores, autenticación o validación de JSON).
+    ```bash
+    npm install
+    # o si usas pnpm
+    pnpm install
+    ```
 
-🚀 Instalación y Ejecución
+3.  **Configurar variables de entorno:**
 
-Sigue estos pasos para poner en marcha el proyecto en tu entorno local.
+    Crea un archivo `.env` en la raíz del proyecto (puedes copiar el `.env_example`) y configura tus credenciales:
 
-1. Pre-requisitos
+    ```ini
+    PORT=3000
 
-Asegúrate de tener instalado:
+    # Configuración de Base de Datos
+    DB_HOST=localhost
+    DB_USER=root
+    DB_PASSWORD=         # Deja vacío si usas Laragon por defecto
+    DB_NAME=backend_db   # Asegúrate de crear esta DB en DBeaver/Laragon
+    DB_PORT=3306
 
-Node.js (versión 18+ recomendada)
+    # Seguridad
+    JWT_SECRET=tu_secreto_super_seguro
+    ```
 
-npm (viene con Node.js)
+## 🗄️ Base de Datos
 
-2. Clonar el Repositorio
+Utilizamos **MySQL**. Puedes usar **Laragon** para iniciar el servicio de MySQL rápidamente.
 
-git clone <URL_DEL_REPOSITORIO>
-cd layered-api
+1.  Abre **Laragon** y dale a "Start All".
+2.  Abre **DBeaver** y conéctate a tu servidor local.
+3.  Crea una base de datos vacía (ej. `backend_db`) que coincida con tu `.env`.
 
+### Migraciones y Seeds
 
-3. Instalar Dependencias
+El proyecto cuenta con scripts para inicializar la base de datos:
 
-Dado que node_modules no está incluido en el repositorio (¡gracias a la limpieza que hicimos!), es necesario instalar todas las dependencias listadas en package.json.
+```bash
+# Correr migraciones (crear tablas)
+npm run migrate
 
-npm install
+# Llenar la base de datos con datos de prueba (seeds)
+npm run seed
+```
 
+## 🧪 Pruebas de API con Bruno
 
-4. Configuración del Entorno
+Olvídate de Postman. Usamos **Bruno** para las pruebas de integración.
 
-Este proyecto asume que las variables de entorno están configuradas (por ejemplo, a través de un archivo .env). Si bien no se han especificado aún, es buena práctica tener un archivo para configurar el puerto o las credenciales de la base de datos.
+1.  Abre la aplicación **Bruno**.
+2.  Haz clic en **"Open Collection"**.
+3.  Selecciona la carpeta `api_tests/Backend Node Project` que está en la raíz de este repositorio.
+4.  ¡Listo! Ya puedes ejecutar las requests de Login, Usuarios, etc.
 
-5. Iniciar la Aplicación
+> **Nota:** La carpeta `api_tests` contiene la colección ("Golden Collection") y está configurada para ignorar tus secretos locales (`Local.bru`), así que puedes usarla con seguridad.
 
-Ejecuta el siguiente comando para iniciar el servidor en modo desarrollo.
+## 📜 Scripts Disponibles
 
-# Dependiendo de tu script de inicio (ej. "start" o "dev")
-npm start
-# o
-npm run dev
+En la terminal puedes ejecutar:
 
+| Comando            | Descripción                                                                          |
+| :----------------- | :----------------------------------------------------------------------------------- |
+| `npm run dev`      | Inicia el servidor en modo desarrollo con **Nodemon** (reinicia al guardar cambios). |
+| `npm start`        | Inicia el servidor en modo producción (Node estándar).                               |
+| `npm run migrate`  | Ejecuta las migraciones de Knex ubicadas en `db/migration`.                          |
+| `npm run seed`     | Ejecuta los seeders de Knex para poblar la DB.                                       |
+| `npm run rollback` | Deshace el último lote de migraciones.                                               |
+| `npm run generate` | Ejecuta el script de generación de código (`scripts/generate.js`).                   |
 
-La API estará disponible en http://localhost:<PUERTO> (ej. http://localhost:3000).
+---
 
-📚 Endpoints Disponibles (Módulo users)
-
-Actualmente, solo el módulo de users está implementado bajo la arquitectura por capas.
-
-Método HTTP
-
-Ruta
-
-Descripción
-
-Cuerpo (Body) Ejemplo
-
-GET
-
-/api/users
-
-Obtiene la lista de todos los usuarios.
-
-N/A
-
-GET
-
-/api/users/:id
-
-Obtiene un usuario por su ID.
-
-N/A
-
-POST
-
-/api/users
-
-Crea un nuevo usuario.
-
-{"name": "Alice", "email": "alice@example.com"}
-
-PUT
-
-/api/users/:id
-
-Actualiza completamente un usuario por ID.
-
-{"name": "Alice M.", "email": "alice.m@example.com"}
-
-DELETE
-
-/api/users/:id
-
-Elimina un usuario por su ID.
-
-N/A
-
-🛠 Pruebas
-
-(Si se usara Jest/Mocha, esta sección detallaría cómo ejecutar las pruebas unitarias para las capas de Servicio y Modelo).
-
-# Ejemplo:
-npm test
-
-
-🤝 Contribución
-
-Haz un fork del repositorio.
-
-Crea una rama para tu nueva funcionalidad (git checkout -b feature/nueva-funcionalidad).
-
-Asegúrate de seguir la arquitectura por capas.
-
-Realiza commit de tus cambios (git commit -m 'feat: Añadir módulo de productos').
-
-Haz push a la rama (git push origin feature/nueva-funcionalidad).
-
-Abre un Pull Request.
+¡Happy Coding! 👨‍💻
