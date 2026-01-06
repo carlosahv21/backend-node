@@ -11,4 +11,4 @@ node_modules
 storage
 
 # Bruno (Opcional: ignorar solo los datos de sesión/tokens)
-api_test/Backend Node Project/environments/*.bru
+api_tests/Backend Node Project/environments/*.bru
