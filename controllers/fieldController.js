@@ -1,5 +1,5 @@
 import fieldService from '../services/fieldService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Campos (Fields).
@@ -12,9 +12,10 @@ class FieldController {
     async getAll(req, res, next) {
         try {
             const result = await fieldService.getAllFields(req.query);
-            res.status(200).json(result);
+            ApiResponse.success(res, 200, "Campos obtenidos correctamente", result);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -25,9 +26,9 @@ class FieldController {
         try {
             const { id } = req.params;
             const field = await fieldService.getFieldById(id);
-            res.status(200).json(field);
+            ApiResponse.success(res, 200, "Campo obtenido correctamente", field);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            ApiResponse.error(res, 500, error.message);
         }
     }
 
@@ -37,14 +38,10 @@ class FieldController {
     async create(req, res, next) {
         try {
             const newField = await fieldService.createField(req.body);
-
-            res.status(201).json({
-                success: true,
-                message: "Campo creado correctamente",
-                data: newField
-            });
+            ApiResponse.success(res, 201, "Campo creado correctamente", newField);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -55,12 +52,10 @@ class FieldController {
         try {
             await fieldService.updateField(req.params.id, req.body);
 
-            res.status(200).json({
-                success: true,
-                message: "Campo actualizado correctamente"
-            });
+            ApiResponse.success(res, 200, "Campo actualizado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -70,9 +65,10 @@ class FieldController {
     async delete(req, res, next) {
         try {
             await fieldService.deleteField(req.params.id);
-            res.status(204).send();
+            ApiResponse.success(res, 204, "Campo eliminado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -84,12 +80,10 @@ class FieldController {
 
         try {
             const data = await fieldService.getModuleFields(moduleId);
-            res.status(200).json({
-                success: true,
-                module: data
-            });
+            ApiResponse.success(res, 200, "Bloques obtenidos correctamente", data);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status || 500));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -101,24 +95,19 @@ class FieldController {
             const { relation_config, search } = req.body;
 
             if (!relation_config) {
-                throw new utilsCustomError(
-                    "El parámetro 'relation_config' es obligatorio para obtener opciones de relación.",
-                    400
-                );
+                ApiResponse.error(res, 400, "El parámetro 'relation_config' es obligatorio para obtener opciones de relación.");
             }
             
             const options = await fieldService.getRelationField(relation_config, search || "");
 
-            res.status(200).json({
-                success: true,
-                options
-            });
+            ApiResponse.success(res, 200, "Opciones obtenidas correctamente", options);
 
         } catch (error) {
             if (error instanceof SyntaxError && error.message.includes('JSON')) {
-                next(new utilsCustomError("El parámetro 'relation_config' no tiene un formato JSON válido.", 400));
+                ApiResponse.error(res, 400, "El parámetro 'relation_config' no tiene un formato JSON válido.");
             } else {
-                next(new utilsCustomError(error.message, error.status || 500));
+                const status = error.statusCode || 500;
+                ApiResponse.error(res, status, error.message);
             }
         }
     }

@@ -7,8 +7,5 @@ node_modules
 # Archivos de configuración
 .env
 
-# Directorios de almacenamiento
-storage
-
 # Bruno (Opcional: ignorar solo los datos de sesión/tokens)
 api_tests/Backend Node Project/environments/*.bru

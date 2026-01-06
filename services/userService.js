@@ -1,7 +1,7 @@
 // services/userService.js
 import bcrypt from 'bcryptjs';
 import userModel from '../models/userModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 const SALT_ROUNDS = 10;
 
@@ -20,7 +20,7 @@ const createUser = async (data) => {
     const { role, ...userData } = data;
 
     if (!userData.password) {
-        throw new utilsCustomError('La contraseña es requerida', 400);
+        throw new AppError('La contraseña es requerida', 400);
     }
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
     userData.password = await bcrypt.hash(userData.password, salt);

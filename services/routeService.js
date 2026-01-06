@@ -1,6 +1,6 @@
 // services/routeService.js
 import RouteModel from '../models/routeModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 /**
  * Obtiene todas las rutas de navegación que pertenecen a módulos activos, 
@@ -11,8 +11,7 @@ const getActiveRoutesWithModuleInfo = async () => {
         const routes = await RouteModel.getActiveRoutesWithModuleInfo();
         return routes;
     } catch (error) {
-        console.error("Error fetching active routes in service:", error);
-        throw new utilsCustomError("Error al recuperar rutas activas para navegación", 500);
+        throw new AppError("Error al recuperar rutas activas para navegación", 500);
     }
 };
 

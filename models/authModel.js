@@ -1,6 +1,6 @@
 // models/authModel.js
 import knex from '../config/knex.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 class AuthModel {
     constructor() {
@@ -25,7 +25,7 @@ class AuthModel {
             .first();
 
         if (!roleData) {
-            throw new utilsCustomError("User has no role assigned", 403);
+            throw new AppError("User has no role assigned", 403);
         }
         return roleData;
     }
@@ -57,7 +57,7 @@ class AuthModel {
             .first();
 
         if (!planData) {
-            throw new utilsCustomError("User has no plan assigned", 403);
+            throw new AppError("User has no plan assigned", 403);
         }
         return planData;
     }

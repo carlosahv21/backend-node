@@ -1,6 +1,6 @@
 // controllers/permissionController.js
 import permissionService from '../services/permissionService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Permisos (Permissions). 
@@ -9,9 +9,10 @@ class PermissionController {
     async getAll(req, res, next) {
         try {
             const result = await permissionService.getAllPermissions(req.query);
-            res.status(200).json(result); 
+            ApiResponse.success(res, 200, "Permisos obtenidos correctamente", result); 
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -19,43 +20,40 @@ class PermissionController {
         try {
             const { id } = req.params;
             const permission = await permissionService.getPermissionById(id);
-            res.status(200).json(permission);
+            ApiResponse.success(res, 200, "Permiso obtenido correctamente", permission);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async create(req, res, next) {
         try {
             const newPermission = await permissionService.createPermission(req.body);
-            res.status(201).json({ 
-                success: true,
-                message: "Permiso creado correctamente", 
-                data: newPermission 
-            });
+            ApiResponse.success(res, 201, "Permiso creado correctamente", newPermission);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
     
     async update(req, res, next) {
         try {
             await permissionService.updatePermission(req.params.id, req.body);
-            res.status(200).json({ 
-                success: true,
-                message: "Permiso actualizado correctamente" 
-            });
+            ApiResponse.success(res, 200, "Permiso actualizado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async delete(req, res, next) {
         try {
             await permissionService.deletePermission(req.params.id);
-            res.status(204).send();
+            ApiResponse.success(res, 200, "Permiso eliminado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

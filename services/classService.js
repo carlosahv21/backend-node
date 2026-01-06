@@ -1,6 +1,6 @@
 // services/classService.js
 import classModel from '../models/classModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 /**
  * Obtiene todas las clases (con paginación, búsqueda, filtros).
@@ -14,7 +14,7 @@ const getAllClasses = async (queryParams) => {
  */
 const createClass = async (data) => {
     if (!data.name || !data.date) {
-        throw new utilsCustomError('Faltan campos obligatorios para crear la clase (name, date)', 400);
+        throw new AppError('Faltan campos obligatorios para crear la clase (name, date)', 400);
     }
 
     const newClass = await classModel.create(data);

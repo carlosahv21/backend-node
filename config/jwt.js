@@ -1,6 +1,6 @@
 // config/jwt.js
-import utilsCustomError from '../utils/utilsCustomError.js'; // Asumiendo que esta dependencia también usa ES Modules
-
+import dotenv from 'dotenv';
+dotenv.config();
 // Clave secreta y tiempo de expiración
 const JWT_SECRET = process.env.JWT_SECRET || 'your_default_jwt_secret_key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';

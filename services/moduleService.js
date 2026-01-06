@@ -1,6 +1,6 @@
 // services/moduleService.js
 import moduleModel from '../models/moduleModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 const getAllModules = async (queryParams) => {
     return moduleModel.findAll(queryParams); 
@@ -31,7 +31,7 @@ const toggleModuleStatus = async (id) => {
     const module = await moduleModel.findById(id);
 
     if (!module) {
-        throw new utilsCustomError('Módulo no encontrado', 404);
+        throw new AppError('Módulo no encontrado', 404);
     }
     
     const newStatus = !module.is_active;

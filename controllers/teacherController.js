@@ -1,6 +1,6 @@
 // controllers/teacherController.js
 import teacherService from '../services/teacherService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Teacher.
@@ -12,9 +12,10 @@ class TeacherController {
     async getAll(req, res, next) {
         try {
             const result = await teacherService.getAllTeachers(req.query);
-            res.status(200).json(result);
+            ApiResponse.success(res, 200, "Profesores obtenidos correctamente", result);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -24,12 +25,13 @@ class TeacherController {
             const teacher = await teacherService.getTeacherById(id);
 
             if (!teacher) {
-                return res.status(404).json({ message: "Profesor no encontrado." });
+                return ApiResponse.error(res, 404, "Profesor no encontrado.");
             }
 
-            res.status(200).json(teacher);
+            ApiResponse.success(res, 200, "Profesor obtenido correctamente", teacher);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -39,24 +41,23 @@ class TeacherController {
             const teacher = await teacherService.getTeacherByIdDetails(id);
 
             if (!teacher) {
-                return res.status(404).json({ message: "Profesor no encontrado." });
+                return ApiResponse.error(res, 404, "Profesor no encontrado.");
             }
 
-            res.status(200).json(teacher);
+            ApiResponse.success(res, 200, "Profesor obtenido correctamente", teacher);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async create(req, res, next) {
         try {
             const newTeacher = await teacherService.createTeacher(req.body);
-            res.status(201).json({
-                message: "Teacher creado correctamente",
-                data: newTeacher
-            });
+            ApiResponse.success(res, 201, "Teacher creado correctamente", newTeacher);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -66,15 +67,13 @@ class TeacherController {
             const teacher = await teacherService.updateTeacher(id, req.body);
 
             if (!teacher) {
-                return res.status(404).json({ message: "Profesor no encontrado para actualizar." });
+                return ApiResponse.error(res, 404, "Profesor no encontrado para actualizar.");
             }
 
-            res.status(200).json({
-                message: "Teacher actualizado correctamente",
-                data: teacher
-            });
+            ApiResponse.success(res, 200, "Teacher actualizado correctamente", teacher);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -84,15 +83,13 @@ class TeacherController {
             const deletedTeacher = await teacherService.deleteTeacher(id);
 
             if (!deletedTeacher) {
-                return res.status(404).json({ message: "Profesor no encontrado para eliminar." });
+                return ApiResponse.error(res, 404, "Profesor no encontrado para eliminar.");
             }
 
-            res.status(200).json({
-                message: "Teacher eliminado correctamente",
-                data: deletedTeacher
-            });
+            ApiResponse.success(res, 200, "Teacher eliminado correctamente", deletedTeacher);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

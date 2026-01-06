@@ -35,14 +35,14 @@ Sigue estos pasos para levantar el entorno de desarrollo:
     Crea un archivo `.env` en la raíz del proyecto (puedes copiar el `.env_example`) y configura tus credenciales:
 
     ```ini
-    PORT=3000
+    PORT=tu_puerto
 
     # Configuración de Base de Datos
-    DB_HOST=localhost
-    DB_USER=root
-    DB_PASSWORD=         # Deja vacío si usas Laragon por defecto
-    DB_NAME=backend_db   # Asegúrate de crear esta DB en DBeaver/Laragon
-    DB_PORT=3306
+    DB_HOST=tu_host
+    DB_USER=tu_usuario
+    DB_PASSWORD=tu_contraseña         # Deja vacío si usas Laragon por defecto
+    DB_NAME=tu_basedatos   # Asegúrate de crear esta DB en DBeaver/Laragon
+    DB_PORT=tu_puerto
 
     # Seguridad
     JWT_SECRET=tu_secreto_super_seguro
@@ -78,6 +78,30 @@ Olvídate de Postman. Usamos **Bruno** para las pruebas de integración.
 4.  ¡Listo! Ya puedes ejecutar las requests de Login, Usuarios, etc.
 
 > **Nota:** La carpeta `api_tests` contiene la colección ("Golden Collection") y está configurada para ignorar tus secretos locales (`Local.bru`), así que puedes usarla con seguridad.
+
+## 📡 Estándar de Respuesta API
+
+Todas las respuestas de la API siguen un formato JSON estandarizado para facilitar su consumo.
+
+### Éxito (200, 201)
+
+```json
+{
+  "success": true,
+  "message": "Operación exitosa",
+  "data": { ... }
+}
+```
+
+### Error (400, 404, 500, etc.)
+
+```json
+{
+  "success": false,
+  "message": "Descripción del error",
+  "error": "Detalles técnicos (opcional)"
+}
+```
 
 ## 📜 Scripts Disponibles
 

@@ -1,6 +1,6 @@
 // controllers/routeController.js
 import routeService from '../services/routeService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Rutas de Navegación. 
@@ -14,9 +14,10 @@ class RouteController {
     async getRoutes(req, res, next) {
         try {
             const routes = await routeService.getActiveRoutesWithModuleInfo();
-            res.status(200).json(routes);
+            ApiResponse.success(res, 200, "Rutas obtenidas correctamente", routes);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status || 500));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

@@ -1,6 +1,5 @@
 // services/studentService.js
 import studentModel from '../models/studentModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).

@@ -1,5 +1,5 @@
 import studentService from '../services/studentService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Capa de Controlador (Controller) para Student.
@@ -9,9 +9,10 @@ class StudentController {
     async getAll(req, res, next) {
         try {
             const result = await studentService.getAllStudents(req.query);
-            res.status(200).json(result);
+            ApiResponse.success(res, 200, "Estudiantes obtenidos correctamente", result);
         } catch (error) {
-            next(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -21,24 +22,23 @@ class StudentController {
             const student = await studentService.getStudentById(id);
 
             if (!student) {
-                return res.status(404).json({ message: "Registro de estudiante no encontrado." });
+                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado.");
             }
 
-            res.status(200).json(student);
+            ApiResponse.success(res, 200, "Estudiante obtenido correctamente", student);
         } catch (error) {
-            next(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async create(req, res, next) {
         try {
             const newStudent = await studentService.createStudent(req.body);
-            res.status(201).json({
-                message: "Student creado exitosamente.",
-                data: newStudent
-            });
+            ApiResponse.success(res, 201, "Student creado exitosamente.", newStudent);
         } catch (error) {
-            next(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -48,15 +48,13 @@ class StudentController {
             const updatedStudent = await studentService.updateStudent(id, req.body);
 
             if (!updatedStudent) {
-                return res.status(404).json({ message: "Registro de estudiante no encontrado para actualizar." });
+                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado para actualizar.");
             }
 
-            res.status(200).json({
-                message: "Student actualizado exitosamente.",
-                data: updatedStudent
-            });
+            ApiResponse.success(res, 200, "Student actualizado exitosamente.", updatedStudent);
         } catch (error) {
-            next(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -66,12 +64,13 @@ class StudentController {
             const student = await studentService.getStudentByIdDetails(id);
 
             if (!student) {
-                return res.status(404).json({ message: "Registro de estudiante no encontrado." });
+                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado.");
             }
 
-            res.status(200).json(student);
+            ApiResponse.success(res, 200, "Estudiante obtenido correctamente", student);
         } catch (error) {
-            next(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -81,15 +80,13 @@ class StudentController {
             const deletedStudent = await studentService.deleteStudent(id);
 
             if (!deletedStudent) {
-                return res.status(404).json({ message: "Registro de estudiante no encontrado para eliminar." });
+                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado para eliminar.");
             }
 
-            res.status(200).json({
-                message: "Student eliminado exitosamente.",
-                data: deletedStudent
-            });
+            ApiResponse.success(res, 200, "Student eliminado exitosamente.", deletedStudent);
         } catch (error) {
-            next(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

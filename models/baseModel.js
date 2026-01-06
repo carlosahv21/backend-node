@@ -2,7 +2,7 @@
 
 import knex from '../config/knex.js';
 import { validationHandlers } from '../utils/utilsValidations.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 class BaseModel {
     constructor(tableName) {
@@ -26,7 +26,7 @@ class BaseModel {
             );
 
             if (message) {
-                throw new utilsCustomError(message, 409);
+                throw new AppError(message, 409);
             }
         }
         return null;
@@ -162,7 +162,7 @@ class BaseModel {
         const record = await this.knex(this.tableName).where({ id }).first();
 
         if (!record) {
-            throw new utilsCustomError(`${this.tableName} record not found`, 404);
+            throw new AppError(`${this.tableName} record not found`, 404);
         }
 
         const fieldValues = await this.knex('field_values as fv')
@@ -203,7 +203,7 @@ class BaseModel {
             .update(standardFields);
 
         if (updatedCount === 0) {
-            throw new utilsCustomError(`${this.tableName} record not found`, 404);
+            throw new AppError(`${this.tableName} record not found`, 404);
         }
 
         await this.saveCustomFields(id, data);
@@ -218,7 +218,7 @@ class BaseModel {
         const deletedCount = await this.knex(this.tableName).where({ id }).del();
 
         if (deletedCount === 0) {
-            throw new utilsCustomError(`${this.tableName} record not found`, 404);
+            throw new AppError(`${this.tableName} record not found`, 404);
         }
 
         return deletedCount;

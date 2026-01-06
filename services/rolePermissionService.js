@@ -1,6 +1,6 @@
 // services/rolePermissionService.js
 import rolePermissionModel from '../models/rolePermissionModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 import knex from '../config/knex.js'; // Necesitamos Knex para la transacción y raw queries
 
 /**
@@ -8,7 +8,7 @@ import knex from '../config/knex.js'; // Necesitamos Knex para la transacción y
  */
 const getPermissionsByRole = async (role_id) => {
     if (!role_id) {
-        throw new utilsCustomError('role_id es requerido.', 400);
+        throw new AppError('role_id es requerido.', 400);
     }
     return rolePermissionModel.getPermissionsByRoleId(role_id);
 };
@@ -19,7 +19,7 @@ const getPermissionsByRole = async (role_id) => {
  */
 const setPermissionsForRole = async (role_id, permission_ids) => {
     if (!role_id || !Array.isArray(permission_ids)) {
-        throw new utilsCustomError('role_id y permission_ids[] son requeridos.', 400);
+        throw new AppError('role_id y permission_ids[] son requeridos.', 400);
     }
 
     try {
@@ -38,8 +38,7 @@ const setPermissionsForRole = async (role_id, permission_ids) => {
             }
         });
     } catch (error) {
-        console.error("Error en transacción al asignar permisos:", error);
-        throw new utilsCustomError("Fallo al actualizar los permisos del rol", 500);
+        throw new AppError("Fallo al actualizar los permisos del rol", 500);
     }
 };
 
@@ -91,8 +90,7 @@ const getAllRolesWithPermissions = async () => {
         });
 
     } catch (error) {
-        console.error("Error al obtener roles con permisos:", error);
-        throw new utilsCustomError("Error al recuperar roles con permisos", 500);
+        throw new AppError("Error al recuperar roles con permisos", 500);
     }
 };
 

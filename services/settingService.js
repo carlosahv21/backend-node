@@ -1,6 +1,6 @@
 // services/settingService.js
 import settingModel from '../models/settingModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 /**
  * Obtiene la configuración global de la aplicación.
@@ -10,15 +10,11 @@ const getSettings = async () => {
         const settings = await settingModel.findFirst();
 
         if (!settings) {
-            throw new utilsCustomError('Settings not found', 404, 'No settings available in the database');
+            throw new AppError('Configuración no encontrada.', 404);
         }
         return settings;
     } catch (err) {
-        if (err instanceof utilsCustomError) throw err;
-
-        // Maneja errores de base de datos como 500
-        console.error("Error al obtener la configuración:", err.message);
-        throw new utilsCustomError('Error fetching settings from the database', 500, err.message);
+        throw new AppError('Error al obtener la configuración', 500);
     }
 };
 
@@ -34,17 +30,14 @@ const updateSettings = async (newSettings) => {
             if (!existingSettings) {
                 await settingModel.create(newSettings);
             } else {
-                throw new utilsCustomError('Failed to update settings (Rows affected: 0)', 500, 'Database update failed unexpectedly');
+                throw new AppError('No se actualizaron filas', 500);
             }
         }
         
         return getSettings();
 
     } catch (err) {
-        if (err instanceof utilsCustomError) throw err;
-
-        console.error("Error al actualizar la configuración:", err.message);
-        throw new utilsCustomError('Error updating settings in the database', 500, err.message);
+        throw new AppError('Error al actualizar la configuración', 500);
     }
 };
 

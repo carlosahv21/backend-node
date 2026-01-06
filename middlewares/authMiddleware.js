@@ -1,6 +1,7 @@
 // middleware/rbacMiddleware.js
 import jwt from 'jsonwebtoken';
 import knex from '../config/knex.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Obtiene todos los permisos (recurso:acción) para un usuario.
@@ -30,12 +31,12 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (token == null) {
-    return res.status(401).json({ message: 'Token de autenticación no proporcionado.' });
+    return ApiResponse.error(res, 401, 'Token de autenticación no proporcionado.');
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ message: 'Sesión expirada o token inválido.' });
+      return ApiResponse.error(res, 403, 'Sesión expirada o token inválido.');
     }
     req.user = user;
     next();
@@ -54,13 +55,11 @@ const authorize = (resourceName, actionName) => {
       if (userPermissionsList.includes(requiredPermission)) {
         next();
       } else {
-        res.status(403).json({
-          message: `Acceso denegado. Permiso requerido: ${requiredPermission}`
-        });
+        return ApiResponse.error(res, 403, `Acceso denegado. Permiso requerido: ${requiredPermission}`);
       }
     } catch (error) {
       console.error('Error en middleware RBAC:', error);
-      res.status(500).json({ message: 'Error interno de autorización.' });
+      return ApiResponse.error(res, 500, 'Error interno de autorización.');
     }
   };
 };

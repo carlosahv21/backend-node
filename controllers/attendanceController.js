@@ -1,45 +1,39 @@
 import attendanceService from '../services/attendanceService.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 class AttendanceController {
 
     async create(req, res) {
         try {
             const result = await attendanceService.registerAttendance(req.body);
-
-            res.status(201).json({ 
-                message: "Asistencia creada correctamente", 
-                attendance: result 
-            });
+            ApiResponse.success(res, 201, "Asistencia creada correctamente", result);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            const status = error.statusCode || 400;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async getAll(req, res) {
-        console.log("getAll");
-        console.log(req.params);
-        console.log(req.query);
         try {
             const result = await attendanceService.getAttendance(req.query);
-            res.status(200).json(result);
+            ApiResponse.success(res, 200, "Asistencias obtenidas correctamente", result);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async getByClassAndDate(req, res) {
-        console.log("getByClassAndDate");
-        console.log(req.params);
-        console.log(req.query);
         try {
             const { class_id, date } = req.query;
             if (!class_id || !date) {
-                return res.status(400).json({ message: "class_id and date are required" });
+                return ApiResponse.error(res, 400, "class_id and date are required");
             }
             const result = await attendanceService.getAttendanceByClassAndDate(class_id, date);
-            res.status(200).json(result);
+            ApiResponse.success(res, 200, "Asistencias obtenidas correctamente", result);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -47,12 +41,10 @@ class AttendanceController {
         try {
             const { id } = req.params;
             const result = await attendanceService.updateAttendance(id, req.body);
-            res.status(200).json({ 
-                message: "Asistencia actualizada correctamente", 
-                attendance: result 
-            });
+            ApiResponse.success(res, 200, "Asistencia actualizada correctamente", result);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            const status = error.statusCode || 400;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -60,9 +52,10 @@ class AttendanceController {
         try {
             const { id } = req.params;
             await attendanceService.deleteAttendance(id);
-            res.status(204).send();
+            ApiResponse.success(res, 204, "Asistencia eliminada correctamente");
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

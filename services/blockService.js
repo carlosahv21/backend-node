@@ -1,6 +1,6 @@
 // services/blockService.js
 import blockModel from '../models/blockModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 /**
  * Obtiene todos los bloques (con paginación, búsqueda, filtros).
@@ -16,7 +16,7 @@ const createBlock = async (data) => {
     const { module_id, name, description } = data;
 
     if (!module_id || !name) {
-        throw new utilsCustomError('module_id y name son campos requeridos para un bloque', 400);
+        throw new AppError('module_id y name son campos requeridos para un bloque', 400);
     }
 
     const lastBlock = await blockModel.findLastBlockInModule(module_id);

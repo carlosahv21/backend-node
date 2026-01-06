@@ -1,6 +1,7 @@
 // services/paymentService.js
 import PaymentModel from '../models/paymentModel.js';
-import knex from '../config/knex.js'; // Necesario para transacciones si se requiere, aunque create maneja su propia logica, aqui coordinamos.
+import knex from '../config/knex.js';
+import AppError from '../utils/AppError.js';
 
 class PaymentService {
     async getAll(query) {
@@ -19,7 +20,7 @@ class PaymentService {
         return await knex.transaction(async (trx) => {
             try {
                 const plan = await trx('plans').where('id', data.plan_id).first();
-                if (!plan) throw new Error("Plan not found");
+                if (!plan) throw new AppError("Plan not found");
 
                 const [paymentId] = await trx('payments').insert(data);
                 const payment = { ...data, id: paymentId };
@@ -72,8 +73,7 @@ class PaymentService {
 
                 return payment;
             } catch (error) {
-                console.error("Error processing payment:", error);
-                throw error;
+                throw new AppError("Error processing payment", 500);
             }
         });
     }

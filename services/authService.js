@@ -2,7 +2,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import authModel from '../models/authModel.js';
-import utilsCustomError from "../utils/utilsCustomError.js";
+import AppError from "../utils/AppError.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "1h";
@@ -14,7 +14,7 @@ const getUserData = async (userId) => {
 
     const userRecord = await authModel.knex("users").where({ id: userId }).first();
 
-    if (!userRecord) throw new utilsCustomError("User not found", 404);
+    if (!userRecord) throw new AppError("User not found", 404);
 
     const roleData = await authModel.findRoleByUserId(userId);
 
@@ -50,12 +50,12 @@ const getUserData = async (userId) => {
 const authenticateUser = async ({ email, password }) => {
     const user = await authModel.findUserByEmail(email);
     if (!user) {
-        throw new utilsCustomError("Invalid email or password", 401);
+        throw new AppError("Invalid email or password", 401);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-        throw new utilsCustomError("Invalid email or password", 401);
+        throw new AppError("Invalid email or password", 401);
     }
 
     const data = await getUserData(user.id);

@@ -1,6 +1,6 @@
 // controllers/classController.js
 import classService from '../services/classService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Clases.
@@ -13,9 +13,10 @@ class ClassController {
     async getAll(req, res, next) {
         try {
             const result = await classService.getAllClasses(req.query);
-            res.status(200).json(result); 
+            ApiResponse.success(res, 200, "Clases obtenidas correctamente", result); 
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -26,9 +27,10 @@ class ClassController {
         try {
             const { id } = req.params;
             const classRecord = await classService.getClassById(id); 
-            res.status(200).json(classRecord);
+            ApiResponse.success(res, 200, "Clase obtenida correctamente", classRecord);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -39,9 +41,10 @@ class ClassController {
         try {
             const { id } = req.params;
             const classRecord = await classService.getClassByIdDetails(id); 
-            res.status(200).json(classRecord);
+            ApiResponse.success(res, 200, "Clase obtenida correctamente", classRecord);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -51,13 +54,10 @@ class ClassController {
     async create(req, res, next) {
         try {
             const newClass = await classService.createClass(req.body);
-
-            res.status(201).json({ 
-                message: "Clase creada correctamente", 
-                class: newClass 
-            });
+            ApiResponse.success(res, 201, "Clase creada correctamente", newClass);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
     
@@ -66,13 +66,11 @@ class ClassController {
      */
     async update(req, res, next) {
         try {
-            await classService.updateClass(req.params.id, req.body);
-            
-            res.status(200).json({ 
-                message: "Clase actualizada correctamente"
-            });
+            await classService.updateClass(req.params.id, req.body);            
+            ApiResponse.success(res, 200, "Clase actualizada correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -82,9 +80,10 @@ class ClassController {
     async delete(req, res, next) {
         try {
             await classService.deleteClass(req.params.id);
-            res.status(204).send();
+            ApiResponse.success(res, 204, "Clase eliminada correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

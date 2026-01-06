@@ -1,7 +1,6 @@
 // controllers/roleController.js
-import e from 'cors';
 import roleService from '../services/roleService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Roles.
@@ -10,9 +9,10 @@ class RoleController {
     async getAll(req, res, next) {
         try {
             const result = await roleService.getAllRoles(req.query);
-            res.status(200).json(result); 
+            ApiResponse.success(res, 200, "Roles obtenidos correctamente", result); 
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -20,43 +20,40 @@ class RoleController {
         try {
             const { id } = req.params;
             const role = await roleService.getRoleById(id);
-            res.status(200).json(role);
+            ApiResponse.success(res, 200, "Rol obtenido correctamente", role);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async create(req, res, next) {
         try {
             const newRole = await roleService.createRole(req.body);
-            res.status(201).json({ 
-                success: true,
-                message: "Rol creado correctamente", 
-                data: newRole 
-            });
+            ApiResponse.success(res, 201, "Rol creado correctamente", newRole);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
     
     async update(req, res, next) {
         try {
             await roleService.updateRole(req.params.id, req.body);
-            res.status(200).json({ 
-                success: true,
-                message: "Rol actualizado correctamente" 
-            });
+            ApiResponse.success(res, 200, "Rol actualizado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
     async delete(req, res, next) {
         try {
             await roleService.deleteRole(req.params.id);
-            res.status(204).send();
+            ApiResponse.success(res, 200, "Rol eliminado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

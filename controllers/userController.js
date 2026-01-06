@@ -1,7 +1,7 @@
 // controllers/userController.js
 import userService from '../services/userService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
 import userModel from '../models/userModel.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para Usuarios.
@@ -15,9 +15,10 @@ class UserController {
         try {
             const result = await userService.getAllUsers(req.query);
 
-            res.status(200).json(result);
+            ApiResponse.success(res, 200, "Usuarios obtenidos correctamente", result);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -28,9 +29,10 @@ class UserController {
         try {
             const { id } = req.params;
             const user = await userModel.findById(id);
-            res.status(200).json(user);
+            ApiResponse.success(res, 200, "Usuario obtenido correctamente", user);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -44,17 +46,15 @@ class UserController {
 
             const user = await userModel.findByEmail(email);
             if (user) {
-                throw new utilsCustomError("Ya existe un usuario con el correo electrónico proporcionado", 400);
+                return ApiResponse.error(res, 400, "Ya existe un usuario con el correo electrónico proporcionado");
             }
 
             const newUser = await userService.createUser(req.body);
 
-            res.status(201).json({
-                message: "Usuario creado correctamente",
-                user: newUser
-            });
+            ApiResponse.success(res, 201, "Usuario creado correctamente", { user: newUser });
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -65,11 +65,10 @@ class UserController {
         try {
             await userService.updateUser(req.params.id, req.body);
 
-            res.status(200).json({
-                message: "Usuario actualizado correctamente"
-            });
+            ApiResponse.success(res, 200, "Usuario actualizado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -79,11 +78,10 @@ class UserController {
     async delete(req, res, next) {
         try {
             await userService.deleteUser(req.params.id);
-            res.status(200).json({
-                message: "Usuario eliminado correctamente"
-            });
+            ApiResponse.success(res, 200, "Usuario eliminado correctamente");
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

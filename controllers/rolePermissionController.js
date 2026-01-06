@@ -1,6 +1,6 @@
 // controllers/rolePermissionController.js
 import rolePermissionService from '../services/rolePermissionService.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Clase controladora para la gestión de relaciones Rol-Permiso.
@@ -15,12 +15,13 @@ class RolePermissionController {
             const { role_id } = req.params;
             const permissions = await rolePermissionService.getPermissionsByRole(role_id);
 
-            res.status(200).json({
+            ApiResponse.success(res, 200, "Permisos obtenidos correctamente", {
                 role_id: parseInt(role_id, 10),
                 permissions
             });
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -34,14 +35,13 @@ class RolePermissionController {
 
             await rolePermissionService.setPermissionsForRole(role_id, permission_ids);
 
-            res.status(200).json({
-                success: true,
-                message: "Permisos actualizados correctamente para el rol",
+            ApiResponse.success(res, 200, "Permisos actualizados correctamente para el rol", {
                 role_id: parseInt(role_id, 10),
                 permission_ids
             });
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status || 500));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 
@@ -51,9 +51,10 @@ class RolePermissionController {
     async getAllRolesWithPermissions(req, res, next) {
         try {
             const roles = await rolePermissionService.getAllRolesWithPermissions();
-            res.status(200).json(roles);
+            ApiResponse.success(res, 200, "Roles obtenidos correctamente", roles);
         } catch (error) {
-            next(new utilsCustomError(error.message, error.status || 500));
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
         }
     }
 }

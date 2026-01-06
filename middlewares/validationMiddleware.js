@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import ApiResponse from '../utils/apiResponse.js';
 
 /**
  * Middleware para validar el body de la solicitud contra un esquema Zod.
@@ -44,9 +44,9 @@ const validateSchema = (schema) => (req, res, next) => {
             }
         }
 
-        next(new utilsCustomError(message, 400));
+        ApiResponse.error(res, 400, message);
     } else {
-        req.body = result.data;
+        req.body = { ...req.body, ...result.data };
         next();
     }
 };

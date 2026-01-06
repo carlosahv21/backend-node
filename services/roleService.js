@@ -1,6 +1,5 @@
 // services/roleService.js
 import roleModel from '../models/roleModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
 
 const getAllRoles = async (queryParams) => {
     return roleModel.findAll(queryParams); 

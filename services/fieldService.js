@@ -1,5 +1,5 @@
 import fieldModel from '../models/fieldModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 const getAllFields = async (queryParams) => {
     return fieldModel.findAll(queryParams);
@@ -14,7 +14,7 @@ const getFieldById = async (id) => {
  */
 const createField = async (data) => {
     if (!data.name || !data.label || !data.type || !data.block_id) {
-        throw new utilsCustomError('Faltan datos obligatorios: name, label, type o block_id.', 400);
+        throw new AppError('Faltan datos obligatorios: name, label, type o block_id.', 400);
     }
 
     if (data.required === undefined) {
@@ -66,7 +66,7 @@ const deleteField = async (id) => {
 const getModuleFields = async (moduleId) => {
     const module = await fieldModel.findModuleById(moduleId);
     if (!module) {
-        throw new utilsCustomError('Módulo no encontrado', 404);
+        throw new AppError('Módulo no encontrado', 404);
     }
 
     let blocks = await fieldModel.findBlocksByModuleId(moduleId);
@@ -148,8 +148,7 @@ const getRelationField = async (config, searchQuery) => {
         const options = await fieldModel.findRelationField(config, searchQuery);
         return options;
     } catch (error) {
-        console.error('Error al obtener opciones de relación:', error);
-        throw new utilsCustomError('Error de base de datos al buscar opciones de relación.', 500);
+        throw new AppError('Error de base de datos al buscar opciones de relación.', 500);
     }
 };
 

@@ -1,6 +1,5 @@
 // services/teacherService.js
 import teacherModel from '../models/teacherModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
 
 /**
  * Obtiene todos los profesores (con paginación, búsqueda, filtros).

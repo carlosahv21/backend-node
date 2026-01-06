@@ -1,6 +1,5 @@
 // services/permissionService.js
 import permissionModel from '../models/permissionModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
 
 const getAllPermissions = async (queryParams) => {
     return permissionModel.findAll(queryParams); 

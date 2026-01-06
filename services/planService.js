@@ -1,6 +1,6 @@
 // services/student.service.js
 import planModel from '../models/planModel.js';
-import utilsCustomError from '../utils/utilsCustomError.js';
+import AppError from '../utils/AppError.js';
 
 /**
  * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
@@ -30,7 +30,7 @@ const createPlan = async (data) => {
     const { name } = data;
 
     if (!name) {
-        throw new utilsCustomError('El campo "name" es requerido.', 400);
+        throw new AppError('El campo "name" es requerido.', 400);
     }
 
     const newPlan = await planModel.create(data);

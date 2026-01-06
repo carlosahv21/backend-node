@@ -1,6 +1,6 @@
 // controllers/authController.js (Clase puramente delegada)
 import authService from "../services/authService.js";
-import utilsCustomError from "../utils/utilsCustomError.js";
+import ApiResponse from "../utils/apiResponse.js";
 
 /**
  * Clase controladora para la autenticación.
@@ -14,14 +14,10 @@ class AuthController {
         try {
             // Delega la autenticación, obtención de datos y generación de token al servicio
             const result = await authService.authenticateUser(req.body);
-            
-            res.json({ 
-                message: "Login successful", 
-                ...result 
-            });
+            ApiResponse.success(res, 200, "Login successful", result);
         } catch (err) {
-            console.error(err);
-            next(new utilsCustomError(err.message, err.status));
+            const status = err.statusCode || 400;
+            ApiResponse.error(res, status, err.message);
         }
     }
 
@@ -33,11 +29,10 @@ class AuthController {
             const userId = req.user.id; // Viene del middleware de token
             // Delega la obtención de todos los datos del perfil al servicio
             const data = await authService.getAuthenticatedUser(userId);
-            
-            res.json(data);
+            ApiResponse.success(res, 200, "Perfil de usuario obtenido correctamente", data);
         } catch (err) {
-            console.error(err);
-            next(new utilsCustomError(err.message, err.status));
+            const status = err.statusCode || 400;
+            ApiResponse.error(res, status, err.message);
         }
     }
 }
