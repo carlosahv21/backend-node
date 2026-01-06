@@ -9,12 +9,31 @@ class ApiResponse {
      * @param {string} message - Success message.
      * @param {object} data - Optional data payload.
      */
-    static success(res, status = 200, message = "Success", data = {}) {
-        return res.status(status).json({
+    static success(res, status = 200, message = "Success", payload = {}) {
+        let data = payload;
+        let pagination = null;
+
+        // Check if payload looks like a paginated result from BaseModel
+        if (payload && Array.isArray(payload.data) && payload.total !== undefined) {
+            data = payload.data;
+            pagination = {
+                total: payload.total,
+                page: payload.page,
+                limit: payload.limit
+            };
+        }
+
+        const response = {
             success: true,
             message,
             data
-        });
+        };
+
+        if (pagination) {
+            response.pagination = pagination;
+        }
+
+        return res.status(status).json(response);
     }
 
     /**

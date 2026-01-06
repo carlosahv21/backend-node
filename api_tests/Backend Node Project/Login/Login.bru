@@ -18,13 +18,13 @@ body:json {
 }
 
 script:post-response {
-  const data = res.getBody();
+  const response = res.getBody();
   
-  if (data.token) {
-    bru.setVar("jwt_token", data.token);
-    bru.setVar("user_name", data.user.name);
+  if (response.data.token) {
+    bru.setVar("jwt_token", response.data.token);
+    bru.setVar("user_name", response.data.user.name);
     
-    console.log("✅ Autenticado como: " + data.user.name);
+    console.log("✅ Autenticado como: " + response.data.user.name);
     console.log("🔑 Token guardado correctamente.");
   } else {
     console.error("❌ No se encontró el token en la respuesta.");
