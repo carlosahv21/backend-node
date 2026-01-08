@@ -1,0 +1,16 @@
+meta {
+  name: AdminAudit
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{base_url}}/reports/admin-audit
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
