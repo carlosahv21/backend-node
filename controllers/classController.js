@@ -6,14 +6,14 @@ import ApiResponse from '../utils/apiResponse.js';
  * Clase controladora para Clases.
  */
 class ClassController {
-    
+
     /**
      * Obtiene todas las clases.
      */
     async getAll(req, res, next) {
         try {
             const result = await classService.getAllClasses(req.query);
-            ApiResponse.success(res, 200, "Clases obtenidas correctamente", result); 
+            ApiResponse.success(res, 200, "Clases obtenidas correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -26,7 +26,7 @@ class ClassController {
     async getById(req, res, next) {
         try {
             const { id } = req.params;
-            const classRecord = await classService.getClassById(id); 
+            const classRecord = await classService.getClassById(id);
             ApiResponse.success(res, 200, "Clase obtenida correctamente", classRecord);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -40,7 +40,7 @@ class ClassController {
     async getByIdDetails(req, res, next) {
         try {
             const { id } = req.params;
-            const classRecord = await classService.getClassByIdDetails(id); 
+            const classRecord = await classService.getClassByIdDetails(id);
             ApiResponse.success(res, 200, "Clase obtenida correctamente", classRecord);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -60,13 +60,13 @@ class ClassController {
             ApiResponse.error(res, status, error.message);
         }
     }
-    
+
     /**
      * Actualiza una clase.
      */
     async update(req, res, next) {
         try {
-            await classService.updateClass(req.params.id, req.body);            
+            await classService.updateClass(req.params.id, req.body);
             ApiResponse.success(res, 200, "Clase actualizada correctamente");
         } catch (error) {
             const status = error.statusCode || 500;
@@ -81,6 +81,26 @@ class ClassController {
         try {
             await classService.deleteClass(req.params.id);
             ApiResponse.success(res, 204, "Clase eliminada correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async bin(req, res, next) {
+        try {
+            const result = await classService.binClass(req.params.id);
+            ApiResponse.success(res, 200, "Clase movida a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const result = await classService.restoreClass(req.params.id);
+            ApiResponse.success(res, 200, "Clase restaurada correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

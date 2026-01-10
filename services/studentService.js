@@ -1,5 +1,5 @@
 // services/studentService.js
-import studentModel from '../models/studentModel.js';
+import studentModel from "../models/studentModel.js";
 
 /**
  * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
@@ -35,13 +35,19 @@ const updateStudent = async (id, data) => {
     return studentModel.update(id, data);
 };
 
-/**
- * Elimina un estudiante por ID.
- */
+// Elimina un estudiante por ID.
+const binStudent = async (id) => {
+    return studentModel.bin(id);
+};
+
+// Restaura un estudiante por ID.
+const restoreStudent = async (id) => {
+    return studentModel.restore(id);
+};
+
 const deleteStudent = async (id) => {
     return studentModel.delete(id);
 };
-
 
 export default {
     getAllStudents,
@@ -49,5 +55,7 @@ export default {
     getStudentByIdDetails,
     createStudent,
     updateStudent,
-    deleteStudent
+    binStudent,
+    restoreStudent,
+    deleteStudent,
 };

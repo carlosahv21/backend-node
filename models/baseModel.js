@@ -1,14 +1,15 @@
 // models/BaseModel.js
 
-import knex from '../config/knex.js';
-import { validationHandlers } from '../utils/utilsValidations.js';
-import AppError from '../utils/AppError.js';
+import knex from "../config/knex.js";
+import { validationHandlers } from "../utils/utilsValidations.js";
+import AppError from "../utils/AppError.js";
 
 class BaseModel {
     constructor(tableName) {
         this.tableName = tableName;
         this.knex = knex;
         this.validations = [];
+        this.softDelete = true;
     }
 
     // Ejecuta las validaciones definidas para el modelo
@@ -33,23 +34,38 @@ class BaseModel {
     }
 
     // Función auxiliar para construir la query base con filtros y búsqueda
-    _buildQuery({ search, isCount = false, order_by, order_direction = 'asc', ...queryParams }) {
+    _buildQuery({
+        search,
+        isCount = false,
+        order_by,
+        order_direction = "asc",
+        ...queryParams
+    }) {
         let query = this.knex(this.tableName);
 
         if (this.joins && Array.isArray(this.joins)) {
-            this.joins.forEach(j => {
+            this.joins.forEach((j) => {
                 query = query.leftJoin(`${j.table} as ${j.alias}`, j.on[0], j.on[1]);
             });
         }
 
-        if (!isCount) {
-            query = this.selectFields && Array.isArray(this.selectFields)
-                ? query.select(this.selectFields)
-                : query.select(`${this.tableName}.*`);
+        if (this.softDelete) {
+            query = query.where(`${this.tableName}.deleted`, false);
         }
 
-        if (search && Array.isArray(this.searchFields) && this.searchFields.length > 0) {
-            query = query.where(builder => {
+        if (!isCount) {
+            query =
+                this.selectFields && Array.isArray(this.selectFields)
+                    ? query.select(this.selectFields)
+                    : query.select(`${this.tableName}.*`);
+        }
+
+        if (
+            search &&
+            Array.isArray(this.searchFields) &&
+            this.searchFields.length > 0
+        ) {
+            query = query.where((builder) => {
                 this.searchFields.forEach((field, index) => {
                     if (index === 0) builder.where(field, "like", `%${search}%`);
                     else builder.orWhere(field, "like", `%${search}%`);
@@ -57,8 +73,11 @@ class BaseModel {
             });
         }
 
-        Object.keys(queryParams).forEach(key => {
-            if (["search", "page", "limit", "order_by", "order_direction"].includes(key)) return;
+        Object.keys(queryParams).forEach((key) => {
+            if (
+                ["search", "page", "limit", "order_by", "order_direction"].includes(key)
+            )
+                return;
 
             let value = queryParams[key];
 
@@ -76,16 +95,18 @@ class BaseModel {
         });
 
         if (!isCount && order_by) {
+
             let orderByColumn = order_by;
             // Map the field if it exists in filterMapping
             if (this.filterMapping && this.filterMapping[order_by]) {
                 orderByColumn = this.filterMapping[order_by];
-            } else if (!order_by.includes('.')) {
+            } else if (!order_by.includes(".")) {
                 // Default to table.field if no dot notation
                 orderByColumn = `${this.tableName}.${order_by}`;
             }
             query = query.orderBy(orderByColumn, order_direction);
         }
+        console.log(query.toString());
 
         return query;
     }
@@ -95,25 +116,25 @@ class BaseModel {
         const customFields = {};
 
         for (const key in data) {
-            if (key.startsWith('cf_')) {
+            if (key.startsWith("cf_")) {
                 customFields[key] = data[key];
             }
         }
 
         for (const [name, value] of Object.entries(customFields)) {
-            const field = await this.knex('fields').where({ name }).first();
+            const field = await this.knex("fields").where({ name }).first();
             if (!field) continue;
 
-            const existing = await this.knex('field_values')
+            const existing = await this.knex("field_values")
                 .where({ field_id: field.id, record_id: recordId })
                 .first();
 
             if (existing) {
-                await this.knex('field_values')
+                await this.knex("field_values")
                     .where({ id: existing.id })
                     .update({ value });
             } else {
-                await this.knex('field_values').insert({
+                await this.knex("field_values").insert({
                     field_id: field.id,
                     record_id: recordId,
                     value,
@@ -128,7 +149,7 @@ class BaseModel {
         const customFields = {};
 
         for (const key in data) {
-            if (key.startsWith('cf_')) {
+            if (key.startsWith("cf_")) {
                 customFields[key] = data[key];
             } else {
                 standardFields[key] = data[key];
@@ -143,7 +164,10 @@ class BaseModel {
         const { page = 1, limit = 10, ...filters } = queryParams;
 
         const query = this._buildQuery(filters);
-        const results = await query.clone().limit(limit).offset((page - 1) * limit);
+        const results = await query
+            .clone()
+            .limit(limit)
+            .offset((page - 1) * limit);
 
         const totalQuery = this._buildQuery({ ...filters, isCount: true });
         const totalRes = await totalQuery.count("* as count").first();
@@ -152,10 +176,9 @@ class BaseModel {
             data: results,
             total: parseInt(totalRes.count),
             page: parseInt(page),
-            limit: parseInt(limit)
+            limit: parseInt(limit),
         };
     }
-
 
     // Obtener un registro por ID
     async findById(id) {
@@ -165,12 +188,12 @@ class BaseModel {
             throw new AppError(`${this.tableName} record not found`, 404);
         }
 
-        const fieldValues = await this.knex('field_values as fv')
-            .join('fields as f', 'fv.field_id', 'f.id')
-            .where('fv.record_id', id)
-            .select('f.name as field_name', 'fv.value');
+        const fieldValues = await this.knex("field_values as fv")
+            .join("fields as f", "fv.field_id", "f.id")
+            .where("fv.record_id", id)
+            .select("f.name as field_name", "fv.value");
 
-        fieldValues.forEach(fv => {
+        fieldValues.forEach((fv) => {
             record[fv.field_name] = fv.value;
         });
 
@@ -211,9 +234,33 @@ class BaseModel {
         return this.findById(id);
     }
 
+    async bin(id) {
+        return this.updateBinStatus(id, { deleted: true });
+    }
+
+    async restore(id) {
+        return this.updateBinStatus(id, { deleted: false });
+    }
+
+    // Actualizar estado de papelera
+    async updateBinStatus(id, data) {
+        const updatedCount = await this.knex(this.tableName)
+            .where({ id })
+            .update(data);
+
+        if (updatedCount === 0) {
+            throw new AppError(
+                `${this.tableName} record with id ${id} not found`,
+                404
+            );
+        }
+
+        return this.findById(id);
+    }
+
     // Eliminar un registro
     async delete(id) {
-        await this.knex('field_values').where({ record_id: id }).del();
+        await this.knex("field_values").where({ record_id: id }).del();
 
         const deletedCount = await this.knex(this.tableName).where({ id }).del();
 

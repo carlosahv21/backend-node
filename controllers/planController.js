@@ -1,11 +1,10 @@
-import planService from '../services/planService.js';
-import ApiResponse from '../utils/apiResponse.js';
+import planService from "../services/planService.js";
+import ApiResponse from "../utils/apiResponse.js";
 
 /**
  * Clase controladora para Planes.
  */
 class PlanController {
-
     /**
      * Obtiene todos los planes.
      */
@@ -58,7 +57,9 @@ class PlanController {
     async create(req, res, next) {
         try {
             const newPlan = await planService.createPlan(req.body);
-            ApiResponse.success(res, 201, "Plan creado correctamente", { plan: newPlan });
+            ApiResponse.success(res, 201, "Plan creado correctamente", {
+                plan: newPlan,
+            });
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -85,6 +86,37 @@ class PlanController {
         try {
             await planService.deletePlan(req.params.id);
             ApiResponse.success(res, 204, "Plan eliminado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    /**
+     * Bin un plan.
+     */
+    async bin(req, res, next) {
+        try {
+            const result = await planService.binPlan(req.params.id);
+            ApiResponse.success(
+                res,
+                200,
+                "Plan movido a papelera correctamente",
+                result
+            );
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    /**
+     * Restaura un plan.
+     */
+    async restore(req, res, next) {
+        try {
+            const result = await planService.restorePlan(req.params.id);
+            ApiResponse.success(res, 200, "Plan restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

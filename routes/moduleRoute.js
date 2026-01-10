@@ -33,6 +33,20 @@ router.put("/:id",
     (req, res, next) => moduleController.update(req, res, next)
 );
 
+// PATCH /api/modules/:id/bin
+router.patch("/:id/bin",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("fields", "delete"),
+    (req, res, next) => moduleController.bin(req, res, next)
+);
+
+// PATCH /api/modules/:id/restore
+router.patch("/:id/restore",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("fields", "delete"),
+    (req, res, next) => moduleController.restore(req, res, next)
+);
+
 // DELETE /api/modules/:id
 router.delete("/:id",
     authMiddleware.authenticateToken,

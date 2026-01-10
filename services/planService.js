@@ -1,6 +1,6 @@
 // services/student.service.js
-import planModel from '../models/planModel.js';
-import AppError from '../utils/AppError.js';
+import planModel from "../models/planModel.js";
+import AppError from "../utils/AppError.js";
 
 /**
  * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
@@ -46,6 +46,20 @@ const updatePlan = async (id, data) => {
 };
 
 /**
+ * Bin un estudiante por ID.
+ */
+const binPlan = async (id) => {
+    return planModel.bin(id);
+};
+
+/**
+ * Restaura un plan por ID.
+ */
+const restorePlan = async (id) => {
+    return planModel.restore(id);
+};
+
+/**
  * Elimina un estudiante por ID.
  */
 const deletePlan = async (id) => {
@@ -65,6 +79,8 @@ export default {
     getPlanByIdDetails,
     createPlan,
     updatePlan,
+    binPlan,
+    restorePlan,
     deletePlan,
-    getStudentPlan
+    getStudentPlan,
 };

@@ -33,6 +33,20 @@ router.put("/:id",
     (req, res, next) => roleController.update(req, res, next)
 );
 
+// PATCH /api/roles/:id/bin
+router.patch("/:id/bin",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("roles", "delete"),
+    (req, res, next) => roleController.bin(req, res, next)
+);
+
+// PATCH /api/roles/:id/restore
+router.patch("/:id/restore",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("roles", "delete"),
+    (req, res, next) => roleController.restore(req, res, next)
+);
+
 // DELETE /api/roles/:id - Eliminar un rol por ID
 router.delete("/:id",
     authMiddleware.authenticateToken,

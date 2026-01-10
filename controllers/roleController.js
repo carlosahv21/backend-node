@@ -9,7 +9,7 @@ class RoleController {
     async getAll(req, res, next) {
         try {
             const result = await roleService.getAllRoles(req.query);
-            ApiResponse.success(res, 200, "Roles obtenidos correctamente", result); 
+            ApiResponse.success(res, 200, "Roles obtenidos correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -36,7 +36,7 @@ class RoleController {
             ApiResponse.error(res, status, error.message);
         }
     }
-    
+
     async update(req, res, next) {
         try {
             await roleService.updateRole(req.params.id, req.body);
@@ -50,7 +50,27 @@ class RoleController {
     async delete(req, res, next) {
         try {
             await roleService.deleteRole(req.params.id);
-            ApiResponse.success(res, 200, "Rol eliminado correctamente");
+            ApiResponse.success(res, 204, "Rol eliminado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async bin(req, res, next) {
+        try {
+            const result = await roleService.binRole(req.params.id);
+            ApiResponse.success(res, 200, "Rol movido a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const result = await roleService.restoreRole(req.params.id);
+            ApiResponse.success(res, 200, "Rol restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

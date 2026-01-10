@@ -33,6 +33,20 @@ router.put("/:id",
     (req, res, next) => permissionController.update(req, res, next)
 );
 
+// PATCH /api/permissions/:id/bin
+router.patch("/:id/bin",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("permissions", "delete"),
+    (req, res, next) => permissionController.bin(req, res, next)
+);
+
+// PATCH /api/permissions/:id/restore
+router.patch("/:id/restore",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("permissions", "delete"),
+    (req, res, next) => permissionController.restore(req, res, next)
+);
+
 // DELETE /api/permissions/:id
 router.delete("/:id",
     authMiddleware.authenticateToken,

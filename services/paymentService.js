@@ -26,7 +26,7 @@ class PaymentService {
                 const payment = { ...data, id: paymentId };
 
                 //falta condicion de solo insertar plan si el pago fue completado
-                
+
                 const currentPlan = await trx('user_plan')
                     .where('user_id', data.user_id)
                     .orderBy('end_date', 'desc')
@@ -84,6 +84,14 @@ class PaymentService {
 
     async delete(id) {
         return PaymentModel.delete(id);
+    }
+
+    async bin(id) {
+        return PaymentModel.bin(id);
+    }
+
+    async restore(id) {
+        return PaymentModel.restore(id);
     }
 }
 

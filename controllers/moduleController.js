@@ -58,6 +58,26 @@ class ModuleController {
         }
     }
 
+    async bin(req, res, next) {
+        try {
+            const result = await moduleService.binModule(req.params.id);
+            ApiResponse.success(res, 200, "Módulo movido a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const result = await moduleService.restoreModule(req.params.id);
+            ApiResponse.success(res, 200, "Módulo restaurado correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
     /**
      * Alterna el estado 'is_active' de un módulo.
      */

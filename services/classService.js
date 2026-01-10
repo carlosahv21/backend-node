@@ -45,9 +45,16 @@ const updateClass = async (id, data) => {
     return updatedClass;
 };
 
-/**
- * Elimina una clase por ID.
- */
+// Elimina una clase por ID.
+const binClass = async (id) => {
+    return classModel.bin(id);
+};
+
+// Restaura una clase por ID.
+const restoreClass = async (id) => {
+    return classModel.restore(id);
+};
+
 const deleteClass = async (id) => {
     return classModel.delete(id);
 };
@@ -59,5 +66,7 @@ export default {
     getClassById,
     getClassByIdDetails,
     updateClass,
+    binClass,
+    restoreClass,
     deleteClass,
 };

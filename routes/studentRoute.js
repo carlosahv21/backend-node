@@ -39,6 +39,20 @@ router.put("/:id",
     (req, res, next) => studentController.update(req, res, next) // Añadimos 'next'
 );
 
+// PATCH /api/students/:id/bin
+router.patch("/:id/bin",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("students", "delete"),
+    (req, res, next) => studentController.bin(req, res, next)
+);
+
+// PATCH /api/students/:id/restore
+router.patch("/:id/restore",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("students", "delete"),
+    (req, res, next) => studentController.restore(req, res, next)
+);
+
 // DELETE /api/students/:id
 router.delete("/:id",
     authMiddleware.authenticateToken,

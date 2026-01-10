@@ -86,7 +86,29 @@ class TeacherController {
                 return ApiResponse.error(res, 404, "Profesor no encontrado para eliminar.");
             }
 
-            ApiResponse.success(res, 200, "Teacher eliminado correctamente", deletedTeacher);
+            ApiResponse.success(res, 204, "Teacher eliminado correctamente", deletedTeacher);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async bin(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await teacherService.binTeacher(id);
+            ApiResponse.success(res, 200, "Teacher movido a papelera exitosamente.", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await teacherService.restoreTeacher(id);
+            ApiResponse.success(res, 200, "Teacher restaurado exitosamente.", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

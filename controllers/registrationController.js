@@ -2,7 +2,7 @@
 import RegistrationService from '../services/registrationService.js';
 import ApiResponse from '../utils/apiResponse.js';
 
-export const createRegistration = async (req, res, next) => {
+const createRegistration = async (req, res, next) => {
     try {
         const result = await RegistrationService.create(req.body);
         ApiResponse.success(res, 201, "Registration created successfully", result);
@@ -12,7 +12,7 @@ export const createRegistration = async (req, res, next) => {
     }
 };
 
-export const listRegistrations = async (req, res, next) => {
+const listRegistrations = async (req, res, next) => {
     try {
         const queryParams = req.query;
         const result = await RegistrationService.list(queryParams);
@@ -23,7 +23,7 @@ export const listRegistrations = async (req, res, next) => {
     }
 };
 
-export const deleteRegistration = async (req, res, next) => {
+const deleteRegistration = async (req, res, next) => {
     try {
         const { id } = req.params;
         const result = await RegistrationService.delete(id);
@@ -34,7 +34,7 @@ export const deleteRegistration = async (req, res, next) => {
     }
 };
 
-export const getAvailableClasses = async (req, res, next) => {
+const getAvailableClasses = async (req, res, next) => {
     try {
         const { user_id } = req.query;
         if (!user_id) {
@@ -47,3 +47,35 @@ export const getAvailableClasses = async (req, res, next) => {
         ApiResponse.error(res, status, error.message);
     }
 };
+
+const binRegistration = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await RegistrationService.bin(id);
+        ApiResponse.success(res, 200, "Registration moved to bin successfully", result);
+    } catch (error) {
+        const status = error.statusCode || 500;
+        ApiResponse.error(res, status, error.message);
+    }
+};
+
+const restoreRegistration = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await RegistrationService.restore(id);
+        ApiResponse.success(res, 200, "Registration restored successfully", result);
+    } catch (error) {
+        const status = error.statusCode || 500;
+        ApiResponse.error(res, status, error.message);
+    }
+};
+
+export {
+    createRegistration,
+    listRegistrations,
+    binRegistration,
+    restoreRegistration,
+    deleteRegistration,
+    getAvailableClasses
+};
+

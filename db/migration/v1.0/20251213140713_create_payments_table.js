@@ -26,6 +26,7 @@ export async function up(knex) {
         table.string('transaction_id').nullable();
 
         table.text('notes').nullable();
+        table.boolean('deleted').defaultTo(false);
 
         // Timestamps
         table.timestamp('created_at').defaultTo(knex.fn.now());

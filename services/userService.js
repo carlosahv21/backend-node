@@ -1,7 +1,7 @@
 // services/userService.js
-import bcrypt from 'bcryptjs';
-import userModel from '../models/userModel.js';
-import AppError from '../utils/AppError.js';
+import bcrypt from "bcryptjs";
+import userModel from "../models/userModel.js";
+import AppError from "../utils/AppError.js";
 
 const SALT_ROUNDS = 10;
 
@@ -20,7 +20,7 @@ const createUser = async (data) => {
     const { role, ...userData } = data;
 
     if (!userData.password) {
-        throw new AppError('La contraseña es requerida', 400);
+        throw new AppError("La contraseña es requerida", 400);
     }
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
     userData.password = await bcrypt.hash(userData.password, salt);
@@ -41,14 +41,21 @@ const createUser = async (data) => {
  */
 const updateUser = async (id, data) => {
     // Definir campos permitidos explícitamente para evitar inyección de campos inválidos o sobreescritura accidental
-    const allowedFields = ['first_name', 'last_name', 'email', 'password', 'email_verified', 'deleted'];
+    const allowedFields = [
+        "first_name",
+        "last_name",
+        "email",
+        "password",
+        "email_verified",
+        "deleted",
+    ];
 
     // Separar el rol del resto de datos
     const { role, ...restData } = data;
 
     // Filtrar solo los campos permitidos y que no sean undefined
     const userData = {};
-    Object.keys(restData).forEach(key => {
+    Object.keys(restData).forEach((key) => {
         if (allowedFields.includes(key) && restData[key] !== undefined) {
             userData[key] = restData[key];
         }
@@ -76,18 +83,26 @@ const updateUser = async (id, data) => {
     return updatedUser;
 };
 
-/**
- * Elimina un usuario por ID.
- */
+// Elimina un usuario por ID.
+const binUser = async (id) => {
+    return userModel.bin(id);
+};
+
+// Restaura un usuario por ID.
+const restoreUser = async (id) => {
+    return userModel.restore(id);
+};
+
 const deleteUser = async (id) => {
     // Delega la eliminación al modelo
     return userModel.delete(id);
 };
 
-
 export default {
     getAllUsers,
     createUser,
     updateUser,
+    binUser,
+    restoreUser,
     deleteUser,
 };

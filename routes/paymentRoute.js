@@ -9,6 +9,8 @@ router.get('/:id', PaymentController.getById);
 router.get('/details/:id', PaymentController.getDetails);
 router.post('/', PaymentController.create);
 router.put('/:id', PaymentController.update);
+router.patch('/:id/bin', PaymentController.bin);
+router.patch('/:id/restore', PaymentController.restore);
 router.delete('/:id', PaymentController.delete);
 
 export default router;

@@ -4,7 +4,8 @@ import BaseModel from './baseModel.js';
 class ModuleModel extends BaseModel {
     constructor() {
         super('modules');
-        
+        this.softDelete = false;
+
         this.joins = [];
         this.selectFields = ['modules.*'];
         this.searchFields = ['modules.name', 'modules.description'];

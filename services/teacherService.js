@@ -38,9 +38,16 @@ const updateTeacher = async (id, data) => {
     return teacherModel.update(id, data);
 };
 
-/**
- * Elimina un profesor por ID.
- */
+// Elimina un profesor por ID.
+const binTeacher = async (id) => {
+    return teacherModel.bin(id);
+};
+
+// Restaura un profesor por ID.
+const restoreTeacher = async (id) => {
+    return teacherModel.restore(id);
+};
+
 const deleteTeacher = async (id) => {
     return teacherModel.delete(id);
 };
@@ -52,5 +59,7 @@ export default {
     getTeacherById,
     getTeacherByIdDetails,
     updateTeacher,
+    binTeacher,
+    restoreTeacher,
     deleteTeacher,
 };

@@ -152,12 +152,22 @@ const getRelationField = async (config, searchQuery) => {
     }
 };
 
+const binField = async (id) => {
+    return fieldModel.bin(id);
+};
+
+const restoreField = async (id) => {
+    return fieldModel.restore(id);
+};
+
 export default {
     getAllFields,
     getFieldById,
     createField,
     updateField,
     deleteField,
+    binField,
+    restoreField,
     getModuleFields,
     getRelationField
 };

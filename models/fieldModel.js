@@ -5,6 +5,7 @@ import { getModelInstance } from '../utils/utilsModelRegistry.js';
 class FieldModel extends BaseModel {
     constructor() {
         super('fields'); // Usa la tabla 'fields'
+        this.softDelete = false;
 
         // Configuración de consultas
         this.joins = [];

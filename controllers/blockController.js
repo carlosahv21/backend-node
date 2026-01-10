@@ -67,7 +67,27 @@ class BlockController {
     async delete(req, res, next) {
         try {
             await blockService.deleteBlock(req.params.id);
-            ApiResponse.success(res, 200, "Bloque eliminado correctamente");
+            ApiResponse.success(res, 204, "Bloque eliminado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async bin(req, res, next) {
+        try {
+            const result = await blockService.binBlock(req.params.id);
+            ApiResponse.success(res, 200, "Bloque movido a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const result = await blockService.restoreBlock(req.params.id);
+            ApiResponse.success(res, 200, "Bloque restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

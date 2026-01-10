@@ -1,13 +1,12 @@
 // controllers/userController.js
-import userService from '../services/userService.js';
-import userModel from '../models/userModel.js';
-import ApiResponse from '../utils/apiResponse.js';
+import userService from "../services/userService.js";
+import userModel from "../models/userModel.js";
+import ApiResponse from "../utils/apiResponse.js";
 
 /**
  * Clase controladora para Usuarios.
  */
 class UserController {
-
     /**
      * Obtiene todos los usuarios.
      */
@@ -23,7 +22,7 @@ class UserController {
     }
 
     /**
-     * Obtiene un usuario por ID. 
+     * Obtiene un usuario por ID.
      */
     async getById(req, res, next) {
         try {
@@ -36,7 +35,6 @@ class UserController {
         }
     }
 
-
     /**
      * Crea un nuevo usuario.
      */
@@ -46,12 +44,18 @@ class UserController {
 
             const user = await userModel.findByEmail(email);
             if (user) {
-                return ApiResponse.error(res, 400, "Ya existe un usuario con el correo electrónico proporcionado");
+                return ApiResponse.error(
+                    res,
+                    400,
+                    "Ya existe un usuario con el correo electrónico proporcionado"
+                );
             }
 
             const newUser = await userService.createUser(req.body);
 
-            ApiResponse.success(res, 201, "Usuario creado correctamente", { user: newUser });
+            ApiResponse.success(res, 201, "Usuario creado correctamente", {
+                user: newUser,
+            });
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -78,7 +82,38 @@ class UserController {
     async delete(req, res, next) {
         try {
             await userService.deleteUser(req.params.id);
-            ApiResponse.success(res, 200, "Usuario eliminado correctamente");
+            ApiResponse.success(res, 204, "Usuario eliminado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    /**
+     * Mueve un usuario a la papelera.
+     */
+    async bin(req, res, next) {
+        try {
+            const result = await userService.binUser(req.params.id);
+            ApiResponse.success(
+                res,
+                200,
+                "Usuario movido a papelera correctamente",
+                result
+            );
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    /**
+     * Restaura un usuario.
+     */
+    async restore(req, res, next) {
+        try {
+            const result = await userService.restoreUser(req.params.id);
+            ApiResponse.success(res, 200, "Usuario restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

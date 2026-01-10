@@ -2,7 +2,7 @@
 import roleModel from '../models/roleModel.js';
 
 const getAllRoles = async (queryParams) => {
-    return roleModel.findAll(queryParams); 
+    return roleModel.findAll(queryParams);
 };
 
 const getRoleById = async (id) => {
@@ -10,7 +10,7 @@ const getRoleById = async (id) => {
 };
 
 const createRole = async (data) => {
-    return roleModel.create(data); 
+    return roleModel.create(data);
 };
 
 const updateRole = async (id, data) => {
@@ -23,10 +23,20 @@ const deleteRole = async (id) => {
     return roleModel.delete(id);
 };
 
+const binRole = async (id) => {
+    return roleModel.bin(id);
+};
+
+const restoreRole = async (id) => {
+    return roleModel.restore(id);
+};
+
 export default {
     getAllRoles,
     getRoleById,
     createRole,
     updateRole,
+    binRole,
+    restoreRole,
     deleteRole,
 };

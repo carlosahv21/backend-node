@@ -3,6 +3,7 @@ import BaseModel from './baseModel.js';
 class RegistrationModel extends BaseModel {
     constructor() {
         super('user_class');
+        this.softDelete = false;
 
         this.joins = [
             { table: "classes", alias: "c", on: ["user_class.class_id", "c.id"] },
@@ -47,7 +48,7 @@ class RegistrationModel extends BaseModel {
             .where({ "users.id": userId })
             .select("user_plan.plan_id")
             .first();
-        
+
         return !!result;
     }
 
@@ -62,7 +63,6 @@ class RegistrationModel extends BaseModel {
             .select("classes.capacity")
             .where("classes.id", class_id)
             .first();
-
 
         return parseInt(result.count) >= parseInt(classes.capacity);
     }

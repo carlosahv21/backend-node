@@ -50,9 +50,16 @@ const updateBlock = async (id, data) => {
     return blockModel.update(id, data);
 };
 
-/**
- * Elimina un bloque por ID.
- */
+// Elimina un bloque por ID.
+const binBlock = async (id) => {
+    return blockModel.bin(id);
+};
+
+// Restaura un bloque por ID.
+const restoreBlock = async (id) => {
+    return blockModel.restore(id);
+};
+
 const deleteBlock = async (id) => {
     return blockModel.delete(id);
 };
@@ -63,5 +70,7 @@ export default {
     createBlock,
     getBlockById,
     updateBlock,
+    binBlock,
+    restoreBlock,
     deleteBlock,
 };

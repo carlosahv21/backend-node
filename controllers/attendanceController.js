@@ -58,6 +58,28 @@ class AttendanceController {
             ApiResponse.error(res, status, error.message);
         }
     }
+
+    async bin(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await attendanceService.binAttendance(id);
+            ApiResponse.success(res, 200, "Asistencia movida a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await attendanceService.restoreAttendance(id);
+            ApiResponse.success(res, 200, "Asistencia restaurada correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new AttendanceController();

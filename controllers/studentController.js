@@ -1,15 +1,19 @@
-import studentService from '../services/studentService.js';
-import ApiResponse from '../utils/apiResponse.js';
+import studentService from "../services/studentService.js";
+import ApiResponse from "../utils/apiResponse.js";
 
 /**
  * Capa de Controlador (Controller) para Student.
  */
 class StudentController {
-
     async getAll(req, res, next) {
         try {
             const result = await studentService.getAllStudents(req.query);
-            ApiResponse.success(res, 200, "Estudiantes obtenidos correctamente", result);
+            ApiResponse.success(
+                res,
+                200,
+                "Estudiantes obtenidos correctamente",
+                result
+            );
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -22,10 +26,19 @@ class StudentController {
             const student = await studentService.getStudentById(id);
 
             if (!student) {
-                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado.");
+                return ApiResponse.error(
+                    res,
+                    404,
+                    "Registro de estudiante no encontrado."
+                );
             }
 
-            ApiResponse.success(res, 200, "Estudiante obtenido correctamente", student);
+            ApiResponse.success(
+                res,
+                200,
+                "Estudiante obtenido correctamente",
+                student
+            );
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -48,10 +61,19 @@ class StudentController {
             const updatedStudent = await studentService.updateStudent(id, req.body);
 
             if (!updatedStudent) {
-                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado para actualizar.");
+                return ApiResponse.error(
+                    res,
+                    404,
+                    "Registro de estudiante no encontrado para actualizar."
+                );
             }
 
-            ApiResponse.success(res, 200, "Student actualizado exitosamente.", updatedStudent);
+            ApiResponse.success(
+                res,
+                200,
+                "Student actualizado exitosamente.",
+                updatedStudent
+            );
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -64,10 +86,19 @@ class StudentController {
             const student = await studentService.getStudentByIdDetails(id);
 
             if (!student) {
-                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado.");
+                return ApiResponse.error(
+                    res,
+                    404,
+                    "Registro de estudiante no encontrado."
+                );
             }
 
-            ApiResponse.success(res, 200, "Estudiante obtenido correctamente", student);
+            ApiResponse.success(
+                res,
+                200,
+                "Estudiante obtenido correctamente",
+                student
+            );
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
@@ -80,10 +111,46 @@ class StudentController {
             const deletedStudent = await studentService.deleteStudent(id);
 
             if (!deletedStudent) {
-                return ApiResponse.error(res, 404, "Registro de estudiante no encontrado para eliminar.");
+                return ApiResponse.error(
+                    res,
+                    404,
+                    "Registro de estudiante no encontrado para eliminar."
+                );
             }
 
-            ApiResponse.success(res, 200, "Student eliminado exitosamente.", deletedStudent);
+            ApiResponse.success(
+                res,
+                204,
+                "Student eliminado exitosamente.",
+                deletedStudent
+            );
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async bin(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await studentService.binStudent(id);
+            ApiResponse.success(
+                res,
+                200,
+                "Student movido a papelera exitosamente.",
+                result
+            );
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await studentService.restoreStudent(id);
+            ApiResponse.success(res, 200, "Student restaurado exitosamente.", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

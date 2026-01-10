@@ -40,6 +40,20 @@ router.put("/:id",
     (req, res, next) => teacherController.update(req, res, next)
 );
 
+// PATCH /api/teachers/:id/bin
+router.patch("/:id/bin",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("teachers", "delete"),
+    (req, res, next) => teacherController.bin(req, res, next)
+);
+
+// PATCH /api/teachers/:id/restore
+router.patch("/:id/restore",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("teachers", "delete"),
+    (req, res, next) => teacherController.restore(req, res, next)
+);
+
 // DELETE /api/teachers/:id
 router.delete("/:id",
     authMiddleware.authenticateToken,

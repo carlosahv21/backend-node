@@ -7,6 +7,7 @@ import BaseModel from './baseModel.js';
 class PaymentModel extends BaseModel {
     constructor() {
         super('payments');
+        this.softDelete = false;
         
         this.joins = [
             { table: "users", alias: "u", on: ["payments.user_id", "u.id"] },

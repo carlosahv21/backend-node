@@ -3,6 +3,7 @@ import BaseModel from './baseModel.js';
 class AttendanceModel extends BaseModel {
     constructor() {
         super('attendance');
+        this.softDelete = false;
 
         this.joins = [
             { table: "classes", alias: "c", on: ["attendance.class_id", "c.id"] },

@@ -29,6 +29,18 @@ router.put("/:id",
     (req, res, next) => fieldController.update(req, res, next)
 );
 
+// PATCH /api/fields/:id/bin
+router.patch("/:id/bin",
+    authMiddleware.authenticateToken,
+    (req, res, next) => fieldController.bin(req, res, next)
+);
+
+// PATCH /api/fields/:id/restore
+router.patch("/:id/restore",
+    authMiddleware.authenticateToken,
+    (req, res, next) => fieldController.restore(req, res, next)
+);
+
 // DELETE /api/fields/:id
 router.delete("/:id",
     authMiddleware.authenticateToken,

@@ -35,6 +35,14 @@ class AttendanceService {
     async deleteAttendance(id) {
         return await attendanceModel.delete(id);
     }
+
+    async binAttendance(id) {
+        return await attendanceModel.bin(id);
+    }
+
+    async restoreAttendance(id) {
+        return await attendanceModel.restore(id);
+    }
 }
 
 export default new AttendanceService();

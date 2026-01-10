@@ -41,9 +41,17 @@ class RegistrationService {
     async delete(id) {
         const registration = await RegistrationModel.findById(id);
         if (!registration) {
-            throw new ApiResponse('Inscripción no encontrada.', 404);
+            throw new AppError('Inscripción no encontrada.', 404);
         }
         return RegistrationModel.delete(id);
+    }
+
+    async bin(id) {
+        return RegistrationModel.bin(id);
+    }
+
+    async restore(id) {
+        return RegistrationModel.restore(id);
     }
 
     async getAvailableClasses(userId, filters = {}) {

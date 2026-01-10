@@ -72,6 +72,26 @@ class FieldController {
         }
     }
 
+    async bin(req, res, next) {
+        try {
+            const result = await fieldService.binField(req.params.id);
+            ApiResponse.success(res, 200, "Campo movido a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const result = await fieldService.restoreField(req.params.id);
+            ApiResponse.success(res, 200, "Campo restaurado correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
     /**
      * Obtiene todos los bloques con sus campos asociados por módulo (incluyendo herencia).
      */
@@ -91,13 +111,13 @@ class FieldController {
      * Obtiene las opciones dinámicas de una relación (campo tipo relación).
      */
     async getRelationField(req, res, next) {
-        try {
+        try {            
             const { relation_config, search } = req.body;
 
             if (!relation_config) {
                 ApiResponse.error(res, 400, "El parámetro 'relation_config' es obligatorio para obtener opciones de relación.");
             }
-            
+
             const options = await fieldService.getRelationField(relation_config, search || "");
 
             ApiResponse.success(res, 200, "Opciones obtenidas correctamente", options);

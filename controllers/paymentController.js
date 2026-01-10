@@ -60,7 +60,29 @@ class PaymentController {
         try {
             const { id } = req.params;
             const result = await PaymentService.delete(id);
-            ApiResponse.success(res, 200, "Pago eliminado correctamente", result);
+            ApiResponse.success(res, 204, "Pago eliminado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async bin(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await PaymentService.bin(id);
+            ApiResponse.success(res, 200, "Pago movido a papelera correctamente", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async restore(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await PaymentService.restore(id);
+            ApiResponse.success(res, 200, "Pago restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

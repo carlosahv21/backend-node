@@ -1,0 +1,23 @@
+meta {
+  name: Update Class
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{base_url}}/classes/35
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Clase Actualizada",
+    "date": "Friday"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
