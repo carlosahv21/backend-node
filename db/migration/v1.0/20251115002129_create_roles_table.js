@@ -11,7 +11,7 @@ export async function up(knex) {
             table.timestamps(true, true); // Timestamps para created_at y updated_at
         });
 
-        console.log('Table "roles" created successfully.');
+        console.log("Table 'roles' created successfully.");
 
         // Roles
         await knex("roles").insert([
@@ -28,5 +28,5 @@ export async function up(knex) {
 
 export async function down(knex) {
     await knex.schema.dropTableIfExists("roles");
-    console.log('Table "roles" dropped successfully.');
+    console.log("Table 'roles' dropped successfully.");
 }

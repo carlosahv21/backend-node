@@ -9,210 +9,202 @@ const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const files = [
     {
         dir: 'models', suffix: 'Model', template: (entitySingular, entityPlural) => `
-import { baseModel } from '../baseModel.js';
+import BaseModel from './baseModel.js';
 
-/*
-    * Capa de Acceso a Datos (DAL) para la entidad ${entityPlural}.
-    * Extiende de baseModel.
-*/
-
-export class ${entitySingular}Model extends baseModel {
+class ${entitySingular}Model extends BaseModel {
     constructor() {
         super('${entityPlural.toLowerCase()}');
         this.joins = [];
         this.selectFields = ['${entityPlural.toLowerCase()}.*'];
-        this.searchFields = ['${entityPlural.toLowerCase()}.nombre'];
+        this.searchFields = ['${entityPlural.toLowerCase()}.name'];
     }
-    
-    // Sobreescribe findById para lanzar un error con etiqueta de 404
-    async findById(id) {
-        const ${entitySingular.toLowerCase()} = await this.knex(this.tableName).where({ id }).first();
-
-        if (!${entitySingular.toLowerCase()}) {
-            // ERROR CRÍTICO: Usamos una etiqueta para que los controladores puedan identificarlo.
-            throw new Error('NOT_FOUND: El ${entitySingular.toLowerCase()} no existe.');
-        }
-
-        return ${entitySingular.toLowerCase()};
-    }
-
-    // Sobreescribe delete para lanzar un error con etiqueta de 404
-    async delete(id) {
-        // En un escenario real, baseModel podría tener un método 'delete' que haga esto.
-        const numDeleted = await this.knex(this.tableName).where({ id }).del();
-        if (numDeleted === 0) {
-            throw new Error('NOT_FOUND: El ${entitySingular.toLowerCase()} no existe para eliminar.');
-        }
-        return numDeleted;
-    }
-
-    // El resto de métodos (findAll, create, update) se heredan o se implementan aquí.
 }
+
 export default new ${entitySingular}Model();
 `},
     {
         dir: 'services', suffix: 'Service', template: (entitySingular, entityPlural) => `
-import ${entitySingular}Model from '../models/${entityPlural}Model.js';
+import ${entitySingular.toLowerCase()}Model from '../models/${entityPlural}Model.js';
 
-// Lógica de negocio (BLL) para la entidad ${entityPlural}
-
-export const getAll${entityPlural} = async () => {
-    try {
-        return await ${entitySingular}Model.findAll();
-    } catch (error) {
-        throw new Error(\`Error al obtener ${entityPlural.toLowerCase()}: \${error.message}\`);
-    }
+const getAll${entityPlural} = async (queryParams) => {
+    return ${entitySingular.toLowerCase()}Model.findAll(queryParams);
 };
 
-export const get${entitySingular}ById = async (id) => {
-    try {
-        return await ${entitySingular}Model.findById(id);
-    } catch (error) {
-        // Propaga el error de NOT_FOUND del modelo
-        throw new Error(\`Error al obtener la ${entitySingular.toLowerCase()} con ID \${id}. \${error.message}\`);
-    }
+const get${entitySingular}ById = async (id) => {
+    return ${entitySingular.toLowerCase()}Model.findById(id);
 };
 
-export const create${entitySingular} = async (data) => {
-    try {
-        // Lógica de Validación (ejemplo)
-        if (!data.nombre || data.nombre.length < 3) {
-            // ERROR CRÍTICO: Usamos una etiqueta para que los controladores puedan identificar un 400
-            throw new Error('BAD_REQUEST: El campo "nombre" es obligatorio y debe tener al menos 3 caracteres.');
-        }
-        
-        const newId = await ${entitySingular}Model.create(data);
-        return { id: newId[0], ...data };
-    } catch (error) {
-        // Si el error ya es BAD_REQUEST, lo propagamos. Si no, es un 500.
-        throw new Error(\`Error al crear el ${entitySingular.toLowerCase()}. \${error.message}\`);
-    }
+const create${entitySingular} = async (data) => {
+    return ${entitySingular.toLowerCase()}Model.create(data);
 };
 
-export const update${entitySingular} = async (id, data) => {
-    try {
-        // Antes de actualizar, podemos verificar si existe usando el mismo findById (que lanzará NOT_FOUND si no)
-        await ${entitySingular}Model.findById(id); 
-
-        // Lógica de Validación (ejemplo, omitida para simplicidad)
-        
-        const result = await ${entitySingular}Model.update(id, data);
-        if (result === 0) {
-            // Aunque findById ya lo verificaría, esta es una doble verificación.
-            throw new Error('NOT_FOUND: ${entitySingular} no encontrada para actualizar');
-        }
-        return { id, ...data };
-    } catch (error) {
-        throw new Error(\`Error al actualizar la ${entitySingular.toLowerCase()} con ID \${id}. \${error.message}\`);
-    }
+const update${entitySingular} = async (id, data) => {
+    return ${entitySingular.toLowerCase()}Model.update(id, data);
 };
 
-export const delete${entitySingular} = async (id) => {
-    try {
-        await ${entitySingular}Model.delete(id);
-        return { deleted: true, id };
-    } catch (error) {
-        // Propaga el error de NOT_FOUND del modelo
-        throw new Error(\`Error al eliminar la ${entitySingular.toLowerCase()} con ID \${id}. \${error.message}\`);
-    }
+const bin${entitySingular} = async (id) => {
+    return ${entitySingular.toLowerCase()}Model.bin(id);
+};
+
+const restore${entitySingular} = async (id) => {
+    return ${entitySingular.toLowerCase()}Model.restore(id);
+};
+
+const delete${entitySingular} = async (id) => {
+    return ${entitySingular.toLowerCase()}Model.delete(id);
+};
+
+export default {
+    getAll${entityPlural},
+    get${entitySingular}ById,
+    create${entitySingular},
+    update${entitySingular},
+    bin${entitySingular},
+    restore${entitySingular},
+    delete${entitySingular},
 };
 `},
     {
         dir: 'controllers', suffix: 'Controller', template: (entitySingular, entityPlural) => `
-import * as ${entityPlural.toLowerCase()}Service from '../services/${entityPlural}Service.js';
+import ${entityPlural.toLowerCase()}Service from '../services/${entityPlural}Service.js';
+import ApiResponse from '../utils/apiResponse.js';
 
-// Función auxiliar para determinar el código de estado HTTP basado en el mensaje de error
-const getStatusFromError = (errorMessage) => {
-    if (errorMessage.includes('NOT_FOUND')) {
-        return 404;
+class ${entitySingular}Controller {
+    async getAll(req, res, next) {
+        try {
+            const result = await ${entityPlural.toLowerCase()}Service.getAll${entityPlural}(req.query);
+            ApiResponse.success(res, 200, "${entityPlural} retrieved successfully", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
     }
-    if (errorMessage.includes('BAD_REQUEST') || errorMessage.includes('violates')) {
-        return 400; // 400 para errores de validación de negocio o de base de datos (e.g., violación de restricción)
-    }
-    return 500; // Por defecto, error interno del servidor
-};
 
-// GET /api/${entityPlural.toLowerCase()}
-export const get${entityPlural} = async (req, res) => {
-    try {
-        const data = await ${entityPlural.toLowerCase()}Service.getAll${entityPlural}();
-        res.status(200).json(data);
-    } catch (error) {
-        console.error('Error en get${entityPlural}:', error.message);
-        const status = getStatusFromError(error.message);
-        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
+    async getById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await ${entityPlural.toLowerCase()}Service.get${entitySingular}ById(id);
+            ApiResponse.success(res, 200, "${entitySingular} retrieved successfully", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
     }
-};
 
-// GET /api/${entityPlural.toLowerCase()}/:id
-export const get${entitySingular} = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const data = await ${entityPlural.toLowerCase()}Service.get${entitySingular}ById(id);
-        res.status(200).json(data);
-    } catch (error) {
-        console.error('Error en get${entitySingular}:', error.message);
-        const status = getStatusFromError(error.message);
-        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
+    async create(req, res, next) {
+        try {
+            const result = await ${entityPlural.toLowerCase()}Service.create${entitySingular}(req.body);
+            ApiResponse.success(res, 201, "${entitySingular} created successfully", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
     }
-};
 
-// POST /api/${entityPlural.toLowerCase()}
-export const create${entitySingular} = async (req, res) => {
-    try {
-        const data = await ${entityPlural.toLowerCase()}Service.create${entitySingular}(req.body);
-        res.status(201).json(data); 
-    } catch (error) {
-        console.error('Error en create${entitySingular}:', error.message);
-        const status = getStatusFromError(error.message);
-        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
+    async update(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await ${entityPlural.toLowerCase()}Service.update${entitySingular}(id, req.body);
+            ApiResponse.success(res, 200, "${entitySingular} updated successfully", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
     }
-};
 
-// PUT /api/${entityPlural.toLowerCase()}/:id
-export const update${entitySingular} = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const data = await ${entityPlural.toLowerCase()}Service.update${entitySingular}(id, req.body);
-        res.status(200).json(data);
-    } catch (error) {
-        console.error('Error en update${entitySingular}:', error.message);
-        const status = getStatusFromError(error.message);
-        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
+    async bin(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await ${entityPlural.toLowerCase()}Service.bin${entitySingular}(id);
+            ApiResponse.success(res, 200, "${entitySingular} moved to bin successfully", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
     }
-};
 
-// DELETE /api/${entityPlural.toLowerCase()}/:id
-export const delete${entitySingular} = async (req, res) => {
-    try {
-        const id = req.params.id;
-        await ${entityPlural.toLowerCase()}Service.delete${entitySingular}(id);
-        res.status(204).send();
-    } catch (error) {
-        console.error('Error en delete${entitySingular}:', error.message);
-        const status = getStatusFromError(error.message);
-        res.status(status).json({ message: error.message.replace(/^(NOT_FOUND|BAD_REQUEST):\\s*/, '') });
+    async restore(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await ${entityPlural.toLowerCase()}Service.restore${entitySingular}(id);
+            ApiResponse.success(res, 200, "${entitySingular} restored successfully", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
     }
-};
+
+    async delete(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await ${entityPlural.toLowerCase()}Service.delete${entitySingular}(id);
+            ApiResponse.success(res, 200, "${entitySingular} deleted permanently", result);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+}
+
+export default new ${entitySingular}Controller();
 `},
     {
         dir: 'routes', suffix: 'Route', template: (entitySingular, entityPlural) => `
 import { Router } from 'express';
-import * as ${entityPlural.toLowerCase()}Controller from '../controllers/${entityPlural}Controller.js';
+import ${entitySingular.toLowerCase()}Controller from '../controllers/${entityPlural}Controller.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 
-// Definición de las rutas para la entidad ${entityPlural}
 const router = Router();
 
-// Rutas GET y POST (Colección)
-router.get('/', ${entityPlural.toLowerCase()}Controller.get${entityPlural});
-router.post('/', ${entityPlural.toLowerCase()}Controller.create${entitySingular});
+// GET /api/${entityPlural.toLowerCase()}
+router.get('/',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'view'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.getAll(req, res, next)
+);
 
-// Rutas GET, PUT y DELETE (Recurso específico por ID)
-router.get('/:id', ${entityPlural.toLowerCase()}Controller.get${entitySingular});
-router.put('/:id', ${entityPlural.toLowerCase()}Controller.update${entitySingular});
-router.delete('/:id', ${entityPlural.toLowerCase()}Controller.delete${entitySingular});
+// GET /api/${entityPlural.toLowerCase()}/:id
+router.get('/:id',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'view'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.getById(req, res, next)
+);
 
-// Exporta el router para ser usado en server.js
+// POST /api/${entityPlural.toLowerCase()}
+router.post('/',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'create'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.create(req, res, next)
+);
+
+// PUT /api/${entityPlural.toLowerCase()}/:id
+router.put('/:id',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'edit'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.update(req, res, next)
+);
+
+// PATCH /api/${entityPlural.toLowerCase()}/:id/bin
+router.patch('/:id/bin',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'delete'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.bin(req, res, next)
+);
+
+// PATCH /api/${entityPlural.toLowerCase()}/:id/restore
+router.patch('/:id/restore',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'delete'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.restore(req, res, next)
+);
+
+// DELETE /api/${entityPlural.toLowerCase()}/:id
+router.delete('/:id',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize('${entityPlural.toLowerCase()}', 'delete'),
+    (req, res, next) => ${entitySingular.toLowerCase()}Controller.delete(req, res, next)
+);
+
 export default router;
 `},
 ];

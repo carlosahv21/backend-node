@@ -31,12 +31,12 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (token == null) {
-    return ApiResponse.error(res, 401, 'Token de autenticación no proporcionado.');
+    return ApiResponse.error(res, 401, 'Token de autenticación no proporcionado');
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return ApiResponse.error(res, 403, 'Sesión expirada o token inválido.');
+      return ApiResponse.error(res, 403, 'Sesión expirada o token inválido');
     }
     req.user = user;
     next();
@@ -59,7 +59,7 @@ const authorize = (resourceName, actionName) => {
       }
     } catch (error) {
       console.error('Error en middleware RBAC:', error);
-      return ApiResponse.error(res, 500, 'Error interno de autorización.');
+      return ApiResponse.error(res, 500, 'Error interno de autorización');
     }
   };
 };

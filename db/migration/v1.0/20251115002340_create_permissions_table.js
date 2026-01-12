@@ -12,7 +12,7 @@ export async function up(knex) {
             table.unique(["module_id", "name"]); // Un permiso único por ruta
         });
 
-        console.log('Table "permissions" created successfully.');
+        console.log("Table 'permissions' created successfully.");
     }
 
     // ============================
@@ -39,5 +39,5 @@ export async function up(knex) {
 
 export async function down(knex) {
     await knex.schema.dropTableIfExists("permissions");
-    console.log('Table "permissions" dropped successfully.');
+    console.log("Table 'permissions' dropped successfully.");
 };

@@ -8,7 +8,7 @@ export async function up(knex) {
             table.integer("permission_id").unsigned().notNullable().references("id").inTable("permissions").onDelete("CASCADE");
             table.timestamps(true, true);
         });
-        console.log('Table "role_permissions" created successfully.');
+        console.log("Table 'role_permissions' created successfully.");
     }
 
     const roles = await knex("roles").select();

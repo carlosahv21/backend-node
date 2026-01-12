@@ -19,7 +19,7 @@ class FieldModel extends BaseModel {
     async findCustomFieldCounter() {
         const counter = await this.knex('custom_field_counters').first();
         if (!counter) {
-            throw new Error('La tabla custom_field_counters está vacía.');
+            throw new Error('La tabla custom_field_counters está vacía');
         }
         return counter;
     }
@@ -83,12 +83,12 @@ class FieldModel extends BaseModel {
             display_field,
             display_alias
         } = config;
-        
+
         const targetModel = getModelInstance(table);
         const relationMap = targetModel?.relationMaps?.default || {};
-        
+
         const joins = relationMap.joins || [];
-        const columnMap = relationMap.column_map || {}; 
+        const columnMap = relationMap.column_map || {};
 
         let query = this.knex(table);
 
@@ -106,22 +106,22 @@ class FieldModel extends BaseModel {
         }
 
         if (searchQuery) {
-            query = query.where(display_field, 'like', `%${searchQuery}%`);
+            query = query.whereRaw(`${display_field} like ?`, [`%${searchQuery}%`]);
         }
 
         if (limit) query = query.limit(limit);
 
-        const selectFields = [value_field]; 
-        
-        const valueKey = value_field.split('.').pop(); 
+        const selectFields = [value_field];
+
+        const valueKey = value_field.split('.').pop();
         let labelKey;
 
         if (display_alias) {
-            labelKey = display_alias; 
+            labelKey = display_alias;
             selectFields.push(this.knex.raw(`${display_field} AS ??`, [display_alias]));
         } else {
             labelKey = display_field.split('.').pop();
-            selectFields.push(display_field); 
+            selectFields.push(display_field);
         }
 
         query = query.select(selectFields);
@@ -130,7 +130,7 @@ class FieldModel extends BaseModel {
 
         return rows.map(r => ({
             value: r[valueKey],
-            label: r[labelKey] 
+            label: r[labelKey]
         }));
     }
 }

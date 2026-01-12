@@ -106,7 +106,6 @@ class BaseModel {
             }
             query = query.orderBy(orderByColumn, order_direction);
         }
-        console.log(query.toString());
 
         return query;
     }

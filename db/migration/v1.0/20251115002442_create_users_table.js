@@ -42,9 +42,9 @@ export async function up(knex) {
 
         await knex("users").insert(users);
 
-        console.log('Table "users" created and admin/manager inserted successfully.');
+        console.log("Table 'users' created and admin/manager inserted successfully.");
     } else {
-        console.log('The "users" table already exists.');
+        console.log("The 'users' table already exists.");
     }
 };
 
@@ -52,9 +52,9 @@ export async function down(knex) {
     return knex.schema
         .dropTableIfExists("users")
         .then(() => {
-            console.log('Table "users" deleted.');
+            console.log("Table 'users' deleted.");
         })
         .catch((err) => {
-            console.error('Error deleting the "users" table:', err);
+            console.error("Error deleting the 'users' table:", err);
         });
 };
