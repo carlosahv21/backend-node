@@ -1,18 +1,67 @@
-import express from "express";
-import ReportsController from "../controllers/reportsController.js";
+import { Router } from "express";
+import reportsController from "../controllers/reportsController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
-const router = express.Router();
+const router = Router();
 
-router.get("/kpi", ReportsController.getKpiData);
-router.get("/class-occupancy", ReportsController.getClassOccupancy);
-router.get("/user-distribution", ReportsController.getUserDistribution);
-router.get("/teachers-participation", ReportsController.getTeachersParticipation);
-router.get("/attendance-rate", ReportsController.getAttendanceRate);
+// GET /api/reports/kpi
+router.get("/kpi",
+    authMiddleware.authenticateToken,
+    reportsController.getKpiData
+);
 
-router.get("/retention-churn", ReportsController.getRetentionChurnAnalysis);
-router.get("/revenue-optimization", ReportsController.getRevenueOptimization);
-router.get("/student-engagement", ReportsController.getStudentEngagement);
-router.get("/operational-efficiency", ReportsController.getOperationalEfficiency);
-router.get("/admin-audit", ReportsController.getAdminAudit);
+// GET /api/reports/class-occupancy
+router.get("/class-occupancy",
+    authMiddleware.authenticateToken,
+    reportsController.getClassOccupancy
+);
+
+// GET /api/reports/user-distribution
+router.get("/user-distribution",
+    authMiddleware.authenticateToken,
+    reportsController.getUserDistribution
+);
+
+// GET /api/reports/teachers-participation
+router.get("/teachers-participation",
+    authMiddleware.authenticateToken,
+    reportsController.getTeachersParticipation
+);
+
+// GET /api/reports/attendance-rate
+router.get("/attendance-rate",
+    authMiddleware.authenticateToken,
+    reportsController.getAttendanceRate
+);
+
+// GET /api/reports/retention-churn
+router.get("/retention-churn",
+    authMiddleware.authenticateToken,
+    reportsController.getRetentionChurnAnalysis
+);
+
+// GET /api/reports/revenue-optimization
+router.get("/revenue-optimization",
+    authMiddleware.authenticateToken,
+    reportsController.getRevenueOptimization
+);
+
+// GET /api/reports/student-engagement
+router.get("/student-engagement",
+    authMiddleware.authenticateToken,
+    reportsController.getStudentEngagement
+);
+
+// GET /api/reports/operational-efficiency
+router.get("/operational-efficiency",
+    authMiddleware.authenticateToken,
+    reportsController.getOperationalEfficiency
+);
+
+// GET /api/reports/admin-audit
+router.get("/admin-audit",
+    authMiddleware.authenticateToken,
+    reportsController.getAdminAudit
+);
 
 export default router;

@@ -97,7 +97,11 @@ class PlanController {
      */
     async bin(req, res, next) {
         try {
-            const result = await planService.binPlan(req.params.id);
+            const { id } = req.params;
+            const userId = req.user.id;
+
+            // Pasamos ambos IDs al servicio
+            const result = await planService.binPlan(id, userId);
             ApiResponse.success(
                 res,
                 200,
@@ -115,7 +119,8 @@ class PlanController {
      */
     async restore(req, res, next) {
         try {
-            const result = await planService.restorePlan(req.params.id);
+            const { id } = req.params;
+            const result = await planService.restorePlan(id);
             ApiResponse.success(res, 200, "Plan restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;

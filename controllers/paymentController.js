@@ -2,10 +2,10 @@
 import PaymentService from '../services/paymentService.js';
 import ApiResponse from '../utils/apiResponse.js';
 
-class PaymentController {
-    async getAll(req, res, next) {
+class paymentController {
+    async getAllPayments(req, res, next) {
         try {
-            const result = await PaymentService.getAll(req.query);
+            const result = await PaymentService.getAllPayments(req.query);
             ApiResponse.success(res, 200, "Pagos obtenidos correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -13,10 +13,10 @@ class PaymentController {
         }
     }
 
-    async getById(req, res, next) {
+    async getPaymentById(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await PaymentService.getById(id);
+            const result = await PaymentService.getPaymentById(id);
             ApiResponse.success(res, 200, "Pago obtenido correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -24,10 +24,10 @@ class PaymentController {
         }
     }
 
-    async getDetails(req, res, next) {
+    async getPaymentDetails(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await PaymentService.getDetails(id);
+            const result = await PaymentService.getPaymentDetails(id);
             ApiResponse.success(res, 200, "Detalles del pago obtenidos correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -35,9 +35,9 @@ class PaymentController {
         }
     }
 
-    async create(req, res, next) {
+    async createPayment(req, res, next) {
         try {
-            const result = await PaymentService.create(req.body);
+            const result = await PaymentService.createPayment(req.body);
             ApiResponse.success(res, 201, "Pago creado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -45,10 +45,10 @@ class PaymentController {
         }
     }
 
-    async update(req, res, next) {
+    async updatePayment(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await PaymentService.update(id, req.body);
+            const result = await PaymentService.updatePayment(id, req.body);
             ApiResponse.success(res, 200, "Pago actualizado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -56,10 +56,10 @@ class PaymentController {
         }
     }
 
-    async delete(req, res, next) {
+    async deletePayment(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await PaymentService.delete(id);
+            const result = await PaymentService.deletePayment(id);
             ApiResponse.success(res, 204, "Pago eliminado correctamente");
         } catch (error) {
             const status = error.statusCode || 500;
@@ -67,10 +67,11 @@ class PaymentController {
         }
     }
 
-    async bin(req, res, next) {
+    async binPayment(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await PaymentService.bin(id);
+            const userId = req.user.id;
+            const result = await PaymentService.binPayment(id, userId);
             ApiResponse.success(res, 200, "Pago movido a papelera correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -78,10 +79,10 @@ class PaymentController {
         }
     }
 
-    async restore(req, res, next) {
+    async restorePayment(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await PaymentService.restore(id);
+            const result = await PaymentService.restorePayment(id);
             ApiResponse.success(res, 200, "Pago restaurado correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -90,4 +91,4 @@ class PaymentController {
     }
 }
 
-export default new PaymentController();
+export default new paymentController();

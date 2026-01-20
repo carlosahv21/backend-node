@@ -45,7 +45,7 @@ class ReportsModel extends BaseModel {
             );
 
         // Tasa de asistencia
-        const attendanceRateResult = await this.knex("attendance as a")
+        const attendanceRateResult = await this.knex("attendances as a")
             .whereBetween("a.date", [this.start_date, this.end_date])
             .select(
                 this.knex.raw(`
@@ -108,7 +108,7 @@ class ReportsModel extends BaseModel {
      * Distribución de Usuarios por Plan
      */
     async getUserDistribution() {
-        return this.knex("user_plan as up")
+        const report = this.knex("user_plan as up")
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("plans as p", "up.plan_id", "p.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
@@ -117,6 +117,8 @@ class ReportsModel extends BaseModel {
             .andWhere("up.status", "active")
             .andWhere("up.end_date", ">=", this.start_date)
             .groupBy("p.id", "p.name");
+
+        return report;
     }
 
     /**
@@ -125,7 +127,7 @@ class ReportsModel extends BaseModel {
      */
     async getAttendanceRate() {
         const report = await this.knex("classes as c")
-            .leftJoin("attendance as a", "c.id", "a.class_id")
+            .leftJoin("attendances as a", "c.id", "a.class_id")
             .select(
                 "c.id",
                 "c.name",
@@ -296,7 +298,7 @@ class ReportsModel extends BaseModel {
             .join("user_plan as up", "u.id", "up.user_id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .leftJoin(
-                this.knex("attendance")
+                this.knex("attendances")
                     .select("student_id")
                     .max("date as last_attendance")
                     .groupBy("student_id")
@@ -334,7 +336,7 @@ class ReportsModel extends BaseModel {
     async getOperationalEfficiency() {
         // Fill Rate por clase
         const fillRateByClass = await this.knex("classes as c")
-            .leftJoin("attendance as a", "c.id", "a.class_id")
+            .leftJoin("attendances as a", "c.id", "a.class_id")
             .select(
                 "c.id",
                 "c.name",
@@ -367,7 +369,7 @@ class ReportsModel extends BaseModel {
             )
             .from(
                 this.knex("classes as c")
-                    .leftJoin("attendance as a", "c.id", "a.class_id")
+                    .leftJoin("attendances as a", "c.id", "a.class_id")
                     .select(
                         "c.id",
                         "c.teacher_id",

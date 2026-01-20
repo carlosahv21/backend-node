@@ -1,42 +1,57 @@
 // services/roleService.js
 import roleModel from '../models/roleModel.js';
 
-const getAllRoles = async (queryParams) => {
-    return roleModel.findAll(queryParams);
-};
+class RoleService {
+    /**
+     * Obtiene todos los roles.
+     */
+    async getAllRoles(queryParams) {
+        return roleModel.findAll(queryParams);
+    };
 
-const getRoleById = async (id) => {
-    return roleModel.findById(id);
-};
+    /**
+     * Obtiene un rol por ID.
+     */
+    async getRoleById(id) {
+        return roleModel.findById(id);
+    };
 
-const createRole = async (data) => {
-    return roleModel.create(data);
-};
+    /**
+     * Crea un nuevo rol.
+     */
+    async createRole(data) {
+        return roleModel.create(data);
+    };
 
-const updateRole = async (id, data) => {
-    return roleModel.update(id, data);
-};
+    /**
+     * Actualiza un rol existente.
+     */
+    async updateRole(id, data) {
+        return roleModel.update(id, data);
+    };
 
-const deleteRole = async (id) => {
-    // Nota: Si el rol tiene usuarios o permisos asociados, la lógica de negocio 
-    // para manejar la cascada o lanzar un error debería ir aquí.
-    return roleModel.delete(id);
-};
+    /**
+     * Elimina un rol.
+     */
+    async deleteRole(id) {
+        // Nota: Si el rol tiene usuarios o permisos asociados, la lógica de negocio 
+        // para manejar la cascada o lanzar un error debería ir aquí.
+        return roleModel.delete(id);
+    };
 
-const binRole = async (id) => {
-    return roleModel.bin(id);
-};
+    /**
+     * Elimina un rol.
+     */
+    async binRole(id, userId) {
+        return roleModel.bin(id, userId);
+    };
 
-const restoreRole = async (id) => {
-    return roleModel.restore(id);
-};
+    /**
+     * Restaura un rol eliminado.
+     */
+    async restoreRole(id) {
+        return roleModel.restore(id);
+    };
+}
 
-export default {
-    getAllRoles,
-    getRoleById,
-    createRole,
-    updateRole,
-    binRole,
-    restoreRole,
-    deleteRole,
-};
+export default new RoleService();

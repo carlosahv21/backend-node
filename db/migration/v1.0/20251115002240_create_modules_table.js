@@ -56,7 +56,7 @@ export async function up(knex) {
                 name: "attendances", 
                 description: "Gestión de asistencia", 
                 has_custom_fields: false, 
-                has_recycle_bin: true 
+                has_recycle_bin: false 
             },
             { 
                 name: "fields", 

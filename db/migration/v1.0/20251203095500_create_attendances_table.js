@@ -1,8 +1,8 @@
 export async function up(knex) {
-    const exists = await knex.schema.hasTable('attendance');
+    const exists = await knex.schema.hasTable('attendances');
 
     if (!exists) {
-        await knex.schema.createTable('attendance', function (table) {
+        await knex.schema.createTable('attendances', function (table) {
             table.increments('id').primary();
             table
                 .integer('class_id')
@@ -28,11 +28,11 @@ export async function up(knex) {
             table.unique(['class_id', 'student_id', 'date']);
         });
 
-        console.log("Table 'attendance' created successfully.");
+        console.log("Table 'attendances' created successfully.");
     }
 };
 
 export async function down(knex) {
-    await knex.schema.dropTableIfExists('attendance');
-    console.log("Table 'attendance' dropped successfully.");
+    await knex.schema.dropTableIfExists('attendances');
+    console.log("Table 'attendances' dropped successfully.");
 };

@@ -1,40 +1,55 @@
 // services/permissionService.js
 import permissionModel from '../models/permissionModel.js';
 
-const getAllPermissions = async (queryParams) => {
-    return permissionModel.findAll(queryParams);
-};
+class permissionService {
+    /**
+     * Obtiene todos los permisos (con paginación, búsqueda, filtros).
+     */
+    async getAllPermissions(queryParams) {
+        return permissionModel.findAll(queryParams);
+    }
 
-const getPermissionById = async (id) => {
-    return permissionModel.findById(id);
-};
+    /**
+     * Obtiene un permiso por ID.
+     */
+    async getPermissionById(id) {
+        return permissionModel.findById(id);
+    }
 
-const createPermission = async (data) => {
-    return permissionModel.create(data);
-};
+    /**
+     * Crea un nuevo permiso.
+     */
+    async createPermission(data) {
+        return permissionModel.create(data);
+    }
 
-const updatePermission = async (id, data) => {
-    return permissionModel.update(id, data);
-};
+    /**
+     * Actualiza un permiso por ID.
+     */
+    async updatePermission(id, data) {
+        return permissionModel.update(id, data);
+    }
 
-const binPermission = async (id) => {
-    return permissionModel.bin(id);
-};
+    /**
+     * Envía un permiso a la papelera por ID.
+     */
+    async binPermission(id, userId) {
+        return permissionModel.bin(id, userId);
+    }
 
-const restorePermission = async (id) => {
-    return permissionModel.restore(id);
-};
+    /**
+     * Restaura un permiso enviado a la papelera por ID.
+     */
+    async restorePermission(id) {
+        return permissionModel.restore(id);
+    }
 
-const deletePermission = async (id) => {
-    return permissionModel.delete(id);
-};
+    /**
+     * Elimina permanentemente un permiso por ID.
+     */
+    async deletePermission(id) {
+        return permissionModel.delete(id);
+    }
+}
 
-export default {
-    getAllPermissions,
-    getPermissionById,
-    createPermission,
-    updatePermission,
-    binPermission,
-    restorePermission,
-    deletePermission,
-};
+export default new permissionService();

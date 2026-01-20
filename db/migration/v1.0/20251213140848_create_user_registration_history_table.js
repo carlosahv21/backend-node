@@ -14,6 +14,24 @@ export async function up(knex) {
         table.timestamp('created_at').defaultTo(knex.fn.now());
     });
     console.log("Tabla 'user_registration_history' creada exitosamente");
+
+    const startDate = knex.fn.now();
+    const endDate = knex.raw("DATE_ADD(NOW(), INTERVAL 1 MONTH)");
+    await knex('user_registration_history').insert([
+        {
+            user_id: 2,
+            plan_id: 1,
+            payment_id: 1,
+            action_type: 'create',
+            previous_plan_id: null,
+            classes_purchased: '20',
+            classes_used: '0',
+            start_date: startDate,
+            end_date: endDate,
+            status: 'active',
+            created_at: knex.fn.now()
+        }
+    ]);
 };
 
 export async function down(knex) {

@@ -16,7 +16,8 @@ export async function up(knex) {
             table.integer('trial_period_days').defaultTo(0);
 
             table.boolean('active').defaultTo(true);
-            table.boolean('deleted').defaultTo(false);
+            table.timestamp("deleted_at").nullable();
+            table.integer("deleted_by").unsigned().nullable();
 
             table.timestamps(true, true);
         });

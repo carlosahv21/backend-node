@@ -51,7 +51,7 @@ const selectRandomPlan = () => {
 // --- Clean DB ---
 const cleanDb = async (knex) => {
     console.log(`\n--- Limpiando Tablas ---`);
-    await knex('attendance').del();
+    await knex('attendances').del();
     await knex('user_class').del();
     await knex('user_registration_history').del();
     await knex('user_plan').del();
@@ -317,7 +317,7 @@ const seedLifeCycle = async (knex, students, allClasses) => {
     // Bulk Inserts
     if (enrollments.length) await knex.batchInsert('user_class', enrollments, 500);
     if (history.length) await knex.batchInsert('user_registration_history', history, 500);
-    if (attendances.length) await knex.batchInsert('attendance', attendances, 500);
+    if (attendances.length) await knex.batchInsert('attendances', attendances, 500);
 
     console.log(`- Generados ${enrollments.length} inscripciones activas.`);
     console.log(`- Generados ${history.length} registros de historial.`);

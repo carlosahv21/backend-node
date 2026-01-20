@@ -1,173 +1,172 @@
 import fieldModel from '../models/fieldModel.js';
 import AppError from '../utils/AppError.js';
 
-const getAllFields = async (queryParams) => {
-    return fieldModel.findAll(queryParams);
-};
+class fieldService {
+    /**
+     * Obtiene todos los campos (con paginación, búsqueda, filtros).
+     */
+    async getAllFields(queryParams) {
+        return fieldModel.findAll(queryParams);
+    };
 
-const getFieldById = async (id) => {
-    return fieldModel.findById(id);
-};
-
-/**
- * Crea un nuevo campo, manejando el nombre 'cf_X' y el contador.
- */
-const createField = async (data) => {
-    if (!data.name || !data.label || !data.type || !data.block_id) {
-        throw new AppError('Faltan datos obligatorios: name, label, type o block_id.', 400);
+    /**
+     * Obtiene un campo por ID.
+     */
+    async getFieldById(id) {
+        return fieldModel.findById(id);
     }
 
-    if (data.required === undefined) {
-        data.required = false;
-    }
-    if (data.options && Array.isArray(data.options)) {
-        data.options = JSON.stringify(data.options);
-    }
+    /**
+     * Crea un nuevo campo, manejando el nombre 'cf_X' y el contador.
+     */
+    async createField(data) {
+        if (!data.name || !data.label || !data.type || !data.block_id) {
+            throw new AppError('Faltan datos obligatorios: name, label, type o block_id.', 400);
+        }
 
-    const lastCounter = await fieldModel.findCustomFieldCounter();
-    const nextCfNumber = lastCounter.last_cf_number + 1;
+        if (data.required === undefined) {
+            data.required = false;
+        }
+        if (data.options && Array.isArray(data.options)) {
+            data.options = JSON.stringify(data.options);
+        }
 
-    data.name = `cf_${nextCfNumber}`;
-    await fieldModel.updateCustomFieldCounter(lastCounter.id, nextCfNumber + 1);
+        const lastCounter = await fieldModel.findCustomFieldCounter();
+        const nextCfNumber = lastCounter.last_cf_number + 1;
 
-    delete data.module_id;
+        data.name = `cf_${nextCfNumber}`;
+        await fieldModel.updateCustomFieldCounter(lastCounter.id, nextCfNumber + 1);
 
-    const newField = await fieldModel.create(data);
+        delete data.module_id;
 
-    return newField;
-};
+        const newField = await fieldModel.create(data);
 
-/**
- * Actualiza un campo existente, limpiando datos no permitidos.
- */
-const updateField = async (id, data) => {
-    delete data.block_id;
-    delete data.name;
-
-    if (data.options && Array.isArray(data.options)) {
-        data.options = JSON.stringify(data.options);
+        return newField;
     }
 
-    const updatedField = await fieldModel.update(id, data);
+    /**
+     * Actualiza un campo existente, limpiando datos no permitidos.
+     */
+    async updateField(id, data) {
+        delete data.block_id;
+        delete data.name;
 
-    return updatedField;
-};
+        if (data.options && Array.isArray(data.options)) {
+            data.options = JSON.stringify(data.options);
+        }
 
-/**
- * Elimina un campo por ID.
- */
-const deleteField = async (id) => {
-    return fieldModel.delete(id);
-};
+        const updatedField = await fieldModel.update(id, data);
 
-/**
- * Función compleja para obtener todos los bloques y campos, incluyendo herencia.
- */
-const getModuleFields = async (moduleId) => {
-    const module = await fieldModel.findModuleById(moduleId);
-    if (!module) {
-        throw new AppError('Módulo no encontrado', 404);
+        return updatedField;
     }
 
-    let blocks = await fieldModel.findBlocksByModuleId(moduleId);
-    blocks = blocks.map(b => ({ ...b, inherited: false }));
-
-    if (module.parent_module_id) {
-        const parentBlocks = await fieldModel.findBlocksByModuleId(module.parent_module_id);
-        const inheritedBlocks = parentBlocks.map(b => ({ ...b, inherited: true }));
-
-        blocks = [...inheritedBlocks, ...blocks].reduce((acc, current) => {
-            const x = acc.find(item => item.id === current.id);
-            if (!x) {
-                return acc.concat([current]);
-            } else {
-                return acc;
-            }
-        }, []);
+    /**
+     * Elimina un campo por ID.
+     */
+    async deleteField(id) {
+        return fieldModel.delete(id);
     }
 
-    const roles = await fieldModel.findRoles();
-    const roleOptions = roles.map(r => r.name);
+    /**
+     * Función compleja para obtener todos los bloques y campos, incluyendo herencia.
+     */
+    async getModuleFields(moduleId) {
+        const module = await fieldModel.findModuleById(moduleId);
+        if (!module) {
+            throw new AppError('Módulo no encontrado', 404);
+        }
 
-    const blocksWithFields = await Promise.all(
-        blocks.map(async (block) => {
-            let fields = await fieldModel.findFieldsByBlockId(block.id);
+        let blocks = await fieldModel.findBlocksByModuleId(moduleId);
+        blocks = blocks.map(b => ({ ...b, inherited: false }));
 
-            fields = fields.map(field => {
-                if (field.name === 'role') {
-                    field.options = roleOptions;
+        if (module.parent_module_id) {
+            const parentBlocks = await fieldModel.findBlocksByModuleId(module.parent_module_id);
+            const inheritedBlocks = parentBlocks.map(b => ({ ...b, inherited: true }));
+
+            blocks = [...inheritedBlocks, ...blocks].reduce((acc, current) => {
+                const x = acc.find(item => item.id === current.id);
+                if (!x) {
+                    return acc.concat([current]);
+                } else {
+                    return acc;
                 }
+            }, []);
+        }
 
-                if (typeof field.options === 'string') {
-                    try {
-                        field.options = JSON.parse(field.options);
-                    } catch (e) {
-                        field.options = [];
+        const roles = await fieldModel.findRoles();
+        const roleOptions = roles.map(r => r.name);
+
+        const blocksWithFields = await Promise.all(
+            blocks.map(async (block) => {
+                let fields = await fieldModel.findFieldsByBlockId(block.id);
+
+                fields = fields.map(field => {
+                    if (field.name === 'role') {
+                        field.options = roleOptions;
                     }
-                }
+
+                    if (typeof field.options === 'string') {
+                        try {
+                            field.options = JSON.parse(field.options);
+                        } catch (e) {
+                            field.options = [];
+                        }
+                    }
+
+                    return {
+                        ...field,
+                        inherited: block.inherited
+                    };
+                });
 
                 return {
-                    ...field,
-                    inherited: block.inherited
+                    block_id: block.id,
+                    block_name: block.name,
+                    collapsible: block.collapsible,
+                    display_mode: block.display_mode || 'edit',
+                    inherited: block.inherited,
+                    fields: fields.map(field => ({
+                        field_id: field.id,
+                        name: field.name,
+                        label: field.label,
+                        type: field.type,
+                        options: field.options,
+                        relation_config: field.relation_config,
+                        required: field.required,
+                        order_sequence: field.order_sequence,
+                        inherited: field.inherited
+                    }))
                 };
-            });
+            })
+        );
 
-            return {
-                block_id: block.id,
-                block_name: block.name,
-                collapsible: block.collapsible,
-                display_mode: block.display_mode || 'edit',
-                inherited: block.inherited,
-                fields: fields.map(field => ({
-                    field_id: field.id,
-                    name: field.name,
-                    label: field.label,
-                    type: field.type,
-                    options: field.options,
-                    relation_config: field.relation_config,
-                    required: field.required,
-                    order_sequence: field.order_sequence,
-                    inherited: field.inherited
-                }))
-            };
-        })
-    );
-
-    return {
-        module_id: module.id,
-        module_name: module.name,
-        blocks: blocksWithFields
-    };
-};
-
-/**
- * Obtiene las opciones de una relación, aplicando los filtros y la búsqueda.
- */
-const getRelationField = async (config, searchQuery) => {
-    try {
-        const options = await fieldModel.findRelationField(config, searchQuery);
-        return options;
-    } catch (error) {
-        throw new AppError('Error de base de datos al buscar opciones de relación.', 500);
+        return {
+            module_id: module.id,
+            module_name: module.name,
+            blocks: blocksWithFields
+        };
     }
-};
 
-const binField = async (id) => {
-    return fieldModel.bin(id);
-};
+    /**
+     * Obtiene las opciones de una relación, aplicando los filtros y la búsqueda.
+     */
+    async getRelationField(config, searchQuery) {
+        try {
+            const options = await fieldModel.findRelationField(config, searchQuery);
+            return options;
+        } catch (error) {
+            throw new AppError('Error de base de datos al buscar opciones de relación.', 500);
+        }
+    }
 
-const restoreField = async (id) => {
-    return fieldModel.restore(id);
-};
+    async binField(id, userId) {
+        return fieldModel.bin(id, userId);
+    }
 
-export default {
-    getAllFields,
-    getFieldById,
-    createField,
-    updateField,
-    deleteField,
-    binField,
-    restoreField,
-    getModuleFields,
-    getRelationField
-};
+    async restoreField(id) {
+        return fieldModel.restore(id);
+    }
+
+}
+
+export default new fieldService();

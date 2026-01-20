@@ -2,71 +2,71 @@
 import classModel from '../models/classModel.js';
 import AppError from '../utils/AppError.js';
 
-/**
- * Obtiene todas las clases (con paginación, búsqueda, filtros).
- */
-const getAllClasses = async (queryParams) => {
-    return classModel.findAll(queryParams);
-};
-
-/**
- * Crea una nueva clase. 
- */
-const createClass = async (data) => {
-    if (!data.name || !data.date) {
-        throw new AppError('Faltan campos obligatorios para crear la clase (name, date)', 400);
+class classService {
+    /**
+     * Obtiene todas las clases (con paginación, búsqueda, filtros).
+     */
+    async getAllClasses(queryParams) {
+        return classModel.findAll(queryParams);
     }
 
-    const newClass = await classModel.create(data);
+    /**
+     * Crea una nueva clase. 
+     */
+    async createClass(data) {
+        if (!data.name || !data.date) {
+            throw new AppError('Faltan campos obligatorios para crear la clase (name, date)', 400);
+        }
 
-    return newClass;
-};
+        const newClass = await classModel.create(data);
 
-/**
- * Obtiene una clase por ID.
- */
-const getClassById = async (id) => {
-    return classModel.findById(id);
-};
+        return newClass;
+    }
 
-/**
- * Obtiene una clase por ID con detalles.
- */
-const getClassByIdDetails = async (id) => {
-    return classModel.findByIdDetails(id);
-};
+    /**
+     * Obtiene una clase por ID.
+     */
+    async getClassById(id) {
+        return classModel.findById(id);
+    }
 
-/**
- * Actualiza una clase existente.
- */
-const updateClass = async (id, data) => {
-    const updatedClass = await classModel.update(id, data);
+    /**
+     * Obtiene una clase por ID con detalles.
+     */
+    async getClassByIdDetails(id) {
+        return classModel.findByIdDetails(id);
+    }
 
-    return updatedClass;
-};
+    /**
+     * Actualiza una clase existente.
+     */
+    async updateClass(id, data) {
+        const updatedClass = await classModel.update(id, data);
 
-// Elimina una clase por ID.
-const binClass = async (id) => {
-    return classModel.bin(id);
-};
+        return updatedClass;
+    }
 
-// Restaura una clase por ID.
-const restoreClass = async (id) => {
-    return classModel.restore(id);
-};
+    /**
+     * Envia una clase a la papelera por ID.
+     */
+    async binClass(id, userId) {
+        return classModel.bin(id, userId);
+    }
 
-const deleteClass = async (id) => {
-    return classModel.delete(id);
-};
+    /**
+     * Restaura una clase enviada a la papelera por ID.
+     */
+    async restoreClass(id) {
+        return classModel.restore(id);
+    }
 
+    /**
+     * Elimina permanentemente una clase por ID.
+     */
+    async deleteClass(id) {
+        return classModel.delete(id);
+    }
 
-export default {
-    getAllClasses,
-    createClass,
-    getClassById,
-    getClassByIdDetails,
-    updateClass,
-    binClass,
-    restoreClass,
-    deleteClass,
-};
+}
+
+export default new classService();

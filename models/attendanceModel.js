@@ -2,16 +2,16 @@ import BaseModel from './baseModel.js';
 
 class AttendanceModel extends BaseModel {
     constructor() {
-        super('attendance');
+        super('attendances');
         this.softDelete = false;
 
         this.joins = [
-            { table: "classes", alias: "c", on: ["attendance.class_id", "c.id"] },
-            { table: "users", alias: "u", on: ["attendance.student_id", "u.id"] }
+            { table: "classes", alias: "c", on: ["attendances.class_id", "c.id"] },
+            { table: "users", alias: "u", on: ["attendances.student_id", "u.id"] }
         ];
 
         this.selectFields = [
-            "attendance.*",
+            "attendances.*",
             "c.name as class_name",
             "c.date as class_date",
             "u.first_name as student_first_name",
@@ -22,10 +22,10 @@ class AttendanceModel extends BaseModel {
         this.searchFields = ["c.name", "u.first_name", "u.last_name"];
 
         this.filterMapping = {
-            'class_id': 'attendance.class_id',
-            'student_id': 'attendance.student_id',
-            'date': 'attendance.date',
-            'status': 'attendance.status'
+            'class_id': 'attendances.class_id',
+            'student_id': 'attendances.student_id',
+            'date': 'attendances.date',
+            'status': 'attendances.status'
         };
 
         this.relationMaps = {
@@ -41,11 +41,11 @@ class AttendanceModel extends BaseModel {
      */
     async getDetails(class_id, date) {
         let query = this.knex(this.tableName)
-            .select("attendance.*")
-            .where({ 'attendance.class_id': class_id });
+            .select("attendances.*")
+            .where({ 'attendances.class_id': class_id });
 
         if (date) {
-            query = query.whereRaw('DATE(attendance.date) = ?', [date]);
+            query = query.whereRaw('DATE(attendances.date) = ?', [date]);
         }
 
         return query;
@@ -182,7 +182,7 @@ class AttendanceModel extends BaseModel {
                 }
             }
 
-            return { success: true, message: "Attendance and plan usage updated successfully." };
+            return { success: true, message: "Attendances and plan usage updated successfully." };
         });
     }
 }

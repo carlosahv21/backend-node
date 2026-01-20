@@ -1,14 +1,50 @@
 // routes/registrationRoute.js
-import express from 'express';
-import * as registrationController from '../controllers/registrationController.js';
+import { Router } from 'express';
+import registrationController from '../controllers/registrationController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', registrationController.createRegistration);
-router.get('/', registrationController.listRegistrations);
-router.patch('/:id/bin', registrationController.binRegistration);
-router.patch('/:id/restore', registrationController.restoreRegistration);
-router.delete('/:id', registrationController.deleteRegistration);
-router.get('/available-classes', registrationController.getAvailableClasses);
+// GET /api/registrations
+router.get('/',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("registrations", "view"),
+    (req, res, next) => registrationController.listRegistrations(req, res, next)
+);
+
+// GET /api/registrations/available-classes
+router.get('/available-classes',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("registrations", "view"),
+    (req, res, next) => registrationController.getAvailableClasses(req, res, next)
+);
+
+// POST /api/registrations
+router.post('/',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("registrations", "create"),
+    (req, res, next) => registrationController.createRegistration(req, res, next)
+);
+
+// PATCH /api/registrations/:id/bin
+router.patch('/:id/bin',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("registrations", "delete"),
+    (req, res, next) => registrationController.binRegistration(req, res, next)
+);
+
+// PATCH /api/registrations/:id/restore
+router.patch('/:id/restore',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("registrations", "delete"),
+    (req, res, next) => registrationController.restoreRegistration(req, res, next)
+);
+
+// DELETE /api/registrations/:id
+router.delete('/:id',
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("registrations", "delete"),
+    (req, res, next) => registrationController.deleteRegistration(req, res, next)
+);
 
 export default router;

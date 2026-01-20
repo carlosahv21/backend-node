@@ -1,65 +1,64 @@
 // services/teacherService.js
 import teacherModel from '../models/teacherModel.js';
 
-/**
- * Obtiene todos los profesores (con paginación, búsqueda, filtros).
- */
-const getAllTeachers = async (queryParams) => {
-    return teacherModel.findAll(queryParams);
-};
+class TeacherService {
+    /**
+     * Obtiene todos los profesores (con paginación, búsqueda, filtros).
+     */
+    async getAllTeachers(queryParams) {
+        return teacherModel.findAll(queryParams);
+    }
 
-/**
- * Crea un nuevo profesor, delegando al modelo.
- */
-const createTeacher = async (data) => {
-    // Validación de campos requeridos delegada al modelo o manejada por base de datos/controlador
-    const newTeacher = await teacherModel.create(data);
-    return newTeacher;
-};
+    /**
+     * Crea un nuevo profesor, delegando al modelo.
+     */
+    async createTeacher(data) {
+        // Validación de campos requeridos delegada al modelo o manejada por base de datos/controlador
+        const newTeacher = await teacherModel.create(data);
+        return newTeacher;
+    }
 
-/**
- * Obtiene un profesor por ID.
- */
-const getTeacherById = async (id) => {
-    return teacherModel.findById(id);
-};
+    /**
+     * Obtiene un profesor por ID.
+     */
+    async getTeacherById(id) {
+        return teacherModel.findById(id);
+    }
 
-/**
- * Obtiene un profesor por ID con detalles.
- */
-const getTeacherByIdDetails = async (id) => {
-    return teacherModel.findByIdDetails(id);
-};
+    /**
+     * Obtiene un profesor por ID con detalles.
+     */
+    async getTeacherByIdDetails(id) {
+        return teacherModel.findByIdDetails(id);
+    }
 
-/**
- * Actualiza un profesor existente, delegando al modelo.
- */
-const updateTeacher = async (id, data) => {
-    return teacherModel.update(id, data);
-};
+    /**
+     * Actualiza un profesor existente, delegando al modelo.
+     */
+    async updateTeacher(id, data) {
+        return teacherModel.update(id, data);
+    }
 
-// Elimina un profesor por ID.
-const binTeacher = async (id) => {
-    return teacherModel.bin(id);
-};
+    /**
+     * Elimina un profesor por ID.
+     */
+    async binTeacher(id, userId) {
+        return teacherModel.bin(id, userId);
+    }
 
-// Restaura un profesor por ID.
-const restoreTeacher = async (id) => {
-    return teacherModel.restore(id);
-};
+    /**
+     * Restaura un profesor por ID.
+     */
+    async restoreTeacher(id) {
+        return teacherModel.restore(id);
+    }
 
-const deleteTeacher = async (id) => {
-    return teacherModel.delete(id);
-};
+    /**
+     * Elimina un profesor por ID.
+     */
+    async deleteTeacher(id) {
+        return teacherModel.delete(id);
+    }
 
-
-export default {
-    getAllTeachers,
-    createTeacher,
-    getTeacherById,
-    getTeacherByIdDetails,
-    updateTeacher,
-    binTeacher,
-    restoreTeacher,
-    deleteTeacher,
-};
+}
+export default new TeacherService();

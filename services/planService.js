@@ -2,85 +2,76 @@
 import planModel from "../models/planModel.js";
 import AppError from "../utils/AppError.js";
 
-/**
- * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
- */
-const getAllPlans = async (queryParams) => {
-    return planModel.findAll(queryParams);
-};
-
-/**
- * Obtiene un estudiante por ID.
- */
-const getPlanById = async (id) => {
-    return planModel.findById(id);
-};
-
-/**
- * Obtiene un estudiante por ID con detalles.
- */
-const getPlanByIdDetails = async (id) => {
-    return planModel.findByIdDetails(id);
-};
-
-/**
- * Crea un nuevo estudiante.
- */
-const createPlan = async (data) => {
-    const { name } = data;
-
-    if (!name) {
-        throw new AppError('El campo "name" es requerido.', 400);
+class PlanService {
+    /**
+     * Obtiene todos los estudiantes (con paginación, búsqueda, filtros).
+     */
+    async getAllPlans(queryParams) {
+        return planModel.findAll(queryParams);
     }
 
-    const newPlan = await planModel.create(data);
+    /**
+     * Obtiene un estudiante por ID.
+     */
+    async getPlanById(id) {
+        return planModel.findById(id);
+    }
 
-    return newPlan;
-};
+    /**
+     * Obtiene un estudiante por ID con detalles.
+     */
+    async getPlanByIdDetails(id) {
+        return planModel.findByIdDetails(id);
+    }
 
-/**
- * Actualiza un estudiante existente.
- */
-const updatePlan = async (id, data) => {
-    return planModel.update(id, data);
-};
+    /**
+     * Crea un nuevo estudiante.
+     */
+    async createPlan(data) {
+        const { name } = data;
 
-/**
- * Bin un estudiante por ID.
- */
-const binPlan = async (id) => {
-    return planModel.bin(id);
-};
+        if (!name) {
+            throw new AppError('El campo "name" es requerido.', 400);
+        }
 
-/**
- * Restaura un plan por ID.
- */
-const restorePlan = async (id) => {
-    return planModel.restore(id);
-};
+        const newPlan = await planModel.create(data);
 
-/**
- * Elimina un estudiante por ID.
- */
-const deletePlan = async (id) => {
-    return planModel.delete(id);
-};
+        return newPlan;
+    };
 
-/**
- * Obtiene el plan actual de un estudiante.
- */
-const getStudentPlan = async (student_id) => {
-    return planModel.getStudentPlan(student_id);
-};
+    /**
+     * Actualiza un estudiante existente.
+     */
+    async updatePlan(id, data) {
+        return planModel.update(id, data);
+    }
 
-export default {
-    getAllPlans,
-    getPlanById,
-    getPlanByIdDetails,
-    createPlan,
-    updatePlan,
-    binPlan,
-    restorePlan,
-    deletePlan,
-    getStudentPlan,
-};
+    /**
+     * Bin un estudiante por ID.
+     */
+    async binPlan(id, userId) {
+        return planModel.bin(id, userId);
+    }
+
+    /**
+     * Restaura un plan por ID.
+     */
+    async restorePlan(id) {
+        return planModel.restore(id);
+    }
+
+    /**
+     * Elimina un estudiante por ID.
+     */
+    async deletePlan(id) {
+        return planModel.delete(id);
+    }
+
+    /**
+     * Obtiene el plan actual de un estudiante.
+     */
+    async getStudentPlan(student_id) {
+        return planModel.getStudentPlan(student_id);
+    }
+}
+export default new PlanService();

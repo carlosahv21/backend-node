@@ -4,19 +4,19 @@ import knex from '../config/knex.js';
 import AppError from '../utils/AppError.js';
 
 class PaymentService {
-    async getAll(query) {
+    async getAllPayments(query) {
         return PaymentModel.findAll(query);
     }
 
-    async getById(id) {
+    async getPaymentById(id) {
         return PaymentModel.findById(id);
     }
 
-    async getDetails(id) {
+    async getPaymentDetails(id) {
         return PaymentModel.findByIdDetails(id);
     }
 
-    async create(data) {
+    async createPayment(data) {
         return await knex.transaction(async (trx) => {
             try {
                 const plan = await trx('plans').where('id', data.plan_id).first();
@@ -78,19 +78,15 @@ class PaymentService {
         });
     }
 
-    async update(id, data) {
+    async updatePayment(id, data) {
         return PaymentModel.update(id, data);
     }
 
-    async delete(id) {
+    async deletePayment(id) {
         return PaymentModel.delete(id);
     }
 
-    async bin(id) {
-        return PaymentModel.bin(id);
-    }
-
-    async restore(id) {
+    async restorePayment(id) {
         return PaymentModel.restore(id);
     }
 }

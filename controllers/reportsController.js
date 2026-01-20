@@ -1,7 +1,7 @@
 import ReportsService from "../services/reportsService.js";
 import ApiResponse from "../utils/apiResponse.js";
 
-class ReportsController {
+class reportsController {
     async getKpiData(req, res, next) {
         try {
             const data = await ReportsService.getKpiData();
@@ -155,4 +155,4 @@ class ReportsController {
     }
 }
 
-export default new ReportsController();
+export default new reportsController();

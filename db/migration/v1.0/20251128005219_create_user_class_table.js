@@ -22,6 +22,10 @@ export async function up(knex) {
         });
 
         console.log("Table 'user_class' created successfully.");
+
+        await knex('user_class').insert([
+            { class_id: 1, user_id: 2 },
+        ]);
     }
 };
 

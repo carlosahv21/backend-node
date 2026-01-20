@@ -49,8 +49,14 @@ class BaseModel {
             });
         }
 
+        const { withDeleted = false, onlyDeleted = false, ...otherQueryParams } = queryParams;
+
         if (this.softDelete) {
-            query = query.where(`${this.tableName}.deleted`, false);
+            if (onlyDeleted) {
+                query = query.whereNotNull(`${this.tableName}.deleted_at`);
+            } else if (!withDeleted) {
+                query = query.whereNull(`${this.tableName}.deleted_at`);
+            }
         }
 
         if (!isCount) {
@@ -75,7 +81,7 @@ class BaseModel {
 
         Object.keys(queryParams).forEach((key) => {
             if (
-                ["search", "page", "limit", "order_by", "order_direction"].includes(key)
+                ["search", "page", "limit", "order_by", "order_direction", "withDeleted", "onlyDeleted"].includes(key)
             )
                 return;
 
@@ -233,16 +239,39 @@ class BaseModel {
         return this.findById(id);
     }
 
-    async bin(id) {
-        return this.updateBinStatus(id, { deleted: true });
+    // Papelera: mover a papelera (Soft Delete) con trazabilidad
+    async bin(id, userId = null) {
+        return this.updateBinStatus(id, {
+            deleted_at: this.knex.fn.now(),
+            deleted_by: userId
+        });
     }
 
+    // Papelera: restaurar de papelera
     async restore(id) {
-        return this.updateBinStatus(id, { deleted: false });
+        return this.updateBinStatus(id, {
+            deleted_at: null,
+            deleted_by: null
+        });
     }
 
-    // Actualizar estado de papelera
+    // Papelera: eliminación permanente (Hard Delete)
+    async permanentDelete(id) {
+        // Primero eliminamos los campos personalizados asociados
+        await this.knex("field_values").where({ record_id: id }).del();
+
+        const deletedCount = await this.knex(this.tableName).where({ id }).del();
+
+        if (deletedCount === 0) {
+            throw new AppError(`${this.tableName} record with id ${id} not found`, 404);
+        }
+
+        return deletedCount;
+    }
+
+    // Actualizar estado de papelera (Soft Delete logic)
     async updateBinStatus(id, data) {
+        
         const updatedCount = await this.knex(this.tableName)
             .where({ id })
             .update(data);
@@ -257,17 +286,9 @@ class BaseModel {
         return this.findById(id);
     }
 
-    // Eliminar un registro
+    // Eliminar un registro (Legacy method, defaults to Hard Delete for field_values but check logic)
     async delete(id) {
-        await this.knex("field_values").where({ record_id: id }).del();
-
-        const deletedCount = await this.knex(this.tableName).where({ id }).del();
-
-        if (deletedCount === 0) {
-            throw new AppError(`${this.tableName} record not found`, 404);
-        }
-
-        return deletedCount;
+        return this.permanentDelete(id);
     }
 }
 

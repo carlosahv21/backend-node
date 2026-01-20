@@ -7,8 +7,9 @@ export async function up(knex) {
             table.increments("id").primary();
             table.string("name", 50).notNullable().unique(); // Nombre del rol (admin, manager, etc.)
             table.string("description", 255).nullable(); // Descripción opcional del rol
-            table.boolean("deleted").defaultTo(false); // Indica si el rol está eliminado
             table.timestamps(true, true); // Timestamps para created_at y updated_at
+            table.timestamp("deleted_at").nullable();
+            table.integer("deleted_by").unsigned().nullable();
         });
 
         console.log("Table 'roles' created successfully.");

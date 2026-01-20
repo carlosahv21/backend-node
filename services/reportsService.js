@@ -1,54 +1,76 @@
 import ReportsModel from "../models/reportsModel.js";
 
-const getKpiData = async () => {
-    return ReportsModel.getKpiData();
-};
+class ReportsService {
+    /**
+     * Obtiene los datos de KPI.
+     */
+    async getKpiData() {
+        return ReportsModel.getKpiData();
+    }
 
-const getClassOccupancy = async () => {
-    return ReportsModel.getClassOccupancy();
-};
+    /**
+     * Obtiene la ocupación de clases.
+     */
+    async getClassOccupancy() {
+        return ReportsModel.getClassOccupancy();
+    }
 
-const getUserDistribution = async () => {
-    return ReportsModel.getUserDistribution();
-};
+    /**
+     * Obtiene la distribución de usuarios.
+     */
+    async getUserDistribution() {
+        return ReportsModel.getUserDistribution();
+    }
 
-const getTeachersParticipation = async () => {
-    return ReportsModel.getTeachersParticipation();
-};
+    /**
+     * Obtiene la participación de los profesores.
+     */
+    async getTeachersParticipation() {
+        return ReportsModel.getTeachersParticipation();
+    }
 
-const getAttendanceRate = async () => {
-    return ReportsModel.getAttendanceRate();
-};
+    /**
+     * Obtiene la tasa de asistencia.
+     */
+    async getAttendanceRate() {
+        return ReportsModel.getAttendanceRate();
+    }
 
-const getRetentionChurnAnalysis = async () => {
-    return ReportsModel.getRetentionChurnAnalysis();
-};
+    /**
+     * Obtiene el análisis de retención y abandono.
+     */
+    async getRetentionChurnAnalysis() {
+        return ReportsModel.getRetentionChurnAnalysis();
+    }
 
-const getRevenueOptimization = async () => {
-    return ReportsModel.getRevenueOptimization();
-};
+    /**
+     * Obtiene la optimización de ingresos.
+     */
+    async getRevenueOptimization() {
+        return ReportsModel.getRevenueOptimization();
+    }
 
-const getStudentEngagement = async () => {
-    return ReportsModel.getStudentEngagement();
-};
+    /**
+     * Obtiene el compromiso del estudiante.
+     */
+    async getStudentEngagement() {
+        return ReportsModel.getStudentEngagement();
+    }
 
-const getOperationalEfficiency = async () => {
-    return ReportsModel.getOperationalEfficiency();
-};
+    /**
+     * Obtiene la eficiencia operativa.
+     */
+    async getOperationalEfficiency() {
+        return ReportsModel.getOperationalEfficiency();
+    }
 
-const getAdminAudit = async () => {
-    return ReportsModel.getAdminAudit();
-};
+    /**
+     * Obtiene la auditoría administrativa.
+     */
+    async getAdminAudit() {
+        return ReportsModel.getAdminAudit();
+    }
+}
 
-export default {
-    getAttendanceRate,
-    getClassOccupancy,
-    getTeachersParticipation,
-    getUserDistribution,
-    getKpiData,
-    getRetentionChurnAnalysis,
-    getRevenueOptimization,
-    getStudentEngagement,
-    getOperationalEfficiency,
-    getAdminAudit,
-};
+export default new ReportsService();
+

@@ -7,8 +7,9 @@ export async function up(knex) {
             table.integer("module_id").unsigned().references("id").inTable("modules").onDelete("CASCADE"); // Asociar permiso a ruta
             table.string("name", 50).notNullable(); // Nombre del permiso (create, edit, etc.)
             table.string("description", 255).nullable(); // Descripción del permiso
-            table.boolean("deleted").defaultTo(false); // Indica si el permiso está eliminado
             table.timestamps(true, true);
+            table.timestamp("deleted_at").nullable();
+            table.integer("deleted_by").unsigned().nullable();
             table.unique(["module_id", "name"]); // Un permiso único por ruta
         });
 

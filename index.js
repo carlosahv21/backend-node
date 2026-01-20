@@ -77,7 +77,7 @@ app.use("/api/students", studentsRoutes);
 app.use("/api/plans", planRoutes);
 app.use("/api/teachers", teachersRoutes);
 app.use("/api/registrations", registrationRoutes);
-app.use("/api/attendance", attendanceRoutes);
+app.use("/api/attendances", attendanceRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/payments", paymentRoutes);
 

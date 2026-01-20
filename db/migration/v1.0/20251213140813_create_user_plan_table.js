@@ -23,6 +23,24 @@ export async function up(knex) {
         table.timestamp('updated_at').defaultTo(knex.fn.now());
     });
     console.log("Tabla 'user_plan' creada exitosamente");
+
+    const startDate = knex.fn.now();
+const endDate = knex.raw("DATE_ADD(NOW(), INTERVAL 1 MONTH)");
+    await knex('user_plan').insert([
+        {
+            user_id: 2,
+            plan_id: 1,
+            payment_id: 1,
+            status: 'active',
+            start_date: startDate,
+            end_date: endDate,
+            max_classes: 20,
+            classes_used: 0,
+            classes_remaining: 20,
+            created_at: knex.fn.now(),
+            updated_at: knex.fn.now()
+        }
+    ]);
 };
 
 export async function down(knex) {

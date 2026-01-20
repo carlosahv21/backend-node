@@ -47,7 +47,7 @@ router.post(
     planController.create
 );
 
-// PATCH /api/plans/bin
+// PATCH /api/plans/:id/bin
 router.patch(
     "/:id/bin",
     authMiddleware.authenticateToken,

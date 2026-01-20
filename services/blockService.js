@@ -2,75 +2,69 @@
 import blockModel from '../models/blockModel.js';
 import AppError from '../utils/AppError.js';
 
-/**
- * Obtiene todos los bloques (con paginación, búsqueda, filtros).
- */
-const getAllBlocks = async (queryParams) => {
-    return blockModel.findAll(queryParams);
-};
-
-/**
- * Crea un nuevo bloque, calculando su campo 'order' automáticamente.
- */
-const createBlock = async (data) => {
-    const { module_id, name, description } = data;
-
-    if (!module_id || !name) {
-        throw new AppError('module_id y name son campos requeridos para un bloque', 400);
-    }
-
-    const lastBlock = await blockModel.findLastBlockInModule(module_id);
-    const nextOrder = lastBlock ? lastBlock.order + 1 : 0;
-
-    const blockData = {
-        module_id,
-        name: name,
-        description: description || '',
-        order: nextOrder,
-        collapsible: false, // Valores por defecto
-        display_mode: 'edit', // Valores por defecto
+class blockService {
+    /**
+     * Obtiene todos los bloques (con paginación, búsqueda, filtros).
+     */
+    async getAllBlocks(queryParams) {
+        return blockModel.findAll(queryParams);
     };
 
-    const newBlock = await blockModel.create(blockData);
+    /**
+     * Crea un nuevo bloque, calculando su campo 'order' automáticamente.
+     */
+    async createBlock(data) {
+        const { module_id, name, description } = data;
 
-    return newBlock;
-};
+        if (!module_id || !name) {
+            throw new AppError('module_id y name son campos requeridos para un bloque', 400);
+        }
 
-/**
- * Obtiene un bloque por ID.
- */
-const getBlockById = async (id) => {
-    return blockModel.findById(id);
-};
+        const lastBlock = await blockModel.findLastBlockInModule(module_id);
+        const nextOrder = lastBlock ? lastBlock.order + 1 : 0;
 
-/**
- * Actualiza un bloque existente.
- */
-const updateBlock = async (id, data) => {
-    return blockModel.update(id, data);
-};
+        const blockData = {
+            module_id,
+            name: name,
+            description: description || '',
+            order: nextOrder,
+            collapsible: false, // Valores por defecto
+            display_mode: 'edit', // Valores por defecto
+        };
 
-// Elimina un bloque por ID.
-const binBlock = async (id) => {
-    return blockModel.bin(id);
-};
+        const newBlock = await blockModel.create(blockData);
 
-// Restaura un bloque por ID.
-const restoreBlock = async (id) => {
-    return blockModel.restore(id);
-};
+        return newBlock;
+    };
 
-const deleteBlock = async (id) => {
-    return blockModel.delete(id);
-};
+    /**
+     * Obtiene un bloque por ID.
+     */
+    async getBlockById(id) {
+        return blockModel.findById(id);
+    };
 
+    /**
+     * Actualiza un bloque existente.
+     */
+    async updateBlock(id, data) {
+        return blockModel.update(id, data);
+    };
 
-export default {
-    getAllBlocks,
-    createBlock,
-    getBlockById,
-    updateBlock,
-    binBlock,
-    restoreBlock,
-    deleteBlock,
-};
+    // Elimina un bloque por ID.
+    async binBlock(id) {
+        return blockModel.bin(id);
+    };
+
+    // Restaura un bloque por ID.
+    async restoreBlock(id) {
+        return blockModel.restore(id);
+    };
+
+    async deleteBlock(id) {
+        return blockModel.delete(id);
+    };
+
+}
+
+export default new blockService();

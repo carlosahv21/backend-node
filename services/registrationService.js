@@ -46,8 +46,8 @@ class RegistrationService {
         return RegistrationModel.delete(id);
     }
 
-    async bin(id) {
-        return RegistrationModel.bin(id);
+    async bin(id, userId) {
+        return RegistrationModel.bin(id, userId);
     }
 
     async restore(id) {

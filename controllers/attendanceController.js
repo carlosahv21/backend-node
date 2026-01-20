@@ -1,11 +1,11 @@
 import attendanceService from '../services/attendanceService.js';
 import ApiResponse from '../utils/apiResponse.js';
 
-class AttendanceController {
+class attendanceController {
 
-    async create(req, res) {
+    async createAttendance(req, res) {
         try {
-            const result = await attendanceService.registerAttendance(req.body);
+            const result = await attendanceService.createAttendance(req.body);
             ApiResponse.success(res, 201, "Asistencia creada correctamente", result);
         } catch (error) {
             const status = error.statusCode || 400;
@@ -13,7 +13,7 @@ class AttendanceController {
         }
     }
 
-    async getAll(req, res) {
+    async getAllAttendances(req, res) {
         try {
             const result = await attendanceService.getAttendance(req.query);
             ApiResponse.success(res, 200, "Asistencias obtenidas correctamente", result);
@@ -37,7 +37,7 @@ class AttendanceController {
         }
     }
 
-    async update(req, res) {
+    async updateAttendance(req, res) {
         try {
             const { id } = req.params;
             const result = await attendanceService.updateAttendance(id, req.body);
@@ -48,7 +48,7 @@ class AttendanceController {
         }
     }
 
-    async delete(req, res) {
+    async deleteAttendance(req, res) {
         try {
             const { id } = req.params;
             await attendanceService.deleteAttendance(id);
@@ -59,7 +59,7 @@ class AttendanceController {
         }
     }
 
-    async bin(req, res) {
+    async binAttendance(req, res) {
         try {
             const { id } = req.params;
             const result = await attendanceService.binAttendance(id);
@@ -70,7 +70,7 @@ class AttendanceController {
         }
     }
 
-    async restore(req, res) {
+    async restoreAttendance(req, res) {
         try {
             const { id } = req.params;
             const result = await attendanceService.restoreAttendance(id);
@@ -82,4 +82,4 @@ class AttendanceController {
     }
 }
 
-export default new AttendanceController();
+export default new attendanceController();
