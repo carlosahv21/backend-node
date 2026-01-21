@@ -14,6 +14,7 @@ export async function up(knex) {
                 .inTable('payments')
                 .onDelete('CASCADE');
         table.string('status').notNullable();
+        table.string('note').nullable();
         table.date('start_date').notNullable();
         table.date('end_date').notNullable();
         table.integer('max_classes').notNullable();

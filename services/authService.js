@@ -7,76 +7,77 @@ import AppError from "../utils/AppError.js";
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "1h";
 
-class authService {
-    /**
-     * Función común para obtener usuario + rol + permisos + rutas + settings
-     */
-    async getUserData(userId) {
+/**
+ * Función común para obtener usuario + rol + permisos + rutas + settings
+ */
+const getUserData = async (userId) => {
 
-        const userRecord = await authModel.knex("users").where({ id: userId }).first();
+    const userRecord = await authModel.knex("users").where({ id: userId }).first();
 
-        if (!userRecord) throw new AppError("User not found", 404);
+    if (!userRecord) throw new AppError("User not found", 404);
 
-        const roleData = await authModel.findRoleByUserId(userId);
+    const roleData = await authModel.findRoleByUserId(userId);
 
-        let planData = null;
-        if (roleData.role_name == "student") {
-            planData = await authModel.findPlanByUserId(userId);
-        }
-
-        const rawPermissions = await authModel.findPermissions(roleData.role_id);
-
-        const permissionsList = [...new Set(rawPermissions.map(p =>
-            `${p.moduleName}:${p.action}`
-        ))];
-
-        const settings = await authModel.findSettings();
-
-        return {
-            user: {
-                id: userRecord.id,
-                email: userRecord.email,
-                name: userRecord.first_name + " " + userRecord.last_name,
-                role: roleData.role_name,
-                plan: planData,
-            },
-            settings,
-            permissions: permissionsList,
-        };
+    let planData = null;
+    if (roleData.role_name == "student") {
+        planData = await authModel.findPlanByUserId(userId);
     }
 
-    /**
-     * 3. Lógica de negocio de Login (hashing y JWT)
-     */
-    async authenticateUser({ email, password }) {
-        const user = await authModel.findUserByEmail(email);
-        if (!user) {
-            throw new AppError("Invalid email or password", 401);
-        }
+    const rawPermissions = await authModel.findPermissions(roleData.role_id);
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            throw new AppError("Invalid email or password", 401);
-        }
+    const permissionsList = [...new Set(rawPermissions.map(p =>
+        `${p.moduleName}:${p.action}`
+    ))];
 
-        const data = await getUserData(user.id);
+    const settings = await authModel.findSettings();
 
-        const token = jwt.sign(
-            { id: user.id, email: user.email },
-            JWT_SECRET,
-            { expiresIn: JWT_EXPIRES_IN }
-        );
+    return {
+        user: {
+            id: userRecord.id,
+            email: userRecord.email,
+            name: userRecord.first_name + " " + userRecord.last_name,
+            role: roleData.role_name,
+            plan: planData,
+        },
+        settings,
+        permissions: permissionsList,
+    };
+};
 
-        return { token, ...data };
+/**
+ * 3. Lógica de negocio de Login (hashing y JWT)
+ */
+const authenticateUser = async ({ email, password }) => {
+    const user = await authModel.findUserByEmail(email);
+    if (!user) {
+        throw new AppError("Invalid email or password", 401);
     }
 
-    /**
-     * Refrescar datos de usuario
-     */
-    async getAuthenticatedUser(userId) {
-        return getUserData(userId);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        throw new AppError("Invalid email or password", 401);
     }
 
-}
+    const data = await getUserData(user.id);
 
-export default new authService();
+    const token = jwt.sign(
+        { id: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    return { token, ...data };
+};
+
+/**
+ * Refrescar datos de usuario
+ */
+const getAuthenticatedUser = async (userId) => {
+    return getUserData(userId);
+};
+
+
+export default {
+    authenticateUser,
+    getAuthenticatedUser,
+};

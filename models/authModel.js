@@ -51,9 +51,10 @@ class AuthModel {
      */
     async findPlanByUserId(userId) {
         const planData = await this.knex("users")
-            .join("plans", "users.plan_id", "plans.id")
+            .join("user_plan", "users.id", "user_plan.user_id")
+            .join("plans", "user_plan.plan_id", "plans.id")
             .where("users.id", userId)
-            .select("plans.max_sessions", "users.plan_classes_used", "users.plan_status", "users.plan_start_date", "users.plan_end_date")
+            .select("plans.max_sessions", "user_plan.classes_used", "user_plan.status", "user_plan.start_date", "user_plan.end_date")
             .first();
 
         if (!planData) {
