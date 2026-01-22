@@ -24,18 +24,20 @@ class SettingService {
      */
     async updateSettings(newSettings) {
         try {
-            const updatedRows = await settingModel.updateFirst(newSettings);
+            const existingSettings = await settingModel.findFirst();
 
-            if (updatedRows === 0) {
-                const existingSettings = await settingModel.findFirst();
-                if (!existingSettings) {
-                    await settingModel.create(newSettings);
-                } else {
-                    throw new AppError('No se actualizaron filas', 500);
-                }
+            if (!existingSettings) {
+                await settingModel.create(newSettings);
+                return newSettings;
             }
 
-            return getSettings();
+            const updatedRows = await settingModel.update(existingSettings.id, newSettings);
+
+            if (updatedRows === 0) {
+                throw new AppError('No se actualizaron filas', 500);
+            }
+
+            return await this.getSettings();
 
         } catch (err) {
             throw new AppError('Error al actualizar la configuración', 500);

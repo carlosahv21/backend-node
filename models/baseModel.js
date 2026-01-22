@@ -185,6 +185,11 @@ class BaseModel {
         };
     }
 
+    //Obtener el primer registro
+    async findFirst() {
+        return this.knex(this.tableName).first();
+    }
+
     // Obtener un registro por ID
     async findById(id) {
         const record = await this.knex(this.tableName).where({ id }).first();
