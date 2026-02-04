@@ -153,6 +153,21 @@ class reportsController {
             ApiResponse.error(res, status, error.message);
         }
     }
+
+    async getUsersAtRisk(req, res, next) {
+        try {
+            const data = await ReportsService.getUsersAtRisk();
+            ApiResponse.success(
+                res,
+                200,
+                "Users at risk data retrieved successfully",
+                data
+            );
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new reportsController();

@@ -70,6 +70,13 @@ class ReportsService {
     async getAdminAudit() {
         return ReportsModel.getAdminAudit();
     }
+
+    /**
+     * Obtiene los usuarios en riesgo.
+     */
+    async getUsersAtRisk() {
+        return ReportsModel.getUsersAtRisk();
+    }
 }
 
 export default new ReportsService();

@@ -68,6 +68,7 @@ const seedUsers = async (knex) => {
         first_name: faker.person.firstName(),
         last_name: faker.person.lastName(),
         email: faker.internet.email({ provider: 'academy.com' }).toLowerCase(),
+        phone: faker.phone.number(),
         password: bcrypt.hashSync('password123', 10),
         role_id: PROFESSOR_ROLE_ID,
         created_at: getStartDateHistory(),
@@ -86,6 +87,7 @@ const seedUsers = async (knex) => {
             first_name: faker.person.firstName(),
             last_name: faker.person.lastName(),
             email: faker.internet.email().toLowerCase(),
+            phone: faker.phone.number(),
             password: bcrypt.hashSync('password123', 10),
             role_id: STUDENT_ROLE_ID,
             created_at: joinedDate, // Fecha base para su primer plan

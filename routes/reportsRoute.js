@@ -64,4 +64,10 @@ router.get("/admin-audit",
     reportsController.getAdminAudit
 );
 
+// GET /api/reports/users-at-risk
+router.get("/users-at-risk",
+    authMiddleware.authenticateToken,
+    reportsController.getUsersAtRisk
+);
+
 export default router;

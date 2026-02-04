@@ -293,7 +293,16 @@ class ReportsModel extends BaseModel {
             .andWhere("up.max_classes", ">", 0)
             .orderBy("utilization_rate", "asc");
 
-        // Usuarios en riesgo (sin asistencia en 15 días)
+        const usersAtRisk = await this.getUsersAtRisk();
+
+        return {
+            classUtilization,
+            usersAtRisk,
+            usersAtRiskCount: usersAtRisk.length,
+        };
+    }
+
+    async getUsersAtRisk() {
         const usersAtRisk = await this.knex("users as u")
             .join("user_plan as up", "u.id", "up.user_id")
             .leftJoin("roles as r", "u.role_id", "r.id")
@@ -320,13 +329,10 @@ class ReportsModel extends BaseModel {
             .andWhere("up.status", "active")
             .andWhereRaw(
                 "(last_att.last_attendance IS NULL OR DATEDIFF(CURDATE(), last_att.last_attendance) > 15)"
-            );
+            )
+            .orderBy("days_since_attendance", "desc");
 
-        return {
-            classUtilization,
-            usersAtRisk,
-            riskCount: usersAtRisk.length,
-        };
+        return usersAtRisk;
     }
 
     /**
