@@ -1,0 +1,19 @@
+meta {
+  name: Notifications
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/users/:userId/send-notification
+  body: none
+  auth: inherit
+}
+
+params:path {
+  userId: 
+}
+
+settings {
+  encodeUrl: true
+}

@@ -73,8 +73,9 @@ class BaseModel {
         ) {
             query = query.where((builder) => {
                 this.searchFields.forEach((field, index) => {
-                    if (index === 0) builder.where(field, "like", `%${search}%`);
-                    else builder.orWhere(field, "like", `%${search}%`);
+                    const normalizedQuery = search.replace(/\+/g, ' ').trim();
+                    if (index === 0) builder.where(field, "like", `%${normalizedQuery}%`);
+                    else builder.orWhere(field, "like", `%${normalizedQuery}%`);
                 });
             });
         }

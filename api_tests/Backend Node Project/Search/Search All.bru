@@ -1,0 +1,20 @@
+meta {
+  name: Search All
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/search?q=col
+  body: none
+  auth: inherit
+}
+
+params:query {
+  q: col
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

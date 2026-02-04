@@ -63,4 +63,33 @@ router.delete(
     (req, res, next) => userController.delete(req, res, next) // Añadimos 'next'
 );
 
+// PATCH /api/users/:userId/push-token
+router.patch(
+    "/:userId/push-token",
+    authMiddleware.authenticateToken,
+    (req, res, next) => userController.savePushToken(req, res, next)
+);
+
+// GET /api/users/:userId/push-token
+router.get(
+    "/:userId/push-token",
+    authMiddleware.authenticateToken,
+    (req, res, next) => userController.getPushToken(req, res, next)
+);
+
+// POST /api/users/:userId/send-notification
+router.post(
+    "/:userId/send-notification",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("users", "edit"),
+    (req, res, next) => userController.sendPushNotification(req, res, next)
+);
+
+// POST /api/users/check-notification-receipts
+router.post(
+    "/check-notification-receipts",
+    authMiddleware.authenticateToken,
+    (req, res, next) => userController.checkNotificationReceipts(req, res, next)
+);
+
 export default router;

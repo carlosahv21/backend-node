@@ -12,6 +12,7 @@ export async function up(knex) {
             table.string("password", 255).notNullable(); // Encrypted password
             table.boolean("email_verified").defaultTo(false); // Whether the email is verified
             table.timestamp("last_login").nullable(); // Last login timestamp
+            table.string("push_token", 255).nullable(); // Push notification token
             table.integer("role_id").unsigned().notNullable().references("id").inTable("roles").onDelete("CASCADE"); // Role
             table.timestamp("deleted_at").nullable();
             table.integer("deleted_by").unsigned().nullable().references("id").inTable("users").onDelete("SET NULL");

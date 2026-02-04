@@ -49,6 +49,7 @@ class UserService {
             "password",
             "email_verified",
             "deleted",
+            "push_token",
         ];
 
         // Separar el rol del resto de datos
@@ -96,6 +97,13 @@ class UserService {
      */
     async restoreUser(id) {
         return userModel.restore(id);
+    }
+
+    /**
+     * Obtiene un usuario por ID.
+     */
+    async getUserById(id) {
+        return userModel.findById(id);
     }
 
     /**
