@@ -106,6 +106,17 @@ class ClassController {
             ApiResponse.error(res, status, error.message);
         }
     }
+
+    async getNextClass(req, res, next) {
+        try {
+            const nextClass = await classService.getNextClass();
+            ApiResponse.success(res, 200, "Clase obtenida correctamente", nextClass);
+        } catch (error) {
+            console.log(error);
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new ClassController();

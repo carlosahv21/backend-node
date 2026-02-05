@@ -12,6 +12,13 @@ router.get("/",
     (req, res, next) => classController.getAll(req, res, next)
 );
 
+// GET /api/classes/next
+router.get("/next",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("classes", "view"),
+    (req, res, next) => classController.getNextClass(req, res, next)
+);
+
 // GET /api/classes/:id
 router.get("/:id",
     authMiddleware.authenticateToken,

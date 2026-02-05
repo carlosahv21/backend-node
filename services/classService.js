@@ -67,6 +67,12 @@ class classService {
         return classModel.delete(id);
     }
 
+    /**
+     * Obtiene la próxima clase.
+     */
+    async getNextClass() {
+        return classModel.getNextClass();
+    }
 }
 
 export default new classService();

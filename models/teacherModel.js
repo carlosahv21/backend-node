@@ -2,94 +2,104 @@
 import { UserModel } from './userModel.js';
 
 /**
- * Capa de Acceso a Datos (DAL) para la entidad Teacher.
- * Extiende de UserModel para heredar funcionalidad de usuarios.
+ * DAL para Teacher optimizado para la vista de Dashboard Mobile.
  */
 class TeacherModel extends UserModel {
     constructor() {
         super();
     }
 
-    async findAll(queryParams = {}) {
-        return super.findAllByRole({ ...queryParams, role: 'teacher' });
-    }
-
     async findByIdDetails(id) {
-        const apiData = await this._getTeacherData(id);
-        return this._transformToViewModel(apiData);
-    }
+        const db = this.knex;
 
-    async _getTeacherData(id) {
-        const record = await super.findById(id);
-
-        const roleValues = await this.knex('roles as r')
-            .join('users', 'r.id', 'users.role_id')
-            .where('users.id', id)
-            .select('r.name as role_name')
+        // 1. Datos base del perfil
+        const teacher = await db('users as u')
+            .leftJoin('roles as r', 'u.role_id', 'r.id')
+            .where('u.id', id)
+            .where('u.role_id', 3)
+            .select(
+                'u.id', 'u.first_name', 'u.last_name', 'u.email', 
+                'u.email_verified', 'r.name as role_name'
+            )
             .first();
 
-        const classValues = await this.knex('classes as c')
-            .join('users', 'c.teacher_id', 'users.id')
-            .where('users.id', id)
-            .select('c.name as class_name', 'c.date as class_date', 'c.hour as class_hour');
+        if (!teacher) return null;
+
+        const [stats, classes, payments] = await Promise.all([
+            // Estadísticas (Simuladas según la UI: Clases, Rating, Alumnos)
+            this._getTeacherStats(id),
+            // Clases de la semana
+            db('classes')
+                .where('teacher_id', id)
+                .select('id', 'name', 'date', 'hour', 'duration', 'genre')
+                .orderBy('date', 'asc')
+                .limit(5),
+            // Resumen de Pagos (Basado en la tabla payments de tu esquema)
+            this._getPaymentSummary(id)
+        ]);
+
+        return this._transformToDetailedModel(teacher, stats, classes, payments);
+    }
+
+    async _getTeacherStats(id) {
+        const db = this.knex;
+        // Total de clases asignadas
+        const classesCount = await db('classes').where('teacher_id', id).count('id as total');
+        // Total de alumnos únicos en sus clases (vía user_class)
+        const studentsCount = await db('user_class as uc')
+            .join('classes as c', 'uc.class_id', 'c.id')
+            .where('c.teacher_id', id)
+            .countDistinct('uc.user_id as total');
 
         return {
-            ...record,
-            ...roleValues,
-            assigned_classes: classValues
+            classes: classesCount[0].total || 0,
+            rating: 4.9, // Valor estático por ahora o de tabla de reviews
+            students: studentsCount[0].total || 0
         };
     }
 
-    _transformToViewModel(apiData) {
-        const capitalize = (string) => string ? string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() : '';
-
-        const formatValue = (key, value) => {
-            if (value === null || value === undefined) return "-";
-
-            if (key.includes("price") && !isNaN(parseFloat(value))) {
-                return `$${parseFloat(value).toFixed(2)}`;
-            }
-            if (key.includes("verified")) {
-                return value === 1 ? "Sí" : "No";
-            }
-            if (key.includes("date") || key.includes("login") || key.includes("at")) {
-                return value;
-            }
-            return value;
-        };
-
-        const assignedClasses = apiData.assigned_classes || [];
-        const classItems = assignedClasses.map((c, index) => ({ 
-            name: `Clase ${index + 1}`, 
-            value: c.class_name + " - " + c.class_date + " - " + c.class_hour, 
-        }));
+    async _getPaymentSummary(id) {
+        const db = this.knex;
+        const currentMonth = new Date().getMonth() + 1;
+        
+        const paidThisMonth = await db('payments')
+            .where('user_id', id)
+                .andWhereRaw('MONTH(payment_date) = ?', [currentMonth])
+            .sum('amount as total');
 
         return {
-            title: `${apiData.first_name} ${apiData.last_name}`,
-            subtitle: capitalize(apiData.role_name),
-            email: apiData.email,
-            sections: [
-                {
-                    label: "Información Básica",
-                    items: [
-                        { name: "Email Verificado", value: formatValue('email_verified', apiData.email_verified) },
-                        { name: "Último Login", value: apiData.last_login },
-                        { name: "Creado En", value: apiData.created_at },
-                        { name: "Actualizado En", value: apiData.updated_at },
-                    ],
-                },
-                {
-                    label: "Clases Asignadas",
-                    items: classItems.length > 0 ? classItems : [{ name: "Clases", value: "Ninguna" }]
-                },
-                {
-                    label: "Registro de Tiempos",
-                    items: [
-                        { name: "Creado En", value: apiData.created_at },
-                        { name: "Actualizado En", value: apiData.updated_at },
-                    ],
-                },
-            ],
+            to_pay: 420.00, // Lógica pendiente según tu sistema de nómina
+            paid_current_month: parseFloat(paidThisMonth[0].total || 0),
+            next_cutoff: '2026-10-30'
+        };
+    }
+
+    _transformToDetailedModel(teacher, stats, classes, payments) {
+        return {
+            header: {
+                id: teacher.id,
+                full_name: `${teacher.first_name} ${teacher.last_name}`,
+                role_label: teacher.role_name,
+                email: teacher.email
+            },
+            stats: {
+                classes_count: stats.classes,
+                rating: stats.rating,
+                students_count: stats.students
+            },
+            payment_summary: {
+                pending_amount: payments.to_pay,
+                paid_amount: payments.paid_current_month,
+                next_cutoff_date: payments.next_cutoff
+            },
+            weekly_classes: classes.map(c => ({
+                id: c.id,
+                name: c.name,
+                genre: c.genre,
+                schedule: `${c.date} • ${c.hour}`,
+                duration: `${c.duration} min`,
+                location: "Sala A"
+            }))
         };
     }
 }

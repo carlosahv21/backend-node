@@ -2,7 +2,7 @@
 import { UserModel } from './userModel.js';
 
 /**
- * Capa de Acceso a Datos (DAL) para la entidad Student.
+ * Capa de Acceso a Datos (DAL) optimizada para la entidad Student.
  */
 class StudentModel extends UserModel {
     constructor() {
@@ -10,100 +10,81 @@ class StudentModel extends UserModel {
     }
 
     /**
-     * Obtiene los detalles completos de un estudiante sin transformar la estructura.
+     * Obtiene los detalles mediante un solo JOIN eficiente.
      */
-    async _getStudentData(id) {
-        const record = await super.findById(id);
+    async findByIdDetails(id) {
+        // Guardamos la referencia a knex para usarla dentro de los callbacks
+        const db = this.knex;
 
-        const planValues = await this.knex('user_plan as up')
-            .join('plans as p', 'up.plan_id', 'p.id')
-            .where('up.user_id', id)
+        const student = await db('users as u')
+            .leftJoin('roles as r', 'u.role_id', 'r.id')
+            .leftJoin('user_plan as up', function() {
+                // Seleccionamos solo el plan más reciente para el usuario
+                this.on('u.id', '=', 'up.user_id')
+                    .andOn('up.id', '=', db.select('id')
+                        .from('user_plan')
+                        .whereRaw('user_id = u.id')
+                        .orderBy('created_at', 'desc')
+                        .limit(1)
+                    );
+            })
+            .leftJoin('plans as p', 'up.plan_id', 'p.id')
+            .where('u.id', id)
             .select(
+                'u.id',
+                'u.first_name',
+                'u.last_name',
+                'u.email',
+                'u.email_verified',
+                'u.last_login',
+                'u.created_at',
+                'r.name as role_name',
+                'p.id as plan_id',
                 'p.name as plan_name',
                 'p.description as plan_description',
                 'p.price as plan_price',
                 'up.status as plan_status',
-                'up.classes_used as plan_classes_used',
-                'up.classes_remaining as plan_classes_remaining',
+                'up.classes_used',
+                'up.classes_remaining',
                 'up.start_date as plan_start_date',
                 'up.end_date as plan_end_date'
             )
-            .orderBy('up.created_at', 'desc')
             .first();
+        
+        if (!student) return null;
 
-        const roleValues = await this.knex('roles as r')
-            .join('users', 'r.id', 'users.role_id')
-            .where('users.id', id)
-            .select('r.name as role_name')
-            .first();
-
-        return { ...record, ...(planValues || {}), ...roleValues };
+        return this._transformToLeanModel(student);
     }
 
     /**
-     * Transforma el objeto de datos de la API al formato de View Model para el Drawer.
+     * Transforma los datos crudos a un formato limpio para el frontend.
      */
-    _transformToViewModel(apiData) {
-
-        const capitalize = (string) => string ? string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() : '';
-
-        const formatValue = (key, value) => {
-            if (value === null || value === undefined) return "-";
-
-            if (key.includes("price") && !isNaN(parseFloat(value))) {
-                return `$${parseFloat(value).toFixed(2)}`;
-            }
-            if (key.includes("verified")) {
-                return value === 1 ? "Sí" : "No";
-            }
-
-            if (key.includes("date") || key.includes("login") || key.includes("at")) {
-                if (value instanceof Date) return value.toISOString().split('T')[0];
-                return value;
-            }
-            return value;
-        };
+    _transformToLeanModel(data) {
+        const toISO = (d) => d ? new Date(d).toISOString() : null;
+        const toYMD = (d) => d ? new Date(d).toISOString().split('T')[0] : null;
 
         return {
-            title: `${apiData.first_name} ${apiData.last_name}`,
-            subtitle: capitalize(apiData.role_name),
-            email: apiData.email,
-            sections: [
-                {
-                    label: "Información del Plan Actual",
-                    items: [
-                        { name: "Plan Asignado", value: apiData.plan_name },
-                        { name: "Descripción", value: apiData.plan_description },
-                        { name: "Precio", value: formatValue('price', apiData.plan_price) },
-                        {
-                            name: "Estado",
-                            value: apiData.plan_status,
-                        },
-                        { name: "Clases Usadas", value: apiData.plan_classes_used },
-                        { name: "Clases Restantes", value: apiData.plan_classes_remaining },
-                        { name: "Inicio", value: formatValue('date', apiData.plan_start_date) },
-                        { name: "Fin", value: formatValue('date', apiData.plan_end_date) },
-                    ],
-                },
-                {
-                    label: "Registro de Tiempos",
-                    items: [
-                        { name: "Email Verificado", value: formatValue('email_verified', apiData.email_verified) },
-                        { name: "Último Login", value: formatValue('date', apiData.last_login) },
-                        { name: "Creado En", value: formatValue('date', apiData.created_at) },
-                        { name: "Actualizado En", value: formatValue('date', apiData.updated_at) },
-                    ],
-                },
-            ],
+            id: data.id,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            role: (data.role_name || 'student').toLowerCase(),
+            email_verified: Boolean(data.email_verified),
+            last_login: toISO(data.last_login),
+            created_at: toISO(data.created_at),
+            
+            plan: data.plan_id ? {
+                id: data.plan_id,
+                name: data.plan_name,
+                description: data.plan_description,
+                price: parseFloat(data.plan_price || 0),
+                status: data.plan_status?.toLowerCase() || 'inactive',
+                classes_used: data.classes_used || 0,
+                classes_total: (data.classes_used || 0) + (data.classes_remaining || 0),
+                start_date: toYMD(data.plan_start_date),
+                end_date: toYMD(data.plan_end_date)
+            } : null
         };
-    }
-
-    /**
-     * Método principal para obtener el detalle y transformarlo.
-     */
-    async findByIdDetails(id) {
-        const apiData = await this._getStudentData(id);
-        return this._transformToViewModel(apiData);
     }
 }
 
