@@ -1,6 +1,7 @@
 // services/classService.js
 import classModel from '../models/classModel.js';
 import AppError from '../utils/AppError.js';
+import notificationService from './notificationService.js';
 
 class classService {
     /**
@@ -19,6 +20,25 @@ class classService {
         }
 
         const newClass = await classModel.create(data);
+
+        // NOTIFICATIONS: Notify teacher if assigned
+        try {
+            if (data.teacher_id) {
+                const days = data.days || 'programados';
+                const time = data.time || 'a confirmar';
+
+                await notificationService.notifyUser(data.teacher_id, {
+                    title: '¡Nueva Clase Asignada!',
+                    message: `Se te ha asignado ${data.name} los ${days} a las ${time}.`,
+                    category: 'CLASS',
+                    related_entity_id: newClass.id,
+                    deep_link: `/classes/${newClass.id}`
+                });
+            }
+        } catch (notifError) {
+            console.error('⚠️ Error sending class assignment notification:', notifError.message);
+            // Don't block class creation if notification fails
+        }
 
         return newClass;
     }
@@ -41,7 +61,30 @@ class classService {
      * Actualiza una clase existente.
      */
     async updateClass(id, data) {
+        // Check if teacher changed
+        const oldClass = await classModel.findById(id);
+        const teacherChanged = data.teacher_id && data.teacher_id !== oldClass.teacher_id;
+
         const updatedClass = await classModel.update(id, data);
+
+        // NOTIFICATIONS: Notify new teacher if assigned
+        try {
+            if (teacherChanged) {
+                const days = updatedClass.days || 'programados';
+                const time = updatedClass.time || 'a confirmar';
+
+                await notificationService.notifyUser(data.teacher_id, {
+                    title: '¡Nueva Clase Asignada!',
+                    message: `Se te ha asignado ${updatedClass.name} los ${days} a las ${time}.`,
+                    category: 'CLASS',
+                    related_entity_id: updatedClass.id,
+                    deep_link: `/classes/${updatedClass.id}`
+                });
+            }
+        } catch (notifError) {
+            console.error('⚠️ Error sending class reassignment notification:', notifError.message);
+            // Don't block class update if notification fails
+        }
 
         return updatedClass;
     }

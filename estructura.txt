@@ -1,0 +1,182 @@
+|-- .env
+|-- .env_example
+|-- .gitignore
+|-- api_tests
+  |-- Backend Node Project
+    |-- bruno.json
+    |-- Classes
+      |-- Create Classes.bru
+      |-- Delete Class.bru
+      |-- folder.bru
+      |-- Get Class by ID.bru
+      |-- List Classes.bru
+      |-- Update Class.bru
+    |-- collection.bru
+    |-- environments
+      |-- Local.bru
+    |-- Health.bru
+    |-- Login
+      |-- folder.bru
+      |-- Login.bru
+    |-- Notifications.bru
+    |-- Plans
+      |-- Create Plan.bru
+      |-- Delete User.bru
+      |-- folder.bru
+      |-- Get Plan by ID.bru
+      |-- List Plans.bru
+      |-- Update User.bru
+    |-- Reports
+      |-- AdminAudit.bru
+      |-- ClassOccupancy.bru
+      |-- folder.bru
+      |-- KpisData.bru
+      |-- OperationalEfficiency.bru
+      |-- RetentionChurn.bru
+      |-- RevenueOptimization.bru
+      |-- StudentEngagement.bru
+      |-- TeachersParticipation.bru
+      |-- UserDistribution.bru
+    |-- Search
+      |-- folder.bru
+      |-- Search All.bru
+    |-- Users
+      |-- Create User.bru
+      |-- Delete User.bru
+      |-- Detail User.bru
+      |-- folder.bru
+      |-- Get User by ID.bru
+      |-- List Users.bru
+      |-- Update User.bru
+|-- config
+  |-- jwt.js
+  |-- knex.js
+|-- controllers
+  |-- attendanceController.js
+  |-- authController.js
+  |-- blockController.js
+  |-- classController.js
+  |-- fieldController.js
+  |-- moduleController.js
+  |-- paymentController.js
+  |-- permissionController.js
+  |-- planController.js
+  |-- registrationController.js
+  |-- reportsController.js
+  |-- roleController.js
+  |-- rolePermissionController.js
+  |-- routeController.js
+  |-- searchController.js
+  |-- settingController.js
+  |-- studentController.js
+  |-- teacherController.js
+  |-- userController.js
+|-- db
+  |-- data
+    |-- blocksData.js
+    |-- fieldsData.js
+  |-- migration
+    |-- migrate.js
+    |-- v1.0
+      |-- 20251115002129_create_roles_table.js
+      |-- 20251115002240_create_modules_table.js
+      |-- 20251115002340_create_permissions_table.js
+      |-- 20251115002404_create_role_permissions_table.js
+      |-- 20251115002405_create_plans_table.js
+      |-- 20251115002442_create_users_table.js
+      |-- 20251115002533_create_settings_table.js
+      |-- 20251115002610_create_classes_table.js
+      |-- 20251115002641_create_blocks_table.js
+      |-- 20251115002708_create_fields_table.js
+      |-- 20251115002722_create_field_values_table.js
+      |-- 20251128005219_create_user_class_table.js
+      |-- 20251203095500_create_attendances_table.js
+      |-- 20251213140713_create_payments_table.js
+      |-- 20251213140813_create_user_plan_table.js
+      |-- 20251213140848_create_user_registration_history_table.js
+      |-- 20251213141402_create_audit_log_table.js
+      |-- 20260120120000_add_soft_delete_constraints.js
+  |-- seeds
+    |-- create_fake_data.js
+|-- estructura.txt
+|-- index.js
+|-- knexfile.js
+|-- middlewares
+  |-- authMiddleware.js
+  |-- errorHandler.js
+  |-- validationMiddleware.js
+|-- models
+  |-- attendanceModel.js
+  |-- authModel.js
+  |-- baseModel.js
+  |-- blockModel.js
+  |-- classModel.js
+  |-- fieldModel.js
+  |-- moduleModel.js
+  |-- paymentModel.js
+  |-- permissionModel.js
+  |-- planModel.js
+  |-- registrationModel.js
+  |-- reportsModel.js
+  |-- roleModel.js
+  |-- rolePermissionModel.js
+  |-- routeModel.js
+  |-- searchModel.js
+  |-- settingModel.js
+  |-- studentModel.js
+  |-- teacherModel.js
+  |-- userModel.js
+|-- package-lock.json
+|-- package.json
+|-- pnpm-lock.yaml
+|-- README.md
+|-- routes
+  |-- attendanceRoutes.js
+  |-- authRoute.js
+  |-- blockRoute.js
+  |-- classRoute.js
+  |-- fieldRoute.js
+  |-- moduleRoute.js
+  |-- paymentRoute.js
+  |-- permissionRoute.js
+  |-- planRoute.js
+  |-- registrationRoute.js
+  |-- reportsRoute.js
+  |-- rolePermissionRoute.js
+  |-- roleRoute.js
+  |-- routeRoute.js
+  |-- searchRoute.js
+  |-- settingRoute.js
+  |-- studentRoute.js
+  |-- teacherRoute.js
+  |-- userRoute.js
+|-- scripts
+  |-- generate.js
+|-- services
+  |-- attendanceService.js
+  |-- authService.js
+  |-- blockService.js
+  |-- classService.js
+  |-- fieldService.js
+  |-- moduleService.js
+  |-- notificationService.js
+  |-- paymentService.js
+  |-- permissionService.js
+  |-- planService.js
+  |-- registrationService.js
+  |-- reportsService.js
+  |-- rolePermissionService.js
+  |-- roleService.js
+  |-- routeService.js
+  |-- searchService.js
+  |-- settingService.js
+  |-- studentService.js
+  |-- teacherService.js
+  |-- userService.js
+|-- utils
+  |-- apiResponse.js
+  |-- AppError.js
+  |-- utilsModelRegistry.js
+  |-- utilsValidations.js
+|-- validators
+  |-- Schemas.js

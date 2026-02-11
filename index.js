@@ -31,6 +31,8 @@ import attendanceRoutes from './routes/attendanceRoutes.js';
 import reportsRoutes from './routes/reportsRoute.js';
 import paymentRoutes from './routes/paymentRoute.js';
 import searchRoutes from './routes/searchRoute.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import cronService from './services/cronService.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -45,6 +47,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // --- Archivos estáticos ---
 app.use("/storage", express.static("storage"));
+
+// --- Initialize Cron Jobs for Automated Notifications ---
+cronService.initialize();
+console.log('📅 Cron jobs initialized for automated notifications');
 
 // --- Health Check Endpoint ---
 app.get('/api/health', async (req, res, next) => {
@@ -82,6 +88,7 @@ app.use("/api/attendances", attendanceRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {

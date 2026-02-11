@@ -2,6 +2,8 @@
 import attendanceModel from '../models/attendanceModel.js';
 import registrationModel from '../models/registrationModel.js';
 import AppError from '../utils/AppError.js';
+import notificationService from './notificationService.js';
+import knex from '../config/knex.js';
 
 class attendanceService {
     async createAttendance(data) {
@@ -14,7 +16,43 @@ class attendanceService {
             }
         }
 
-        return await attendanceModel.bulkCreateOrUpdate(records);
+        const result = await attendanceModel.bulkCreateOrUpdate(records);
+
+        // NOTIFICATIONS: Check for milestone achievements
+        try {
+            const milestones = [10, 25, 50];
+            const firstDayOfMonth = new Date();
+            firstDayOfMonth.setDate(1);
+            firstDayOfMonth.setHours(0, 0, 0, 0);
+
+            for (const record of records) {
+                if (record.status !== 'present') continue;
+
+                // Count total attendances this month
+                const monthCount = await knex('attendances')
+                    .where('student_id', record.student_id)
+                    .where('status', 'present')
+                    .where('date', '>=', firstDayOfMonth)
+                    .count('* as count')
+                    .first();
+
+                const total = parseInt(monthCount.count);
+
+                // Check if user just hit a milestone
+                if (milestones.includes(total)) {
+                    await notificationService.notifyUser(record.student_id, {
+                        title: '¡Felicidades!',
+                        message: `Has completado ${total} clases este mes. ¡Sigue así!`,
+                        category: 'ATTENDANCE'
+                    });
+                }
+            }
+        } catch (notifError) {
+            console.error('⚠️ Error sending attendance milestone notifications:', notifError.message);
+            // Don't block attendance creation if notifications fail
+        }
+
+        return result;
     }
 
     async getAttendance(queryParams) {

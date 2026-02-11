@@ -2,6 +2,7 @@
 import PaymentModel from '../models/paymentModel.js';
 import knex from '../config/knex.js';
 import AppError from '../utils/AppError.js';
+import notificationService from './notificationService.js';
 
 class PaymentService {
     async getAllPayments(query) {
@@ -70,6 +71,43 @@ class PaymentService {
                     status: 'active',
                     created_at: new Date()
                 });
+
+                // NOTIFICATIONS: Notify student and admin/receptionist about payment
+                try {
+                    const user = await trx('users').where('id', data.user_id).select('first_name', 'last_name').first();
+                    const userName = user ? `${user.first_name} ${user.last_name}`.trim() : 'Usuario';
+                    const endDateStr = endDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                    // Notify student about payment confirmation
+                    await notificationService.notifyUser(data.user_id, {
+                        title: '¡Pago Recibido!',
+                        message: `Tu acceso a ${plan.name} ha sido renovado. Válido hasta ${endDateStr}.`,
+                        category: 'PAYMENT',
+                        related_entity_id: paymentId,
+                        deep_link: `/payments/${paymentId}`
+                    });
+
+                    // Notify admin about revenue
+                    await notificationService.notifyRole('ADMIN', {
+                        title: 'Pago Registrado',
+                        message: `Se ha recibido un pago de $${data.amount || 0} de ${userName}.`,
+                        category: 'PAYMENT',
+                        related_entity_id: paymentId,
+                        deep_link: `/payments/${paymentId}`
+                    });
+
+                    // Notify receptionist about revenue
+                    await notificationService.notifyRole('RECEPTIONIST', {
+                        title: 'Pago Registrado',
+                        message: `Se ha recibido un pago de $${data.amount || 0} de ${userName}.`,
+                        category: 'PAYMENT',
+                        related_entity_id: paymentId,
+                        deep_link: `/payments/${paymentId}`
+                    });
+                } catch (notifError) {
+                    console.error('⚠️ Error sending payment notifications:', notifError.message);
+                    // Don't block payment if notifications fail
+                }
 
                 return payment;
             } catch (error) {

@@ -54,7 +54,7 @@ class AuthModel {
             .join("user_plan", "users.id", "user_plan.user_id")
             .join("plans", "user_plan.plan_id", "plans.id")
             .where("users.id", userId)
-            .select("plans.max_sessions", "user_plan.classes_used", "user_plan.status", "user_plan.start_date", "user_plan.end_date")
+            .select("plans.name", "plans.description", "plans.price", "plans.type", "user_plan.status", "user_plan.max_classes", "user_plan.classes_used", "user_plan.start_date", "user_plan.end_date")
             .first();
 
         if (!planData) {
