@@ -1,0 +1,16 @@
+meta {
+  name: Get Student by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/users/2
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

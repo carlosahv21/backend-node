@@ -1,0 +1,26 @@
+meta {
+  name: Create Student
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "first_name": "Nuevo",
+    "last_name": "Usuario",
+    "email" : "nuevo4@usuario.com",
+    "password": "password123",
+    "role_id": "2"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

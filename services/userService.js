@@ -2,7 +2,6 @@
 import bcrypt from "bcryptjs";
 import userModel from "../models/userModel.js";
 import AppError from "../utils/AppError.js";
-import notificationService from "./notificationService.js";
 
 const SALT_ROUNDS = 10;
 
@@ -33,42 +32,6 @@ class UserService {
 
         if (role) {
             await userModel.updateRole(newUser.id, role);
-        }
-
-        // NOTIFICATIONS: Send welcome to student and notify admin/receptionist
-        try {
-            const firstName = userData.first_name || 'Usuario';
-            const lastName = userData.last_name || '';
-            const fullName = `${firstName} ${lastName}`.trim();
-
-            // If student, send welcome notification
-            if (role === 'STUDENT') {
-                await notificationService.notifyUser(newUser.id, {
-                    title: '¡Bienvenido a DanceFlow!',
-                    message: `¡Hola ${firstName}! Tu cuenta ha sido creada con éxito. Comienza tu viaje de baile hoy.`,
-                    category: 'SYSTEM'
-                });
-            }
-
-            // Notify admin and receptionist about new registration
-            await notificationService.notifyRole('ADMIN', {
-                title: 'Nuevo Registro',
-                message: `${fullName} se ha unido a la academia.`,
-                category: 'REGISTRATION',
-                related_entity_id: newUser.id,
-                deep_link: `/users/${newUser.id}`
-            });
-
-            await notificationService.notifyRole('RECEPTIONIST', {
-                title: 'Nuevo Registro',
-                message: `${fullName} se ha unido a la academia.`,
-                category: 'REGISTRATION',
-                related_entity_id: newUser.id,
-                deep_link: `/users/${newUser.id}`
-            });
-        } catch (notifError) {
-            console.error('⚠️ Error sending user creation notifications:', notifError.message);
-            // Don't block user creation if notifications fail
         }
 
         return { id: newUser.id, email: newUser.email, role: role || null }

@@ -1,5 +1,6 @@
 // services/studentService.js
 import studentModel from "../models/studentModel.js";
+import notificationService from "./notificationService.js";
 
 class StudentService {
     /**
@@ -25,6 +26,40 @@ class StudentService {
      */
     async createStudent(data) {
         const newStudent = await studentModel.create(data);
+
+        try {
+            const firstName = newStudent.first_name || 'Usuario';
+            const lastName = newStudent.last_name || '';
+            const fullName = `${firstName} ${lastName}`.trim();
+
+            // If student, send welcome notification
+            if (newStudent.role === 'STUDENT') {
+                await notificationService.notifyUser(newUser.id, {
+                    title: '¡Bienvenido a DanceFlow!',
+                    message: `¡Hola ${firstName}! Tu cuenta ha sido creada con éxito. Comienza tu viaje de baile hoy.`,
+                    category: 'SYSTEM'
+                });
+            }
+
+            // Notify admin and receptionist about new registration
+            await notificationService.notifyRole('ADMIN', {
+                title: 'Nuevo Estudiante',
+                message: `${fullName} se ha unido a la academia.`,
+                category: 'REGISTRATION',
+                related_entity_id: newStudent.id,
+                deep_link: `/students/${newStudent.id}/history`
+            });
+
+            await notificationService.notifyRole('RECEPTIONIST', {
+                title: 'Nuevo Estudiante',
+                message: `${fullName} se ha unido a la academia.`,
+                category: 'REGISTRATION',
+                related_entity_id: newStudent.id,
+                deep_link: `/students/${newStudent.id}/history`
+            });
+        } catch (notifError) {
+            console.error('⚠️ Error sending user creation notifications:', notifError.message);
+        }
 
         return newStudent;
     }
