@@ -20,9 +20,14 @@ router.get('/',
 // PATCH /api/notifications/read/:id? - Mark notification(s) as read
 // If id is provided: marks single notification as read
 // If id is omitted: marks all user's notifications as read
-router.patch('/read/:id?',
+router.patch('/:id/read/',
     authMiddleware.authenticateToken,
     (req, res, next) => notificationController.markAsRead(req, res, next)
+);
+
+router.patch('/read-all',
+    authMiddleware.authenticateToken,
+    (req, res, next) => notificationController.markAllAsRead(req, res, next)
 );
 
 // DELETE /api/notifications/:id - Soft delete a notification

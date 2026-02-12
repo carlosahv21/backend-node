@@ -63,7 +63,7 @@ class NotificationService {
      * @returns {Promise<object>} Deleted notification
      */
     async deleteNotification(notificationId, userId) {
-        return notificationModel.softDelete(notificationId, userId);
+        return notificationModel.deleteByUser(notificationId, userId);
     }
 
     /**
@@ -87,18 +87,21 @@ class NotificationService {
 
             const notification = await notificationModel.create(notificationData);
 
+            // Create initial interaction record for data integrity
+            await notificationModel.createInteraction(userId, notification.id);
+
             // 2. Try to send push notification
             try {
                 // Get user's push token from database
                 const user = await notificationModel.knex('users')
                     .where('id', userId)
-                    .select('expo_push_token', 'first_name')
+                    .select('push_token', 'first_name')
                     .first();
 
-                if (user && user.expo_push_token) {
+                if (user && user.push_token) {
                     // Send push notification asynchronously (don't block on failure)
                     this.sendPushNotification(
-                        user.expo_push_token,
+                        user.push_token,
                         title,
                         message,
                         {
@@ -148,13 +151,13 @@ class NotificationService {
                 const users = await notificationModel.knex('users')
                     .join('roles', 'users.role_id', 'roles.id')
                     .where('roles.name', role.toUpperCase())
-                    .whereNotNull('users.expo_push_token')
-                    .select('users.expo_push_token');
+                    .whereNotNull('users.push_token')
+                    .select('users.push_token');
 
                 // Send push to all users with tokens (async, non-blocking)
                 users.forEach(user => {
                     this.sendPushNotification(
-                        user.expo_push_token,
+                        user.push_token,
                         title,
                         message,
                         {
@@ -217,7 +220,6 @@ class NotificationService {
         for (const chunk of chunks) {
             try {
                 const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-                console.log('✅ Tickets recibidos:', JSON.stringify(ticketChunk, null, 2));
                 tickets.push(...ticketChunk);
             } catch (error) {
                 console.error('❌ Error enviando chunk de notificaciones:', error);

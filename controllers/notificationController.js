@@ -17,6 +17,7 @@ class NotificationController {
             const userId = req.user.id;
             const userRole = req.user.role || 'STUDENT'; // Extract role from JWT token
 
+
             const result = await notificationService.getUserNotifications(
                 userId,
                 userRole,
@@ -74,6 +75,28 @@ class NotificationController {
                     { updated_count: count }
                 );
             }
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
+    async markAllAsRead(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const userRole = req.user.role || 'STUDENT';
+
+            const count = await notificationService.markAllNotificationsAsRead(
+                userId,
+                userRole
+            );
+
+            ApiResponse.success(
+                res,
+                200,
+                `${count} notificaciones marcadas como leídas`,
+                { updated_count: count }
+            );
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
