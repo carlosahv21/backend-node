@@ -4,6 +4,8 @@ import BaseModel from "./baseModel.js";
 class ClassModel extends BaseModel {
     constructor() {
         super("classes");
+        this.selectFields = ["classes.*"];
+        this.searchFields = ["classes.name", "classes.level", "classes.genre"];
     }
 
     async findByIdDetails(id) {

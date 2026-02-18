@@ -11,7 +11,13 @@ class UserModel extends BaseModel {
         ];
 
         this.selectFields = ["users.*", "r.name as role_name"];
-        this.searchFields = ["users.first_name", "users.last_name", "users.email", "r.name"];
+        this.searchFields = [
+            "users.first_name",
+            "users.last_name",
+            "users.email",
+            "r.name",
+            this.knex.raw("CONCAT(users.first_name, ' ', users.last_name)")
+        ];
 
         this.filterMapping = { 'role': 'r.name' };
 

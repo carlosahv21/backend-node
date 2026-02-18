@@ -9,6 +9,7 @@ class PlanModel extends BaseModel {
         super('plans');
 
         this.jsonFields = ['metadata'];
+        this.searchFields = ['plans.name', 'plans.description', 'plans.type'];
     }
 
     // --- Métodos de CRUD (Se mantienen iguales) ---
