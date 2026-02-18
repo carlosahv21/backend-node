@@ -23,6 +23,13 @@ class PaymentService {
                 const plan = await trx('plans').where('id', data.plan_id).first();
                 if (!plan) throw new AppError("Plan not found");
 
+                // Manejar payment_date si viene como un array [startDate, endDate]
+                let manualEndDate = null;
+                if (Array.isArray(data.payment_date) && data.payment_date.length >= 2) {
+                    manualEndDate = new Date(data.payment_date[1]);
+                    data.payment_date = data.payment_date[0]; // Normalizar para la tabla payments
+                }
+
                 const [paymentId] = await trx('payments').insert(data);
                 const payment = { ...data, id: paymentId };
 
@@ -40,8 +47,10 @@ class PaymentService {
                     startDate = new Date(data.payment_date);
                 }
 
-                let endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 30);
+                let endDate = manualEndDate || new Date(startDate);
+                if (!manualEndDate) {
+                    endDate.setDate(endDate.getDate() + 30);
+                }
 
                 const maxClasses = plan.max_sessions || 0;
                 await trx('user_plan').insert({

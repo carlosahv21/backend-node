@@ -174,10 +174,20 @@ async function getFieldsData() {
         },
         {
             name: "role_id",
-            type: "select",
+            type: "relation",
             label: "Role",
             required: true,
-            order_sequence: 4,
+            order_sequence: 5,
+            relation_config: JSON.stringify({
+                "table": "roles",
+                "value_field": "roles.id",
+                "display_field": "roles.name",
+                "display_alias": "name",
+                "filters": {},
+                "multiple": false,
+                "search": true,
+                "limit": 20
+            }),
             block_id: usersBlockInfo.id,
         },
 

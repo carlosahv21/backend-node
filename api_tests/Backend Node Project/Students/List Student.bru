@@ -5,9 +5,17 @@ meta {
 }
 
 get {
-  url: {{base_url}}/users/
+  url: {{base_url}}/students/?page=1&limit=8&order_by=first_name&order_direction=asc&role_id=2
   body: none
   auth: inherit
+}
+
+params:query {
+  page: 1
+  limit: 8
+  order_by: first_name
+  order_direction: asc
+  role_id: 2
 }
 
 settings {
