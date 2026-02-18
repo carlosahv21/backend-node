@@ -1,8 +1,7 @@
 import { Router } from "express";
 import planController from "../controllers/planController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import validateSchema from "../middlewares/validationMiddleware.js";
-import { createPlanSchema } from "../validators/Schemas.js";
+import { validateModule } from "../middlewares/dynamicValidationMiddleware.js";
 
 const router = Router();
 
@@ -43,7 +42,7 @@ router.post(
     "/",
     authMiddleware.authenticateToken,
     authMiddleware.authorize("plans", "create"),
-    validateSchema(createPlanSchema),
+    validateModule('plans'),
     planController.create
 );
 

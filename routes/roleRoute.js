@@ -19,6 +19,13 @@ router.get("/:id",
     (req, res, next) => roleController.getById(req, res, next)
 );
 
+// GET /api/roles/details/:id
+router.get("/details/:id",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("roles", "view"),
+    (req, res, next) => roleController.getByIdDetails(req, res, next)
+);
+
 // POST /api/roles - Crear un nuevo rol
 router.post("/",
     authMiddleware.authenticateToken,

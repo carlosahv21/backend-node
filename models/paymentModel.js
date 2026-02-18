@@ -8,7 +8,7 @@ class PaymentModel extends BaseModel {
     constructor() {
         super('payments');
         this.softDelete = false;
-        
+
         this.joins = [
             { table: "users", alias: "u", on: ["payments.user_id", "u.id"] },
             { table: "plans", alias: "p", on: ["payments.plan_id", "p.id"] }
@@ -51,47 +51,40 @@ class PaymentModel extends BaseModel {
         return this._transformToViewModel(payment);
     }
 
-    _transformToViewModel(apiData) {
-        const capitalize = (string) => string ? string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() : '';
-
-        const formatCurrency = (value) => {
-            return isNaN(parseFloat(value)) ? value : `$${parseFloat(value).toFixed(2)}`;
-        };
-
-        const formatDate = (date) => {
-            if (!date) return '-';
-            return new Date(date).toISOString().split('T')[0];
-        };
+    _transformToViewModel(data) {
+        const toISO = (d) => d ? new Date(d).toISOString() : null;
+        const toYMD = (d) => d ? new Date(d).toISOString().split('T')[0] : null;
 
         return {
-            title: `Pago #${apiData.id}`,
-            sections: [
-                {
-                    label: "Información del Usuario",
-                    items: [
-                        { name: "Nombre", value: `${apiData.first_name} ${apiData.last_name}` },
-                        { name: "Email", value: apiData.user_email },
-                        { name: "Plan", value: apiData.plan_name },
-                    ]
-                },
-                {
-                    label: "Detalles del Pago",
-                    items: [
-                        { name: "Monto", value: formatCurrency(apiData.amount) },
-                        { name: "Método", value: capitalize(apiData.payment_method) },
-                        { name: "Estado del Pago", value: capitalize(apiData.status) },
-                        { name: "Fecha del Pago", value: formatDate(apiData.payment_date) },
-                    ]
-                },
-                {
-                    label: "Información Adicional",
-                    items: [
-                        { name: "Notas", value: apiData.notes || '-' },
-                        { name: "Fecha de Inicio", value: formatDate(apiData.user_plan_start_date) },
-                        { name: "Fecha de Finalización", value: formatDate(apiData.user_plan_end_date) },
-                    ]
-                }
-            ]
+            id: data.id,
+            amount: parseFloat(data.amount || 0),
+            original_amount: parseFloat(data.original_amount || 0),
+            payment_method: (data.payment_method || '').toLowerCase(),
+            status: (data.status || '').toLowerCase(),
+            payment_date: toYMD(data.payment_date),
+            notes: data.notes || '',
+            created_at: toISO(data.created_at),
+
+            user: {
+                id: data.user_id,
+                first_name: data.first_name,
+                last_name: data.last_name,
+                email: data.user_email,
+                full_name: `${data.first_name} ${data.last_name}`.trim()
+            },
+
+            plan: {
+                id: data.plan_id,
+                name: data.plan_name,
+                start_date: toYMD(data.user_plan_start_date),
+                end_date: toYMD(data.user_plan_end_date)
+            },
+
+            discount: {
+                type: data.discount_type,
+                value: parseFloat(data.discount_value || 0),
+                notes: data.discount_notes
+            }
         };
     }
 }

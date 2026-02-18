@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import studentController from '../controllers/studentController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import { validateModule } from '../middlewares/dynamicValidationMiddleware.js';
 
 const router = Router();
 // GET /api/students
@@ -29,6 +30,7 @@ router.get("/details/:id",
 router.post("/",
     authMiddleware.authenticateToken,
     authMiddleware.authorize("students", "create"),
+    validateModule('users'),
     (req, res, next) => studentController.create(req, res, next) // Añadimos 'next'
 );
 

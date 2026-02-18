@@ -53,77 +53,26 @@ class PlanModel extends BaseModel {
     /**
      * Transforma el objeto de datos del plan al formato de View Model para el Drawer.
      */
-    _transformToViewModel(apiData) {
-        const capitalize = (string) => string ? string.charAt(0).toUpperCase() + string.slice(1).toLowerCase() : '';
-
-        const formatValue = (key, value) => {
-            if (value === null || value === undefined) return "-";
-
-            // Si el valor es 0 (para max_sessions), ya fue convertido a "Ilimitadas" en findById
-            // Si es otro 0 (ej. trial_period_days), lo manejamos aquí.
-            if (value === 0 && !key.includes('sessions') && !key.includes('classes')) return 0;
-
-            // Formato de Precio
-            if (key.includes("price") && !isNaN(parseFloat(value))) {
-                return `$${parseFloat(value).toFixed(2)}`;
-            }
-            // Formato Booleano (1/0)
-            if (key.includes("active")) {
-                // Dejamos el valor crudo (1 o 0) y usamos un renderer para el Tag
-                return value;
-            }
-
-            // Las fechas se dejan en el formato ISO para que el frontend (dayjs) las formatee
-            if (key.includes("date") || key.includes("at")) {
-                return value;
-            }
-            return value;
-        };
-
-        // Determinar el "tipo de plan" (título principal)
-        let subtitleText = capitalize(apiData.type);
-        if (apiData.type === 'package') {
-            subtitleText = `Paquete de ${apiData.max_sessions} Clases`;
-        } else if (apiData.type === 'subscription') {
-            subtitleText = 'Suscripción Mensual';
-        }
-
+    _transformToViewModel(data) {
+        const toISO = (d) => d ? new Date(d).toISOString() : null;
 
         return {
-            title: apiData.name,
-            subtitle: subtitleText,
-            email: apiData.description, // Usamos la descripción como subtítulo secundario
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            // Convertir precio a número float
+            price: parseFloat(data.price || 0),
+            type: (data.type || '').toLowerCase(),
+            active: Boolean(data.active),
+            trial_period_days: parseInt(data.trial_period_days || 0),
 
-            sections: [
-                {
-                    label: "Información de Precios y Tipo",
-                    items: [
-                        { name: "Precio", value: formatValue('price', apiData.price) },
-                        { name: "Tipo de Plan", value: capitalize(apiData.type) },
-                        {
-                            name: "Estado",
-                            // Usamos un renderer que crearemos en el frontend para pintar el Tag
-                            value: apiData.active,
-                            renderer: 'activeStatusTag'
-                        },
-                        { name: "Periodo de Prueba (Días)", value: apiData.trial_period_days },
-                    ],
-                },
-                {
-                    label: "Límites de Uso",
-                    items: [
-                        { name: "Sesiones Máximas", value: apiData.max_sessions }, // Usará "Ilimitadas" o el número
-                        { name: "Clases Máximas por Día", value: apiData.max_classes || 'N/A' },
-                    ],
-                },
-                {
-                    label: "Registro de Tiempos",
-                    items: [
-                        { name: "Creado En", value: apiData.created_at },
-                        { name: "Actualizado En", value: apiData.updated_at },
-                    ],
-                },
-            ],
+            // max_sessions ya viene transformado por findById (número o "Ilimitadas")
+            max_sessions: data.max_sessions,
+            max_classes: data.max_classes || null,
+
+            metadata: data.metadata || null,
+            created_at: toISO(data.created_at),
+            updated_at: toISO(data.updated_at)
         };
     }
 }

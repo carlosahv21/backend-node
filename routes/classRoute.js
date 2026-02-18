@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import classController from '../controllers/classController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import { validateModule } from '../middlewares/dynamicValidationMiddleware.js';
 
 const router = Router();
 
@@ -37,6 +38,7 @@ router.get("/details/:id",
 router.post("/",
     authMiddleware.authenticateToken,
     authMiddleware.authorize("classes", "create"),
+    validateModule('classes'),
     (req, res, next) => classController.create(req, res, next)
 );
 

@@ -17,6 +17,13 @@ class RoleService {
     };
 
     /**
+     * Obtiene un rol por ID con detalles.
+     */
+    async getRoleByIdDetails(id) {
+        return roleModel.findByIdDetails(id);
+    };
+
+    /**
      * Crea un nuevo rol.
      */
     async createRole(data) {

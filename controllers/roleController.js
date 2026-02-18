@@ -27,6 +27,17 @@ class RoleController {
         }
     }
 
+    async getByIdDetails(req, res, next) {
+        try {
+            const { id } = req.params;
+            const role = await roleService.getRoleByIdDetails(id);
+            ApiResponse.success(res, 200, "Rol obtenido correctamente", role);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
+
     async create(req, res, next) {
         try {
             const newRole = await roleService.createRole(req.body);

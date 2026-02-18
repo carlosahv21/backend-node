@@ -2,8 +2,7 @@
 import { Router } from "express";
 import userController from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import validateSchema from "../middlewares/validationMiddleware.js";
-import { createUserSchema } from "../validators/Schemas.js";
+import { validateModule } from "../middlewares/dynamicValidationMiddleware.js";
 
 const router = Router();
 // GET /api/users
@@ -27,7 +26,7 @@ router.post(
     "/",
     authMiddleware.authenticateToken,
     authMiddleware.authorize("users", "create"),
-    validateSchema(createUserSchema),
+    validateModule('users'),
     (req, res, next) => userController.create(req, res, next) // Añadimos 'next'
 );
 

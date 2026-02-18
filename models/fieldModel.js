@@ -72,6 +72,76 @@ class FieldModel extends BaseModel {
     }
 
     /**
+     * Obtiene todos los campos de un módulo por nombre
+     * @param {string} moduleName - Nombre del módulo
+     * @returns {Promise<Array>} - Array de campos con metadata
+     */
+    async findFieldsByModuleName(moduleName) {
+        const fields = await this.knex('fields')
+            .join('blocks', 'fields.block_id', 'blocks.id')
+            .join('modules', 'blocks.module_id', 'modules.id')
+            .where('modules.name', moduleName)
+            .select(
+                'fields.id',
+                'fields.block_id',
+                'fields.name',
+                'fields.label',
+                'fields.type',
+                'fields.options',
+                'fields.relation_config',
+                'fields.required',
+                'fields.order_sequence',
+                'blocks.name as block_name'
+            )
+            .orderBy('blocks.order')
+            .orderBy('fields.order_sequence');
+
+        return fields;
+    }
+
+    /**
+     * Obtiene campos para validación por ID de módulo
+     * @param {number} moduleId - ID del módulo
+     * @returns {Promise<Array>} - Array de campos con metadata de validación
+     */
+    async findFieldsForValidation(moduleId) {
+        return this.knex('fields')
+            .join('blocks', 'fields.block_id', 'blocks.id')
+            .where('blocks.module_id', moduleId)
+            .select(
+                'fields.name',
+                'fields.type',
+                'fields.options',
+                'fields.relation_config',
+                'fields.required'
+            );
+    }
+
+    /**
+     * Obtiene campos para validación por nombre de bloque
+     * @param {string} blockName - Nombre del bloque
+     * @param {string} moduleName - Nombre del módulo
+     * @returns {Promise<Array>} - Array de campos con metadata de validación
+     */
+    async findFieldsByBlockName(blockName, moduleName) {
+        return this.knex('fields')
+            .join('blocks', 'fields.block_id', 'blocks.id')
+            .join('modules', 'blocks.module_id', 'modules.id')
+            .where({
+                'blocks.name': blockName,
+                'modules.name': moduleName
+            })
+            .select(
+                'fields.name',
+                'fields.type',
+                'fields.options',
+                'fields.relation_config',
+                'fields.required'
+            )
+            .orderBy('fields.order_sequence');
+    }
+
+    /**
      * Obtiene la configuración de una relación.
      */
     async findRelationField(config, searchQuery) {
