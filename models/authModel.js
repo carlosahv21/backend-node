@@ -40,7 +40,8 @@ class AuthModel {
             .where("role_permissions.role_id", roleId)
             .select(
                 "permissions.name as action",
-                "modules.name as moduleName"
+                "modules.name as moduleName",
+                "role_permissions.scope as scope"
             );
 
         return rawPermissions;

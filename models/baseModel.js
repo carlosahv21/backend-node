@@ -166,16 +166,26 @@ class BaseModel {
     }
 
     // Obtener todos los registros con paginación y filtros
-    async findAll(queryParams = {}) {
+    async findAll(queryParams = {}, queryModifier = null) {
         const { page = 1, limit = 10, ...filters } = queryParams;
 
         const query = this._buildQuery(filters);
+
+        if (queryModifier) {
+            await queryModifier(query);
+        }
+
         const results = await query
             .clone()
             .limit(limit)
             .offset((page - 1) * limit);
 
         const totalQuery = this._buildQuery({ ...filters, isCount: true });
+
+        if (queryModifier) {
+            await queryModifier(totalQuery);
+        }
+
         const totalRes = await totalQuery.count("* as count").first();
 
         return {
@@ -277,7 +287,6 @@ class BaseModel {
 
     // Actualizar estado de papelera (Soft Delete logic)
     async updateBinStatus(id, data) {
-        
         const updatedCount = await this.knex(this.tableName)
             .where({ id })
             .update(data);

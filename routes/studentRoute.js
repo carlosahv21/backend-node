@@ -22,7 +22,6 @@ router.get("/:id",
 // GET /api/students/details/:id
 router.get("/details/:id",
     authMiddleware.authenticateToken,
-    authMiddleware.authorize("students", "view"),
     (req, res, next) => studentController.getByIdDetails(req, res, next) // Añadimos 'next'
 );
 

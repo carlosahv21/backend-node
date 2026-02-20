@@ -14,7 +14,7 @@ class RolePermissionModel extends BaseModel {
         return this.knex('permissions as p')
             .join('role_permissions as rp', 'p.id', 'rp.permission_id')
             .where('rp.role_id', role_id)
-            .select('p.id', 'p.name', 'p.description');
+            .select('p.id', 'p.name', 'p.description', 'rp.scope');
     }
 
     /**

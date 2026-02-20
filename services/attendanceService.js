@@ -4,6 +4,7 @@ import registrationModel from '../models/registrationModel.js';
 import AppError from '../utils/AppError.js';
 import notificationService from './notificationService.js';
 import knex from '../config/knex.js';
+import { applyScope } from '../utils/applyScope.js';
 
 class attendanceService {
     async createAttendance(data) {
@@ -55,8 +56,18 @@ class attendanceService {
         return result;
     }
 
-    async getAttendance(queryParams) {
-        return await attendanceModel.findAll(queryParams);
+    async getAllAttendances(user, permission, queryParams) {
+        return await attendanceModel.findAll(queryParams, async (query) => {
+            await applyScope(query, permission, user, {
+                ownColumn: 'attendances.student_id',
+                assignedColumn: 'attendances.class_id',
+                assignedResolver: async (user) => {
+                    return await knex('teacher_classes')
+                        .where('teacher_id', user.id)
+                        .pluck('class_id');
+                }
+            });
+        });
     }
 
     async getAttendanceByClassAndDate(class_id, date) {

@@ -61,7 +61,8 @@ class RolePermissionService {
                         JSON_OBJECT(
                             'id', p.id,
                             'name', p.name,
-                            'module', m.name 
+                            'module', m.name,
+                            'scope', rp.scope
                         )
                     ) as permissions
                 `)

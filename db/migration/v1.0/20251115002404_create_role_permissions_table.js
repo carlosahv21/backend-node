@@ -6,6 +6,7 @@ export async function up(knex) {
             table.increments("id").primary();
             table.integer("role_id").unsigned().notNullable().references("id").inTable("roles").onDelete("CASCADE");
             table.integer("permission_id").unsigned().notNullable().references("id").inTable("permissions").onDelete("CASCADE");
+            table.enum('scope', ['all', 'own', 'assigned']).notNullable().defaultTo('all');
             table.timestamps(true, true);
         });
         console.log("Table 'role_permissions' created successfully.");
@@ -26,6 +27,7 @@ export async function up(knex) {
     const adminPermissions = permissions.map(p => ({
         role_id: roleMap["admin"],
         permission_id: p.id,
+        scope: 'all'
     }));
 
     // RECEPTIONIST → permisos relacionados con estudiantes, pagos y asistencia
@@ -36,6 +38,7 @@ export async function up(knex) {
         .map(p => ({
             role_id: roleMap["receptionist"],
             permission_id: p.id,
+            scope: 'all'
         }));
 
     // TEACHER → solo ver + asistencia
@@ -49,6 +52,7 @@ export async function up(knex) {
         .map(p => ({
             role_id: roleMap["teacher"],
             permission_id: p.id,
+            scope: 'assigned'
         }));
 
     const studentModules = ["dashboard", "classes", "registrations"];
@@ -57,6 +61,7 @@ export async function up(knex) {
         .map(p => ({
             role_id: roleMap["student"],
             permission_id: p.id,
+            scope: 'own'
         }));
 
     // Consolidar todo

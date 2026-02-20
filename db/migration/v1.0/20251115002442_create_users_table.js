@@ -6,6 +6,7 @@ export async function up(knex) {
     if (!exists) {
         await knex.schema.createTable("users", function (table) {
             table.increments("id").primary(); // Primary key (auto-incremental)
+            table.string("avatar", 255).notNullable().unique(); // Avatar URL, unique for each user
             table.string("first_name", 100).notNullable(); // First name
             table.string("last_name", 100).notNullable(); // Last name
             table.string("email", 255).notNullable().unique(); // Email, unique for authentication
@@ -13,6 +14,7 @@ export async function up(knex) {
             table.string("password", 255).notNullable(); // Encrypted password
             table.boolean("email_verified").defaultTo(false); // Whether the email is verified
             table.timestamp("last_login").nullable(); // Last login timestamp
+            table.boolean("needs_password_change").defaultTo(false); // Whether the user needs to change their password on next login
             table.string("push_token", 255).nullable(); // Push notification token
             table.integer("role_id").unsigned().notNullable().references("id").inTable("roles").onDelete("CASCADE"); // Role
             table.timestamp("deleted_at").nullable();

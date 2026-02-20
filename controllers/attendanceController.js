@@ -15,7 +15,7 @@ class attendanceController {
 
     async getAllAttendances(req, res) {
         try {
-            const result = await attendanceService.getAttendance(req.query);
+            const result = await attendanceService.getAllAttendances(req.user, req.permission, req.query);
             ApiResponse.success(res, 200, "Asistencias obtenidas correctamente", result);
         } catch (error) {
             const status = error.statusCode || 500;
