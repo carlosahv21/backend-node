@@ -3,12 +3,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import authModel from '../models/authModel.js';
 import AppError from "../utils/AppError.js";
+import { buildPermissionMap } from "../utils/permissionMapper.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "1h";
 
 /**
- * Función común para obtener usuario + rol + permisos + rutas + settings
+ * Función común para obtener usuario + rol + permisos + academy + modules
  */
 const getUserData = async (userId) => {
 
@@ -19,17 +20,32 @@ const getUserData = async (userId) => {
     const roleData = await authModel.findRoleByUserId(userId);
 
     let planData = null;
-    if (roleData.role_name == "student") {
+    if (roleData.role_name === "student") {
         planData = await authModel.findPlanByUserId(userId);
     }
 
     const rawPermissions = await authModel.findPermissions(roleData.role_id);
 
-    const permissionsList = [...new Set(rawPermissions.map(p =>
-        `${p.moduleName}:${p.action}`
-    ))];
+    // Permisos estructurados jerárquicamente para SaaS
+    const permissions = buildPermissionMap(rawPermissions);
 
+    // Extraer nombres de módulos únicos habilitados y distinguir producto de internals
+    const allModules = Object.keys(permissions);
+    const internalModules = ['roles', 'permissions', 'modules', 'settings'];
+    const productModules = allModules.filter(m => !internalModules.includes(m));
+
+    // Datos de la academia derivados de la tabla settings. 
+    // Plan "pro" es un stub temporal por requerimiento SaaS.
     const settings = await authModel.findSettings();
+    const academy = settings ? {
+        id: settings.id,
+        name: settings.academy_name,
+        plan: "pro",
+        logo: settings.logo_url,
+        currency: settings.currency,
+        language: settings.language,
+        theme: settings.theme,
+    } : null;
 
     return {
         user: {
@@ -39,13 +55,14 @@ const getUserData = async (userId) => {
             role: roleData.role_name,
             plan: planData,
         },
-        settings,
-        permissions: permissionsList,
+        academy,
+        modules: productModules, // Solo modulos SaaS exportados al UI
+        permissions,
     };
 };
 
 /**
- * 3. Lógica de negocio de Login (hashing y JWT)
+ * Lógica de negocio de Login (hashing y JWT)
  */
 const authenticateUser = async ({ email, password }) => {
     const user = await authModel.findUserByEmail(email);
@@ -60,8 +77,13 @@ const authenticateUser = async ({ email, password }) => {
 
     const data = await getUserData(user.id);
 
+    // JWT ultraligero: solo identidad y tenant (academy)
     const token = jwt.sign(
-        { id: user.id, email: user.email, role: data.user.role },
+        {
+            id: user.id,
+            role: data.user.role,
+            academy_id: data.academy?.id || null
+        },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN }
     );
@@ -70,7 +92,7 @@ const authenticateUser = async ({ email, password }) => {
 };
 
 /**
- * Refrescar datos de usuario
+ * Refrescar datos de usuario autenticado (/me)
  */
 const getAuthenticatedUser = async (userId) => {
     return getUserData(userId);

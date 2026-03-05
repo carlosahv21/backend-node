@@ -38,6 +38,9 @@ import cronService from './services/cronService.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Configuración de confianza de proxy para Rate Limiting real (ej. Cloudflare, Nginx, AWS ELB)
+app.set('trust proxy', 1);
+
 // --- Middlewares Globales ---
 app.use(morgan("dev"));
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
@@ -67,6 +70,10 @@ app.get('/api/health', async (req, res, next) => {
     ApiResponse.error(res, 500, error.message);
   }
 });
+
+// --- Middlewares Globales de API ---
+import { apiLimiter } from './middlewares/rateLimiter.js';
+app.use('/api', apiLimiter);
 
 // --- Rutas de la API ---
 app.use('/api/auth', authRoutes);

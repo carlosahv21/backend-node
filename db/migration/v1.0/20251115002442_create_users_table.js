@@ -6,7 +6,7 @@ export async function up(knex) {
     if (!exists) {
         await knex.schema.createTable("users", function (table) {
             table.increments("id").primary(); // Primary key (auto-incremental)
-            table.string("avatar", 255).notNullable().unique(); // Avatar URL, unique for each user
+            table.string("avatar", 255).nullable().unique(); // Avatar URL, unique for each user
             table.string("first_name", 100).notNullable(); // First name
             table.string("last_name", 100).notNullable(); // Last name
             table.string("email", 255).notNullable().unique(); // Email, unique for authentication
