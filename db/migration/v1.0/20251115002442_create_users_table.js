@@ -11,6 +11,8 @@ export async function up(knex) {
             table.string("last_name", 100).notNullable(); // Last name
             table.string("email", 255).notNullable().unique(); // Email, unique for authentication
             table.string("phone", 255).nullable(); // Phone number
+            table.enum('gender', ['male', 'female', 'other']).nullable(); // Gender
+            table.date("birth_date").nullable(); // Birth date
             table.string("password", 255).notNullable(); // Encrypted password
             table.boolean("email_verified").defaultTo(false); // Whether the email is verified
             table.timestamp("last_login").nullable(); // Last login timestamp

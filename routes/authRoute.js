@@ -21,7 +21,7 @@ router.post("/register",
 // POST /api/auth/reset-password (Placeholder for when password reset is fully implemented)
 router.post("/reset-password",
     passwordResetLimiter,
-    (req, res) => res.status(501).json({ message: "Not implemented yet" })
+    (req, res, next) => authController.resetPassword(req, res, next)    
 );
 
 // GET /api/auth/me

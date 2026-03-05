@@ -6,7 +6,7 @@ import ApiResponse from "../utils/apiResponse.js";
  * Clase controladora para la autenticación.
  */
 class AuthController {
-    
+
     /**
      * Maneja la solicitud de login.
      */
@@ -30,6 +30,22 @@ class AuthController {
             // Delega la obtención de todos los datos del perfil al servicio
             const data = await authService.getAuthenticatedUser(userId);
             ApiResponse.success(res, 200, "Perfil de usuario obtenido correctamente", data);
+        } catch (err) {
+            const status = err.statusCode || 400;
+            ApiResponse.error(res, status, err.message);
+        }
+    }
+
+    /**
+     * Maneja la solicitud de reset de contraseña.
+     */
+    async resetPassword(req, res, next) {
+        try {
+            const { new_password: password, email } = req.body;
+            console.log("Request body:", req.body);
+
+            const result = await authService.resetPassword({ email, password });
+            ApiResponse.success(res, 200, "Contraseña restablecida correctamente", result);
         } catch (err) {
             const status = err.statusCode || 400;
             ApiResponse.error(res, status, err.message);

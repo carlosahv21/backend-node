@@ -70,6 +70,13 @@ class AuthModel {
     async findSettings() {
         return this.knex("settings").first();
     }
+
+    /**
+     * Actualiza la contraseña de un usuario.
+     */
+    async updateUser(userId, data) {
+        return this.knex("users").where({ id: userId }).update(data);
+    }
 }
 
 export default new AuthModel();

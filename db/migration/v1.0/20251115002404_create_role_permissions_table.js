@@ -55,9 +55,12 @@ export async function up(knex) {
             scope: 'assigned'
         }));
 
-    const studentModules = ["dashboard", "classes", "registrations"];
+    const studentModules = ["dashboard", "classes", "registrations", "students"];
     const studentPermissions = permissions
-        .filter(p => studentModules.includes(p.resource) && p.action === 'view')
+        .filter(p =>
+            (studentModules.includes(p.resource) && p.action === 'view') ||
+            (p.resource === 'students' && p.action === 'edit')
+        )
         .map(p => ({
             role_id: roleMap["student"],
             permission_id: p.id,

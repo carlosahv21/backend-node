@@ -39,9 +39,12 @@ const getUserData = async (userId) => {
     const settings = await authModel.findSettings();
     const academy = settings ? {
         id: settings.id,
-        name: settings.academy_name,
+        academy_name: settings.academy_name,
+        contact_email: settings.contact_email,
+        phone_number: settings.phone_number,
         plan: "pro",
-        logo: settings.logo_url,
+        logo_url: settings.logo_url,
+        date_format: settings.date_format,
         currency: settings.currency,
         language: settings.language,
         theme: settings.theme,
@@ -98,8 +101,24 @@ const getAuthenticatedUser = async (userId) => {
     return getUserData(userId);
 };
 
+/**
+ * Lógica de negocio de Reset de Contraseña
+ */
+const resetPassword = async ({ email, password }) => {
+    const user = await authModel.findUserByEmail(email);
+
+    if (!user) {
+        throw new AppError("Usuario no encontrado", 404);
+    }
+    const hashedPassword = await bcrypt.hashSync(password, 10);
+
+    await authModel.updateUser(user.id, { password: hashedPassword });
+
+    return { message: "Contraseña restablecida correctamente" };
+};
 
 export default {
     authenticateUser,
     getAuthenticatedUser,
+    resetPassword,
 };
