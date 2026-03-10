@@ -70,4 +70,10 @@ router.get("/users-at-risk",
     reportsController.getUsersAtRisk
 );
 
+// GET /api/reports/dashboard-sidebar
+router.get("/dashboard-sidebar",
+    authMiddleware.authenticateToken,
+    reportsController.getDashboardSidebar
+);
+
 export default router;

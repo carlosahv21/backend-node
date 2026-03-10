@@ -168,6 +168,23 @@ class reportsController {
             ApiResponse.error(res, status, error.message);
         }
     }
+
+    async getDashboardSidebar(req, res, next) {
+        try {
+            const { id: userId, role_id: roleId } = req.user;
+            const data = await ReportsService.getSidebarData(userId, roleId);
+
+            ApiResponse.success(
+                res,
+                200,
+                "Dashboard sidebar data retrieved successfully",
+                data
+            );
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new reportsController();

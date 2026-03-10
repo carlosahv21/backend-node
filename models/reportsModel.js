@@ -465,6 +465,156 @@ class ReportsModel extends BaseModel {
             adminActivity,
         };
     }
+
+    /**
+     * Obtiene los datos para el sidebar del dashboard de forma centralizada.
+     * @param {string} userId ID del usuario autenticado.
+     * @param {number} roleId ID del rol del usuario.
+     */
+    async getSidebarData(userId, roleId) {
+        const today = new Date();
+        const todayStr = today.toISOString().split("T")[0];
+        const currentDayName = today.toLocaleDateString("en-US", { weekday: "long" });
+
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // start on monday
+        const startOfWeekStr = startOfWeek.toISOString().split("T")[0];
+
+        // Section 2: Perfil del usuario general
+        const section2 = await this.knex("users")
+            .select(
+                "users.id",
+                "users.first_name",
+                "users.last_name",
+                "users.email",
+                "roles.name as role_name"
+            )
+            .leftJoin("roles", "users.role_id", "roles.id")
+            .where("users.id", userId)
+            .first();
+
+        const roleName = section2?.role_name || '';
+
+        let section1 = [];
+        let section3 = {};
+
+        if (roleName === 'admin' || roleName === 'receptionist') {
+            // ADMIN / RECEPTIONIST
+
+            // Section 1: Universal - Agenda (Todas las clases de hoy)
+            section1 = await this.knex("classes")
+                .where("date", currentDayName)
+                .select("name", "genre", "hour", "level")
+                .orderBy("hour", "asc");
+
+            // Section 2: Recaudación del día
+            const todayPayments = await this.knex("payments")
+                .where("payment_date", todayStr)
+                .sum("amount as total_amount")
+                .first();
+
+            section2.daily_revenue = parseFloat(todayPayments?.total_amount || 0);
+
+            // Section 3: Nuevos Estudiantes esta semana
+            const newStudentsResult = await this.knex("users as u")
+                .join("roles as r", "u.role_id", "r.id")
+                .where("r.name", "student")
+                .andWhere("u.created_at", ">=", startOfWeekStr)
+                .count("u.id as new_students")
+                .first();
+
+            section3.new_students_this_week = parseInt(newStudentsResult?.new_students || 0);
+
+        } else if (roleName === 'teacher') {
+            // PROFESOR
+
+            // Section 1: Universal - Agenda del profesor hoy
+            section1 = await this.knex("classes")
+                .where("teacher_id", userId)
+                .andWhere("date", currentDayName)
+                .select("name", "genre", "hour", "level")
+                .orderBy("hour", "asc");
+
+            // Section 2: Ratio de Asistencia
+            const attendanceInfo = await this.knex("attendances as a")
+                .join("classes as c", "a.class_id", "c.id")
+                .where("c.teacher_id", userId)
+                .select(
+                    this.knex.raw('SUM(CASE WHEN a.status = "present" THEN 1 ELSE 0 END) as attended_count'),
+                    this.knex.raw('SUM(c.capacity) as total_capacity')
+                )
+                .first();
+
+            let attendanceRate = 0;
+            if (attendanceInfo && attendanceInfo.total_capacity > 0) {
+                attendanceRate = ((attendanceInfo.attended_count / attendanceInfo.total_capacity) * 100).toFixed(2);
+            }
+            section2.attendance_ratio = parseFloat(attendanceRate);
+
+            // Section 3: Clases con Mayor Inscripción
+            const topClasses = await this.knex("classes as c")
+                .leftJoin("user_class as uc", "c.id", "uc.class_id")
+                .where("c.teacher_id", userId)
+                .select("c.name", "c.genre")
+                .count("uc.user_id as enrollments")
+                .groupBy("c.id", "c.name", "c.genre")
+                .orderBy("enrollments", "desc")
+                .limit(3);
+
+            section3.top_classes = topClasses;
+
+        } else if (roleName === 'student') {
+            // ESTUDIANTE
+
+            // Section 1: Universal - Clases donde está inscrito hoy
+            section1 = await this.knex("classes as c")
+                .join("user_class as uc", "c.id", "uc.class_id")
+                .where("uc.user_id", userId)
+                .andWhere("c.date", currentDayName)
+                .select("c.name", "c.genre", "c.hour", "c.level")
+                .orderBy("c.hour", "asc");
+
+            // Section 2: Estado de Cuenta y Plan
+            const userPlan = await this.knex("user_plan as up")
+                .join("plans as p", "up.plan_id", "p.id")
+                .where("up.user_id", userId)
+                .andWhere("up.status", "active")
+                .select("up.classes_remaining", "up.end_date", "p.name as plan_name")
+                .orderBy("up.created_at", "desc")
+                .first();
+
+            if (userPlan) {
+                // Ensure date formatting is clean
+                if (userPlan.end_date) {
+                    userPlan.end_date = new Date(userPlan.end_date).toISOString().split("T")[0];
+                }
+                section2.plan = userPlan;
+            } else {
+                section2.plan = null;
+            }
+
+            // Section 3: Asistencia Semanal
+            const weeklyAttendanceCount = await this.knex("attendances")
+                .where("student_id", userId)
+                .andWhere("date", ">=", startOfWeekStr)
+                .select(
+                    this.knex.raw('SUM(CASE WHEN LOWER(status) = "present" THEN 1 ELSE 0 END) as attended'),
+                    this.knex.raw('COUNT(id) as scheduled')
+                )
+                .first();
+
+            section3.weekly_attendance = {
+                attended: parseInt(weeklyAttendanceCount?.attended || 0),
+                scheduled: parseInt(weeklyAttendanceCount?.scheduled || 0)
+            };
+        }
+
+        return {
+            section1,
+            section2: section2 || {},
+            section3
+        };
+    }
 }
 
 export default new ReportsModel();

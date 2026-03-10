@@ -77,6 +77,14 @@ class ReportsService {
     async getUsersAtRisk() {
         return ReportsModel.getUsersAtRisk();
     }
+
+    /**
+     * Obtiene los datos para el sidebar del dashboard.
+     */
+    async getSidebarData(userId, roleId) {
+        console.log("here");
+        return ReportsModel.getSidebarData(userId, roleId);
+    }
 }
 
 export default new ReportsService();

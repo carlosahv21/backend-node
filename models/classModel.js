@@ -5,7 +5,7 @@ class ClassModel extends BaseModel {
     constructor() {
         super("classes");
         this.selectFields = ["classes.*"];
-        this.searchFields = ["classes.name", "classes.level", "classes.genre"];
+        this.searchFields = ["classes.name", "classes.level", "classes.genre", "classes.date", "classes.hour"];
     }
 
     async findByIdDetails(id) {
