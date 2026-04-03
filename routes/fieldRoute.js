@@ -19,8 +19,8 @@ router.get("/:id",
     (req, res, next) => fieldController.getById(req, res, next)
 );
 
-// GET /api/fields/module/:id
-router.get("/module/:id",
+// GET /api/fields/module/:name
+router.get("/module/:name",
     authMiddleware.authenticateToken,
     authMiddleware.authorize("fields", "view"),
     (req, res, next) => fieldController.getFieldsByModule(req, res, next)

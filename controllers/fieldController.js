@@ -96,10 +96,10 @@ class FieldController {
      * Obtiene todos los bloques con sus campos asociados por módulo (incluyendo herencia).
      */
     async getFieldsByModule(req, res, next) {
-        const { id: moduleId } = req.params;
+        const { name: moduleName } = req.params;
 
         try {
-            const data = await fieldService.getModuleFields(moduleId);
+            const data = await fieldService.getModuleFields(moduleName);
             ApiResponse.success(res, 200, "Bloques obtenidos correctamente", data);
         } catch (error) {
             const status = error.statusCode || 500;

@@ -112,7 +112,6 @@ class ClassController {
             const nextClass = await classService.getNextClass();
             ApiResponse.success(res, 200, "Clase obtenida correctamente", nextClass);
         } catch (error) {
-            console.log(error);
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
         }

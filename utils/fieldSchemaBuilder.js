@@ -126,7 +126,7 @@ class FieldSchemaBuilder {
         const { relation_config, name } = field;
 
         if (!relation_config) {
-            return z.number();
+            return z.string().min(1, { message: `El campo '${name}' debe ser válido` });
         }
 
         // Parse relation_config si es string JSON
@@ -134,8 +134,8 @@ class FieldSchemaBuilder {
             ? JSON.parse(relation_config)
             : relation_config;
 
-        const baseSchema = z.number().int().positive({
-            message: `El campo '${name}' debe ser un ID válido`
+        const baseSchema = z.string().min(1, {
+            message: `El campo '${name}' es obligatorio y requiere un valor válido`
         });
 
         // Si permite múltiples valores, retornar array

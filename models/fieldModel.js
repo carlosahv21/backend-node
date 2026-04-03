@@ -36,9 +36,9 @@ class FieldModel extends BaseModel {
     /**
      * Obtiene la información básica de un módulo.
      */
-    async findModuleById(moduleId) {
+    async findModuleByName(moduleName) {
         return this.knex('modules')
-            .where({ id: moduleId })
+            .where({ name: moduleName })
             .select('id', 'name', 'parent_module_id')
             .first();
     }
@@ -176,7 +176,7 @@ class FieldModel extends BaseModel {
         }
 
         if (searchQuery) {
-            query = query.whereRaw(`${display_field} like ?`, [`%${searchQuery}%`]);
+            query = query.whereRaw(`${display_field} ilike ?`, [`%${searchQuery}%`]);
         }
 
         if (limit) query = query.limit(limit);

@@ -6,7 +6,11 @@ class TeacherService {
      * Obtiene todos los profesores (con paginación, búsqueda, filtros).
      */
     async getAllTeachers(queryParams) {
-        return teacherModel.findAll(queryParams);
+        // Ignorar role_id si es un número legacy (ej. "3") y forzar filtro por nombre de rol
+        const { role_id, ...cleanParams } = queryParams;
+        const filters = (role_id && !isNaN(role_id)) ? cleanParams : queryParams;
+
+        return teacherModel.findAll({ ...filters, role: 'teacher' });
     }
 
     /**

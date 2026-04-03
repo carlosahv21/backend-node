@@ -16,7 +16,6 @@ class TeacherModel extends UserModel {
         const teacher = await db('users as u')
             .leftJoin('roles as r', 'u.role_id', 'r.id')
             .where('u.id', id)
-            .where('u.role_id', 3)
             .select(
                 'u.id', 'u.first_name', 'u.last_name', 'u.email', 
                 'u.email_verified', 'r.name as role_name'
@@ -64,7 +63,7 @@ class TeacherModel extends UserModel {
         
         const paidThisMonth = await db('payments')
             .where('user_id', id)
-                .andWhereRaw('MONTH(payment_date) = ?', [currentMonth])
+                .andWhereRaw('EXTRACT(MONTH FROM payment_date) = ?', [currentMonth])
             .sum('amount as total');
 
         return {

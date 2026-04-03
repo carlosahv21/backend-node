@@ -2,43 +2,35 @@ export async function up(knex) {
     const exists = await knex.schema.hasTable("permissions");
 
     if (!exists) {
-        await knex.schema.createTable("permissions", function (table) {
-            table.increments("id").primary();
-            table.integer("module_id").unsigned().references("id").inTable("modules").onDelete("CASCADE"); // Asociar permiso a ruta
-            table.string("name", 50).notNullable(); // Nombre del permiso (create, edit, etc.)
-            table.string("description", 255).nullable(); // Descripción del permiso
+        await knex.schema.createTable("permissions", (table) => {
+            table.uuid("id").primary().defaultTo(knex.raw("uuid_generate_v4()"));
+            table.uuid("module_id").notNullable().references("id").inTable("modules").onDelete("CASCADE");
+            table.string("name", 50).notNullable();
+            table.string("description", 255).nullable();
             table.timestamps(true, true);
             table.timestamp("deleted_at").nullable();
-            table.integer("deleted_by").unsigned().nullable();
-            table.unique(["module_id", "name"]); // Un permiso único por ruta
+            table.uuid("deleted_by").nullable();
+            table.unique(["module_id", "name"]);
         });
 
-        console.log("Table 'permissions' created successfully.");
-    }
+        const modules = await knex("modules").select("id", "name");
+        const permissionsTemplate = ["create", "edit", "delete", "view"];
+        const permissionsToInsert = [];
 
-    // ============================
-    // Insertar permisos asociados a módulos
-    // ============================
-    const modules = await knex("modules").select(); // Traemos todas las rutas
-    const permissionsTemplate = ["create", "edit", "delete", "view"];
-
-    const permissionsToInsert = [];
-
-    modules.forEach(module => {
-        permissionsTemplate.forEach(name => {
-            permissionsToInsert.push({
-                module_id: module.id,
-                name,
-                description: `${name} permission for ${module.name}`
+        modules.forEach(module => {
+            permissionsTemplate.forEach(name => {
+                permissionsToInsert.push({
+                    module_id: module.id,
+                    name,
+                    description: `${name} permission for ${module.name}`
+                });
             });
         });
-    });
 
-    await knex("permissions").insert(permissionsToInsert);
-    console.log("Permissions for all modules inserted successfully.");
-};
+        await knex("permissions").insert(permissionsToInsert);
+    }
+}
 
 export async function down(knex) {
     await knex.schema.dropTableIfExists("permissions");
-    console.log("Table 'permissions' dropped successfully.");
-};
+}

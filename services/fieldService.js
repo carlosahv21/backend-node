@@ -70,13 +70,13 @@ class fieldService {
     /**
      * Función compleja para obtener todos los bloques y campos, incluyendo herencia.
      */
-    async getModuleFields(moduleId) {
-        const module = await fieldModel.findModuleById(moduleId);
+    async getModuleFields(moduleName) {
+        const module = await fieldModel.findModuleByName(moduleName);
         if (!module) {
             throw new AppError('Módulo no encontrado', 404);
         }
 
-        let blocks = await fieldModel.findBlocksByModuleId(moduleId);
+        let blocks = await fieldModel.findBlocksByModuleId(module.id);
         blocks = blocks.map(b => ({ ...b, inherited: false }));
 
         if (module.parent_module_id) {

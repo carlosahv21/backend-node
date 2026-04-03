@@ -1,19 +1,17 @@
-
 export async function up(knex) {
-    return knex.schema.createTable('notifications', function (table) {
-        table.increments('id').primary();
-        table.integer('user_id').unsigned().nullable();
+    return knex.schema.createTable('notifications', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+        table.uuid('user_id').nullable().references('id').inTable('users').onDelete('CASCADE');
         table.enum('role_target', ['ADMIN', 'STUDENT', 'TEACHER', 'RECEPTIONIST']).nullable();
         table.enum('category', ['PAYMENT', 'CLASS', 'SYSTEM', 'ATTENDANCE', 'REGISTRATION']).notNullable();
         table.string('title', 255).notNullable();
         table.text('message').notNullable();
-        table.integer('related_entity_id').unsigned().nullable();
+        table.uuid('related_entity_id').nullable();
         table.string('deep_link').nullable();
-        table.timestamp('created_at').defaultTo(knex.fn.now());
-        table.timestamp('updated_at').defaultTo(knex.fn.now());
+        table.timestamps(true, true);
     });
-};
+}
 
 export async function down(knex) {
-    return knex.schema.dropTable('notifications');
-};
+    return knex.schema.dropTableIfExists('notifications');
+}

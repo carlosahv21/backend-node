@@ -19,7 +19,10 @@ class UserModel extends BaseModel {
             this.knex.raw("CONCAT(users.first_name, ' ', users.last_name)")
         ];
 
-        this.filterMapping = { 'role': 'r.name' };
+        this.filterMapping = {
+            'role': 'r.name',
+            'role_name': 'r.name'
+        };
 
         this.relationMaps = {
             'default': {
@@ -62,21 +65,34 @@ class UserModel extends BaseModel {
     }
 
     async create(userData) {
-        const { password, ...user } = userData;
+        const { password, role, ...user } = userData;
 
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
             user.password = hashedPassword;
         }
+
+        const roleRecord = await this.findRoleByName(role);
+        if (roleRecord) {
+            user.role_id = roleRecord.id;
+        }
+
         return super.create(user);
     }
 
     async update(id, userData) {
-        const { password, ...user } = userData;
+        const { password, role, ...user } = userData;
+
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
             user.password = hashedPassword;
         }
+
+        const roleRecord = await this.findRoleByName(role);
+        if (roleRecord) {
+            user.role_id = roleRecord.id;
+        }
+
         return super.update(id, user);
     }
 

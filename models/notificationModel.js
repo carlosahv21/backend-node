@@ -77,7 +77,7 @@ class NotificationModel extends BaseModel {
         const results = await query
             .limit(limit)
             .offset((page - 1) * limit)
-            .select('n.*', knex.raw('COALESCE(uni.is_read, 0) as is_read'));
+            .select('n.*', knex.raw('COALESCE(uni.is_read, false) as is_read'));
 
         // Convert is_read to boolean because MySQL returns 0/1
         const formattedResults = results.map(row => ({
@@ -138,14 +138,15 @@ class NotificationModel extends BaseModel {
 
         const query = `
             INSERT INTO user_notifications_interactions (user_id, notification_id, is_read, created_at, updated_at)
-            SELECT ?, n.id, true, NOW(), NOW()
+            SELECT ?, n.id, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
             FROM notifications n
             WHERE (n.user_id = ? OR n.role_target = ?)
             AND n.id NOT IN (
                 SELECT notification_id FROM user_notifications_interactions 
                 WHERE user_id = ? AND is_read = true AND (is_deleted IS NULL OR is_deleted = false)
             )
-            ON DUPLICATE KEY UPDATE is_read = true, updated_at = NOW()
+            ON CONFLICT (user_id, notification_id) 
+            DO UPDATE SET is_read = true, updated_at = CURRENT_TIMESTAMP
         `;
 
         const result = await this.knex.raw(query, [userId, userId, userRole.toUpperCase(), userId]);

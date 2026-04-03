@@ -1,41 +1,39 @@
 // db/seeds/fieldsData.js
-import knex from '../../config/knex.js';
-
-async function getFieldsData() {
-    const [classBlockInfo] = await knex('blocks')
+async function getFieldsData(knex) {
+    const classBlockInfo = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'classes' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
-    const [usersBlockInfo] = await knex('blocks')
+    const usersBlockInfo = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'users' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
-    const [blockDetails] = await knex('blocks')
+    const blockDetails = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Class Details', 'modules.name': 'classes' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
-    const [blockSchedule] = await knex('blocks')
+    const blockSchedule = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Schedule', 'modules.name': 'classes' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
-    const [plansBlockInfo] = await knex('blocks')
+    const plansBlockInfo = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'plans' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
-    const [studentsBlockInfo] = await knex('blocks')
+    const studentsBlockInfo = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Class Details', 'modules.name': 'students' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
-    const [paymentsBlockInfo] = await knex('blocks')
+    const paymentsBlockInfo = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'payments' })
-        .select('blocks.id');
+        .select('blocks.id').first();
 
     const fieldsData = [
         // 🧩 Información general (Clases)
@@ -100,11 +98,9 @@ async function getFieldsData() {
             relation_config: JSON.stringify({
                 "table": "users",
                 "value_field": "users.id",
-                "display_field": "CONCAT(`users`.`first_name`, ' ', `users`.`last_name`)",
+                "display_field": "CONCAT(users.first_name, ' ', users.last_name)",
                 "display_alias": "full_name",
-                "filters": {
-                    "role": "teacher"
-                },
+                "filters": { "role_name": "teacher" },
                 "multiple": false,
                 "search": true,
                 "limit": 20
@@ -173,14 +169,14 @@ async function getFieldsData() {
             block_id: usersBlockInfo.id,
         },
         {
-            name: "role_id",
+            name: "role",
             type: "relation",
             label: "Role",
             required: true,
             order_sequence: 5,
             relation_config: JSON.stringify({
                 "table": "roles",
-                "value_field": "roles.id",
+                "value_field": "roles.name",
                 "display_field": "roles.name",
                 "display_alias": "name",
                 "filters": {},
@@ -259,9 +255,9 @@ async function getFieldsData() {
             relation_config: JSON.stringify({
                 "table": "users",
                 "value_field": "users.id",
-                "display_field": "CONCAT(`users`.`first_name`, ' ', `users`.`last_name`)",
+                "display_field": "CONCAT(users.first_name, ' ', users.last_name)",
                 "display_alias": "student_name",
-                "filters": { "role_id": 2 },
+                "filters": { "role_name": "student" },
                 "multiple": false,
                 "search": true,
                 "limit": 20
@@ -279,7 +275,7 @@ async function getFieldsData() {
                 "value_field": "plans.id",
                 "display_field": "plans.name",
                 "display_alias": "plan_name",
-                "filters": { "active": 1 },
+                "filters": { "active": true },
                 "multiple": false,
                 "search": true,
                 "limit": 20

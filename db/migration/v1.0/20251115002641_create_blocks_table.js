@@ -1,6 +1,4 @@
-
 import blocksModule from '../../data/blocksData.js';
-
 const { getBlocksData } = blocksModule;
 
 export async function up(knex) {
@@ -8,13 +6,8 @@ export async function up(knex) {
 
     if (!exists) {
         await knex.schema.createTable('blocks', (table) => {
-            table.increments('id').primary();
-            table
-                .integer('module_id')
-                .unsigned()
-                .references('id')
-                .inTable('modules')
-                .onDelete('CASCADE');
+            table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+            table.uuid('module_id').references('id').inTable('modules').onDelete('CASCADE');
             table.string('name').notNullable();
             table.string('description');
             table.integer('order').defaultTo(0);
@@ -23,13 +16,11 @@ export async function up(knex) {
             table.timestamps(true, true);
         });
 
-        console.log("Table 'blocks' created successfully.");
-
         const blocksData = await getBlocksData(knex);
-        await knex('blocks').insert(blocksData);
+        if (blocksData.length > 0) await knex('blocks').insert(blocksData);
     }
-};
+}
 
 export async function down(knex) {
-    return knex.schema.dropTableIfExists('blocks');
-};
+    await knex.schema.dropTableIfExists('blocks');
+}

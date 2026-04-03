@@ -50,7 +50,7 @@ class ReportsModel extends BaseModel {
             .select(
                 this.knex.raw(`
                 ROUND(
-                    (SUM(CASE WHEN a.status = "present" THEN 1 ELSE 0 END) / COUNT(a.id)) * 100, 
+                    (SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(a.id), 0)), 
                     1
                 ) AS attendance_rate_percent
             `)
@@ -173,14 +173,14 @@ class ReportsModel extends BaseModel {
             .leftJoin("user_plan as up", "u.id", "up.user_id")
             .leftJoin("plans as p", "urh.plan_id", "p.id")
             .select(
-                this.knex.raw('DATE_FORMAT(urh.start_date, "%Y-%m") as cohort_month'),
+                this.knex.raw("TO_CHAR(urh.start_date, 'YYYY-MM') as cohort_month"),
                 "p.name as plan_name",
                 this.knex.raw("COUNT(DISTINCT urh.user_id) as total_users"),
                 this.knex.raw(
-                    'COUNT(DISTINCT CASE WHEN up.status = "active" THEN urh.user_id END) as active_users'
+                    "COUNT(DISTINCT CASE WHEN up.status = 'active' THEN urh.user_id END) as active_users"
                 ),
                 this.knex.raw(
-                    'ROUND((COUNT(DISTINCT CASE WHEN up.status = "active" THEN urh.user_id END) / COUNT(DISTINCT urh.user_id)) * 100, 2) as retention_rate'
+                    "ROUND((COUNT(DISTINCT CASE WHEN up.status = 'active' THEN urh.user_id END) * 100.0 / NULLIF(COUNT(DISTINCT urh.user_id), 0)), 2) as retention_rate"
                 )
             )
             .where("r.name", "student")
@@ -192,13 +192,13 @@ class ReportsModel extends BaseModel {
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .select(
-                this.knex.raw('DATE_FORMAT(up.end_date, "%Y-%m") as month'),
+                this.knex.raw("TO_CHAR(up.end_date, 'YYYY-MM') as month"),
                 this.knex.raw(
-                    'COUNT(CASE WHEN up.status = "expired" THEN 1 END) as churned_users'
+                    "COUNT(CASE WHEN up.status = 'expired' THEN 1 END) as churned_users"
                 ),
                 this.knex.raw("COUNT(*) as total_users"),
                 this.knex.raw(
-                    'ROUND((COUNT(CASE WHEN up.status = "expired" THEN 1 END) / COUNT(*)) * 100, 2) as churn_rate'
+                    "ROUND((COUNT(CASE WHEN up.status = 'expired' THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0)), 2) as churn_rate"
                 )
             )
             .where("r.name", "student")
@@ -322,13 +322,13 @@ class ReportsModel extends BaseModel {
                 "u.email",
                 "last_att.last_attendance",
                 this.knex.raw(
-                    "DATEDIFF(CURDATE(), last_att.last_attendance) as days_since_attendance"
+                    "CURRENT_DATE - CAST(last_att.last_attendance AS DATE) as days_since_attendance"
                 )
             )
             .where("r.name", "student")
             .andWhere("up.status", "active")
             .andWhereRaw(
-                "(last_att.last_attendance IS NULL OR DATEDIFF(CURDATE(), last_att.last_attendance) > 15)"
+                "(last_att.last_attendance IS NULL OR CURRENT_DATE - CAST(last_att.last_attendance AS DATE) > 15)"
             )
             .orderBy("days_since_attendance", "desc");
 
@@ -350,10 +350,10 @@ class ReportsModel extends BaseModel {
                 "c.level",
                 "c.capacity",
                 this.knex.raw(
-                    'COUNT(CASE WHEN LOWER(a.status) = "present" THEN 1 END) as avg_attendance'
+                    "COUNT(CASE WHEN LOWER(a.status) = 'present' THEN 1 END) as avg_attendance"
                 ),
                 this.knex.raw(
-                    'ROUND((COUNT(CASE WHEN LOWER(a.status) = "present" THEN 1 END) / NULLIF(c.capacity, 0)) * 100, 2) as fill_rate'
+                    "ROUND((COUNT(CASE WHEN LOWER(a.status) = 'present' THEN 1 END) * 100.0 / NULLIF(c.capacity, 0)), 2) as fill_rate"
                 )
             )
             .groupBy("c.id", "c.name", "c.genre", "c.level", "c.capacity")
@@ -381,10 +381,10 @@ class ReportsModel extends BaseModel {
                         "c.teacher_id",
                         "c.capacity",
                         this.knex.raw(
-                            'COUNT(CASE WHEN LOWER(a.status) = "present" THEN 1 END) as attended_count'
+                            "COUNT(CASE WHEN LOWER(a.status) = 'present' THEN 1 END) as attended_count"
                         ),
                         this.knex.raw(
-                            "ROUND((COUNT(CASE WHEN LOWER(a.status) = 'present' THEN 1 END) / NULLIF(c.capacity, 0)) * 100, 2) as fill_rate"
+                            "ROUND((COUNT(CASE WHEN LOWER(a.status) = 'present' THEN 1 END) * 100.0 / NULLIF(c.capacity, 0)) * 100, 2) as fill_rate"
                         )
                     )
                     .groupBy("c.id", "c.teacher_id", "c.capacity")
@@ -448,7 +448,7 @@ class ReportsModel extends BaseModel {
             .join("users as u", "al.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .select(
-                this.knex.raw('DATE_FORMAT(al.created_at, "%Y-%m-%d") as date'),
+                this.knex.raw("TO_CHAR(al.created_at, 'YYYY-MM-DD') as date"),
                 "u.first_name",
                 "u.last_name",
                 "al.action",
@@ -540,7 +540,7 @@ class ReportsModel extends BaseModel {
                 .join("classes as c", "a.class_id", "c.id")
                 .where("c.teacher_id", userId)
                 .select(
-                    this.knex.raw('SUM(CASE WHEN a.status = "present" THEN 1 ELSE 0 END) as attended_count'),
+                    this.knex.raw("SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as attended_count"),
                     this.knex.raw('SUM(c.capacity) as total_capacity')
                 )
                 .first();
@@ -598,7 +598,7 @@ class ReportsModel extends BaseModel {
                 .where("student_id", userId)
                 .andWhere("date", ">=", startOfWeekStr)
                 .select(
-                    this.knex.raw('SUM(CASE WHEN LOWER(status) = "present" THEN 1 ELSE 0 END) as attended'),
+                    this.knex.raw("SUM(CASE WHEN LOWER(status) = 'present' THEN 1 ELSE 0 END) as attended"),
                     this.knex.raw('COUNT(id) as scheduled')
                 )
                 .first();

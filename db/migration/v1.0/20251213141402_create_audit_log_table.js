@@ -1,20 +1,20 @@
 export async function up(knex) {
-    await knex.schema.createTable('audit_log', function(table) {
-        table.increments('id').primary();
-        table.integer('user_id').notNullable();
-        table.string('action').notNullable();
+    const exists = await knex.schema.hasTable('audit_log');
 
-        table.string('table_name').notNullable();
-        table.string('record_id').notNullable();
-        
-        table.json('old_values').notNullable();
-        table.json('new_values').notNullable();
-        table.timestamp('created_at').defaultTo(knex.fn.now());
-    });
-    console.log("Tabla 'audit_log' creada exitosamente");
-};
+    if (!exists) {
+        await knex.schema.createTable('audit_log', (table) => {
+            table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+            table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
+            table.string('action').notNullable();
+            table.string('table_name').notNullable();
+            table.string('record_id').notNullable();
+            table.jsonb('old_values').notNullable();
+            table.jsonb('new_values').notNullable();
+            table.timestamps(true, true);
+        });
+    }
+}
 
 export async function down(knex) {
-    await knex.schema.dropTable('audit_log');
-    console.log("Tabla 'audit_log' eliminada exitosamente");
-};
+    await knex.schema.dropTableIfExists('audit_log');
+}

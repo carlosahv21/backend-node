@@ -74,8 +74,8 @@ class BaseModel {
             query = query.where((builder) => {
                 this.searchFields.forEach((field, index) => {
                     const normalizedQuery = search.replace(/\+/g, ' ').trim();
-                    if (index === 0) builder.where(field, "like", `%${normalizedQuery}%`);
-                    else builder.orWhere(field, "like", `%${normalizedQuery}%`);
+                    if (index === 0) builder.where(field, "ilike", `%${normalizedQuery}%`);
+                    else builder.orWhere(field, "ilike", `%${normalizedQuery}%`);
                 });
             });
         }
@@ -227,7 +227,8 @@ class BaseModel {
 
         const { standardFields } = this.splitFields(data);
 
-        const [recordId] = await this.knex(this.tableName).insert(standardFields);
+        const [record] = await this.knex(this.tableName).insert(standardFields).returning('id');
+        const recordId = typeof record === 'object' ? record.id : record;
 
         await this.saveCustomFields(recordId, data);
 

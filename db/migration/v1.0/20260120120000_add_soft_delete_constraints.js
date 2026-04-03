@@ -3,7 +3,7 @@ export async function up(knex) {
 
     for (const tableName of tables) {
         await knex.schema.alterTable(tableName, (table) => {
-            table.foreign('deleted_by').references('id').inTable('users').onDelete('SET NULL');
+            table.uuid('deleted_by').nullable().references('id').inTable('users').onDelete('SET NULL').alter();
         });
     }
 }

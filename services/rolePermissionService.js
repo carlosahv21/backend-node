@@ -57,13 +57,16 @@ class RolePermissionService {
                     "r.id as role_id",
                     "r.name as role_name",
                     knex.raw(`
-                    JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                            'id', p.id,
-                            'name', p.name,
-                            'module', m.name,
-                            'scope', rp.scope
-                        )
+                    COALESCE(
+                        jsonb_agg(
+                            jsonb_build_object(
+                                'id', p.id,
+                                'name', p.name,
+                                'module', m.name,
+                                'scope', rp.scope
+                            )
+                        ) FILTER (WHERE p.id IS NOT NULL),
+                        '[]'::jsonb
                     ) as permissions
                 `)
                 )
