@@ -51,7 +51,7 @@ class NotificationController {
             if (id) {
                 // Mark single notification as read
                 const notification = await notificationService.markNotificationAsRead(
-                    parseInt(id),
+                    id,
                     userId
                 );
 
@@ -121,7 +121,7 @@ class NotificationController {
             }
 
             const notification = await notificationService.deleteNotification(
-                parseInt(id),
+                id,
                 userId
             );
 

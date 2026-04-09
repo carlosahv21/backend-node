@@ -150,9 +150,7 @@ class NotificationModel extends BaseModel {
         `;
 
         const result = await this.knex.raw(query, [userId, userId, userRole.toUpperCase(), userId]);
-
-        // result[0].affectedRows typically contains count of affected rows in mysql2
-        return result[0] ? result[0].affectedRows : 0;
+        return result.rowCount || 0;
     }
 
     /**

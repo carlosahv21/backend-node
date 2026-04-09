@@ -43,7 +43,7 @@ const authenticateToken = (req, res, next) => {
 
 	jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
 		if (err) {
-			return ApiResponse.error(res, 403, "Sesión expirada o token inválido");
+			return ApiResponse.error(res, 401, "Sesión expirada o token inválido");
 		}
 
 		req.user = decoded;

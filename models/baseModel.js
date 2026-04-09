@@ -226,6 +226,7 @@ class BaseModel {
         await this._runValidations(data);
 
         const { standardFields } = this.splitFields(data);
+        console.log(standardFields);
 
         const [record] = await this.knex(this.tableName).insert(standardFields).returning('id');
         const recordId = typeof record === 'object' ? record.id : record;

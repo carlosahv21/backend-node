@@ -72,9 +72,11 @@ class UserModel extends BaseModel {
             user.password = hashedPassword;
         }
 
-        const roleRecord = await this.findRoleByName(role);
-        if (roleRecord) {
-            user.role_id = roleRecord.id;
+        if (role) {
+            const roleRecord = await this.findRoleByName(role);
+            if (roleRecord) {
+                user.role_id = roleRecord.id;
+            }
         }
 
         return super.create(user);
@@ -88,9 +90,11 @@ class UserModel extends BaseModel {
             user.password = hashedPassword;
         }
 
-        const roleRecord = await this.findRoleByName(role);
-        if (roleRecord) {
-            user.role_id = roleRecord.id;
+        if (role) {
+            const roleRecord = await this.findRoleByName(role);
+            if (roleRecord) {
+                user.role_id = roleRecord.id;
+            }
         }
 
         return super.update(id, user);

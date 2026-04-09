@@ -13,6 +13,12 @@ router.get(
     (req, res, next) => userController.getAll(req, res, next) // Añadimos 'next'
 );
 
+// GET /api/users/details/:id
+router.get("/details/:id",
+    authMiddleware.authenticateToken,
+    (req, res, next) => userController.getByIdDetails(req, res, next) // Añadimos 'next'
+);
+
 // GET /api/users/:id
 router.get(
     "/:id",

@@ -12,6 +12,7 @@ export async function up(knex) {
             table.string("language", 10).defaultTo("en");
             table.string("contact_email").notNullable();
             table.string("phone_number", 20).nullable();
+            table.string("plan", 50).defaultTo("free");
             table.string("address").nullable();
             table.timestamps(true, true);
         });

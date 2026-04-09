@@ -238,6 +238,20 @@ class UserController {
             ApiResponse.error(res, status, error.message);
         }
     }
+
+    /**
+     * Obtiene los detalles de un usuario.
+     */
+    async getByIdDetails(req, res, next) {
+        try {
+            const { id } = req.params;
+            const user = await userModel.findById(id);
+            ApiResponse.success(res, 200, "Usuario obtenido correctamente", user);
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new UserController();

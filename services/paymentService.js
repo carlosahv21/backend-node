@@ -30,7 +30,8 @@ class PaymentService {
                     data.payment_date = data.payment_date[0]; // Normalizar para la tabla payments
                 }
 
-                const [paymentId] = await trx('payments').insert(data);
+                const [result] = await trx('payments').insert(data).returning('id');
+                const paymentId = typeof result === 'object' ? result.id : result;
                 const payment = { ...data, id: paymentId };
 
                 //falta condicion de solo insertar plan si el pago fue completado
