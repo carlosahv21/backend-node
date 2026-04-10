@@ -65,13 +65,6 @@ class AuthModel {
     }
 
     /**
-     * Obtiene la configuración global de la academia.
-     */
-    async findSettings() {
-        return this.knex("settings").first();
-    }
-
-    /**
      * Actualiza la contraseña de un usuario.
      */
     async updateUser(userId, data) {

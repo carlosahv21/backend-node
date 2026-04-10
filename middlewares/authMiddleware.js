@@ -4,6 +4,7 @@ import knex from "../config/knex.js";
 import ApiResponse from "../utils/apiResponse.js";
 import cache from "../utils/cache.js";
 import { buildPermissionMap } from "../utils/permissionMapper.js";
+import { runWithTenant } from "../utils/tenantContext.js";
 
 /**
  * Obtiene todos los permisos de un usuario y los estructura en un Map O(1).
@@ -46,8 +47,26 @@ const authenticateToken = (req, res, next) => {
 			return ApiResponse.error(res, 401, "Sesión expirada o token inválido");
 		}
 
-		req.user = decoded;
-		next();
+		// Inyectar el payload completo. academy_id es el identificador del tenant
+		// y debe estar presente para garantizar el aislamiento de datos.
+		req.user = {
+			id: decoded.id,
+			role: decoded.role,
+			academy_id: decoded.academy_id ?? null,
+		};
+
+		if (!req.user.academy_id) {
+			return ApiResponse.error(
+				res,
+				401,
+				"Token inválido: no contiene un academy_id de tenant",
+			);
+		}
+
+		// Activar el contexto de tenant para toda la cadena de petición.
+		// Cualquier llamada a BaseModel dentro de este contexto filtrará
+		// automáticamente por academy_id sin necesidad de pasarlo explícitamente.
+		runWithTenant(req.user.academy_id, next);
 	});
 };
 

@@ -33,6 +33,7 @@ import paymentRoutes from './routes/paymentRoute.js';
 import searchRoutes from './routes/searchRoute.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import cronService from './services/cronService.js';
+import academyRoutes from './routes/academyRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -96,6 +97,7 @@ app.use("/api/reports", reportsRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/academies", academyRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {

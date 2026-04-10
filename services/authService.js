@@ -34,29 +34,35 @@ const getUserData = async (userId) => {
     const internalModules = ['roles', 'permissions', 'modules', 'settings'];
     const productModules = allModules.filter(m => !internalModules.includes(m));
 
-    // Datos de la academia derivados de la tabla settings. 
-    // Plan "pro" es un stub temporal por requerimiento SaaS.
-    const settings = await authModel.findSettings();
-    const academy = settings ? {
-        id: settings.id,
-        academy_name: settings.academy_name,
-        contact_email: settings.contact_email,
-        phone_number: settings.phone_number,
-        plan: "pro",
-        logo_url: settings.logo_url,
-        date_format: settings.date_format,
-        currency: settings.currency,
-        language: settings.language,
-        theme: settings.theme,
-    } : null;
+    // Resolver academia del tenant al que pertenece el usuario (multi-tenancy)
+    let academy = null;
+    if (userRecord.academy_id) {
+        const academyRecord = await authModel.knex("academies")
+            .where({ id: userRecord.academy_id })
+            .first();
+
+        if (academyRecord) {
+            academy = {
+                id: academyRecord.id,
+                name: academyRecord.name,
+                logo_url: academyRecord.logo_url,
+                plan: academyRecord.plan || "free",
+                currency: academyRecord.currency || "USD",
+                date_format: academyRecord.date_format || "YYYY-MM-DD",
+                address: academyRecord.address || null,
+            };
+        }
+    }
 
     return {
         user: {
             id: userRecord.id,
             email: userRecord.email,
-            name: userRecord.first_name + " " + userRecord.last_name,
+            name: `${userRecord.first_name} ${userRecord.last_name}`.trim(),
             role: roleData.role_name,
             plan: planData,
+            theme: userRecord.theme || "light",
+            language: userRecord.language || "es",
         },
         academy,
         modules: productModules, // Solo modulos SaaS exportados al UI
@@ -81,11 +87,13 @@ const authenticateUser = async ({ email, password }) => {
     const data = await getUserData(user.id);
 
     // JWT ultraligero: solo identidad y tenant (academy)
+    // academy_id se lee directamente del registro del usuario para garantizar
+    // que el valor del token siempre refleje el tenant real del usuario.
     const token = jwt.sign(
         {
             id: user.id,
             role: data.user.role,
-            academy_id: data.academy?.id || null
+            academy_id: user.academy_id ?? data.academy?.id ?? null,
         },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN }

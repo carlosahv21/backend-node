@@ -20,20 +20,6 @@ export async function up(knex) {
             table.uuid("deleted_by").nullable().references("id").inTable("users").onDelete("SET NULL");
             table.timestamps(true, true);
         });
-
-        const user = await knex("users").where("email", "student1@example.com").first();
-        const plan = await knex("plans").where("name", "Mensualidad Ilimitada").first();
-        if (user && plan) {
-            await knex('payments').insert([{
-                user_id: user.id,
-                plan_id: plan.id,
-                original_amount: 100,
-                amount: 100,
-                payment_method: 'efectivo',
-                payment_date: knex.fn.now(),
-                status: 'completed'
-            }]);
-        }
     }
 }
 

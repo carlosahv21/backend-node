@@ -16,24 +16,6 @@ export async function up(knex) {
             table.integer('classes_remaining').notNullable();
             table.timestamps(true, true);
         });
-
-        const user = await knex("users").where("email", "student1@example.com").first();
-        const plan = await knex("plans").where("name", "Mensualidad Ilimitada").first();
-        const payment = await knex("payments").where("user_id", user?.id).first();
-
-        if (user && plan && payment) {
-            await knex('user_plan').insert([{
-                user_id: user.id,
-                plan_id: plan.id,
-                payment_id: payment.id,
-                status: 'active',
-                start_date: knex.fn.now(),
-                end_date: knex.raw("NOW() + INTERVAL '1 month'"),
-                max_classes: 20,
-                classes_used: 0,
-                classes_remaining: 20
-            }]);
-        }
     }
 }
 

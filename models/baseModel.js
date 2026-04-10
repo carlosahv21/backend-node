@@ -3,6 +3,22 @@
 import knex from "../config/knex.js";
 import { validationHandlers } from "../utils/utilsValidations.js";
 import AppError from "../utils/AppError.js";
+import { getCurrentTenantId } from "../utils/tenantContext.js";
+
+/**
+ * Tablas de catálogo global que NO pertenecen a un tenant específico.
+ * Estas tablas son compartidas entre todas las academias del sistema.
+ */
+const GLOBAL_TABLES = new Set([
+    "roles",
+    "permissions",
+    "modules",
+    "plans",
+    "role_permissions",
+    "knex_migrations",
+    "knex_migrations_lock",
+    "database_version",
+]);
 
 class BaseModel {
     constructor(tableName) {
@@ -10,6 +26,32 @@ class BaseModel {
         this.knex = knex;
         this.validations = [];
         this.softDelete = true;
+        // Si la tabla es global, no aplicar filtro de tenant automáticamente
+        this._isTenantScoped = !GLOBAL_TABLES.has(tableName);
+    }
+
+    // --- Helpers de Tenant ----------------------------------------------
+
+    /**
+     * Obtiene el academy_id del contexto de la petición actual.
+     * Retorna null si estamos fuera de una petición HTTP (cron, seeds, etc.)
+     */
+    _getTenantId() {
+        return this._isTenantScoped ? getCurrentTenantId() : null;
+    }
+
+    /**
+     * Aplica el filtro de tenant a una query si corresponde.
+     * Acepta un alias de tabla para queries con JOIN (ej: "c" para "classes as c").
+     * @param {object} query - Knex query builder
+     * @param {string} [tableAlias] - Alias de tabla (opcional)
+     */
+    _applyTenantFilter(query, tableAlias = null) {
+        const tenantId = this._getTenantId();
+        if (!tenantId) return query;
+
+        const prefix = tableAlias || this.tableName;
+        return query.where(`${prefix}.academy_id`, tenantId);
     }
 
     // Ejecuta las validaciones definidas para el modelo
@@ -66,6 +108,12 @@ class BaseModel {
                     : query.select(`${this.tableName}.*`);
         }
 
+        // ── TENANT ISOLATION ─────────────────────────────────────────────
+        // Aplicar el filtro de tenant automáticamente si la tabla es tenant-scoped
+        // y existe un contexto de petición activo.
+        query = this._applyTenantFilter(query);
+        // ─────────────────────────────────────────────────────────────────
+
         if (
             search &&
             Array.isArray(this.searchFields) &&
@@ -80,13 +128,13 @@ class BaseModel {
             });
         }
 
-        Object.keys(queryParams).forEach((key) => {
+        Object.keys(otherQueryParams).forEach((key) => {
             if (
                 ["search", "page", "limit", "order_by", "order_direction", "withDeleted", "onlyDeleted"].includes(key)
             )
                 return;
 
-            let value = queryParams[key];
+            let value = otherQueryParams[key];
 
             if (value === "true") value = true;
             if (value === "false") value = false;
@@ -198,12 +246,18 @@ class BaseModel {
 
     //Obtener el primer registro
     async findFirst() {
-        return this.knex(this.tableName).first();
+        let query = this.knex(this.tableName);
+        query = this._applyTenantFilter(query);
+        return query.first();
     }
 
     // Obtener un registro por ID
+    // El filtro de tenant asegura que un tenant no pueda acceder a registros de otro tenant
+    // aunque conozca el UUID exacto del registro.
     async findById(id) {
-        const record = await this.knex(this.tableName).where({ id }).first();
+        let query = this.knex(this.tableName).where({ id });
+        query = this._applyTenantFilter(query);
+        const record = await query.first();
 
         if (!record) {
             throw new AppError(`${this.tableName} record not found`, 404);
@@ -222,11 +276,22 @@ class BaseModel {
     }
 
     // Crear registro
+    // Inyecta el academy_id automáticamente desde el contexto del tenant
     async create(data) {
         await this._runValidations(data);
 
         const { standardFields } = this.splitFields(data);
         console.log(standardFields);
+
+        // ── TENANT ISOLATION ─────────────────────────────────────────────
+        // Inyectar academy_id automáticamente en el insert si la tabla es scoped
+        // y hay un contexto de petición activo. No sobreescribe un valor existente
+        // para permitir seeds/migraciones que asignan academy_id manualmente.
+        const tenantId = this._getTenantId();
+        if (tenantId && !standardFields.academy_id) {
+            standardFields.academy_id = tenantId;
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         const [record] = await this.knex(this.tableName).insert(standardFields).returning('id');
         const recordId = typeof record === 'object' ? record.id : record;
@@ -244,9 +309,13 @@ class BaseModel {
 
         const { standardFields } = this.splitFields(data);
 
-        const updatedCount = await this.knex(this.tableName)
-            .where({ id })
-            .update(standardFields);
+        // Nunca permitir que un cliente sobreescriba el academy_id de un registro
+        delete standardFields.academy_id;
+
+        let query = this.knex(this.tableName).where({ id });
+        query = this._applyTenantFilter(query);
+
+        const updatedCount = await query.update(standardFields);
 
         if (updatedCount === 0) {
             throw new AppError(`${this.tableName} record not found`, 404);
@@ -278,7 +347,9 @@ class BaseModel {
         // Primero eliminamos los campos personalizados asociados
         await this.knex("field_values").where({ record_id: id }).del();
 
-        const deletedCount = await this.knex(this.tableName).where({ id }).del();
+        let query = this.knex(this.tableName).where({ id });
+        query = this._applyTenantFilter(query);
+        const deletedCount = await query.del();
 
         if (deletedCount === 0) {
             throw new AppError(`${this.tableName} record with id ${id} not found`, 404);
@@ -289,9 +360,10 @@ class BaseModel {
 
     // Actualizar estado de papelera (Soft Delete logic)
     async updateBinStatus(id, data) {
-        const updatedCount = await this.knex(this.tableName)
-            .where({ id })
-            .update(data);
+        let query = this.knex(this.tableName).where({ id });
+        query = this._applyTenantFilter(query);
+
+        const updatedCount = await query.update(data);
 
         if (updatedCount === 0) {
             throw new AppError(
