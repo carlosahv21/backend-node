@@ -63,6 +63,13 @@ const getUserData = async (userId) => {
             plan: planData,
             theme: userRecord.theme || "light",
             language: userRecord.language || "es",
+            hide_tour: userRecord.hide_tour || false,
+            tour_completed: userRecord.tour_completed || false,
+            needs_password_change: userRecord.needs_password_change || false,
+            phone: userRecord.phone || null,
+            avatar: userRecord.avatar || null,
+            gender: userRecord.gender || null,
+            birth_date: userRecord.birth_date || null
         },
         academy,
         modules: productModules, // Solo modulos SaaS exportados al UI

@@ -86,7 +86,7 @@ class AcademyService {
                 academy_id: academyId,
                 email_verified: true,
                 tour_completed: false,
-                skip_tour: false,
+                hide_tour: false,
                 created_at: new Date(),
                 updated_at: new Date()
             });

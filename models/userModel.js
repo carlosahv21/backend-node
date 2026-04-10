@@ -65,12 +65,7 @@ class UserModel extends BaseModel {
     }
 
     async create(userData) {
-        const { password, role, ...user } = userData;
-
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            user.password = hashedPassword;
-        }
+        const { role, ...user } = userData;
 
         if (role) {
             const roleRecord = await this.findRoleByName(role);
@@ -83,12 +78,7 @@ class UserModel extends BaseModel {
     }
 
     async update(id, userData) {
-        const { password, role, ...user } = userData;
-
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            user.password = hashedPassword;
-        }
+        const { role, ...user } = userData;
 
         if (role) {
             const roleRecord = await this.findRoleByName(role);

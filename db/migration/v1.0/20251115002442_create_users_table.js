@@ -26,7 +26,7 @@ export async function up(knex) {
             // [Preferencias y Push (App Mobile)]
             table.string("push_token", 255).nullable(); // Para expo-server-sdk
             table.boolean("tour_completed").defaultTo(false);
-            table.boolean("skip_tour").defaultTo(false);
+            table.boolean("hide_tour").defaultTo(false);
             table.string("theme", 50).defaultTo("light");
             table.string("language", 10).defaultTo("es");
 
@@ -52,7 +52,7 @@ export async function up(knex) {
             role_id: adminRole.id,
             email_verified: true,
             tour_completed: true,
-            skip_tour: true,
+            hide_tour: true,
             needs_password_change: false,
             gender: "male",
             birth_date: "1990-01-01"

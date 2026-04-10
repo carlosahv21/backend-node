@@ -47,9 +47,18 @@ class UserService {
             "last_name",
             "email",
             "password",
+            "phone",
+            "gender",
+            "birth_date",
+            "avatar",
             "email_verified",
-            "deleted",
             "push_token",
+            "theme",
+            "language",
+            "tour_completed",
+            "hide_tour",
+            "needs_password_change",
+            "last_login",
         ];
 
         // Separar el rol del resto de datos
@@ -62,6 +71,8 @@ class UserService {
                 userData[key] = restData[key];
             }
         });
+
+        console.log(`[UserService] Actualizando usuario ${id}. Campos detectados:`, Object.keys(userData));
 
         // Si hay password, hashearlo
         if (userData.password) {

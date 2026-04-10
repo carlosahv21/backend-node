@@ -69,9 +69,9 @@ class UserController {
      */
     async update(req, res, next) {
         try {
-            await userService.updateUser(req.params.id, req.body);
+            const updatedUser = await userService.updateUser(req.params.id, req.body);
 
-            ApiResponse.success(res, 200, "Usuario actualizado correctamente");
+            ApiResponse.success(res, 200, "Usuario actualizado correctamente", updatedUser);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);
