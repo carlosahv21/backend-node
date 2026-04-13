@@ -125,9 +125,14 @@ const resetPassword = async ({ email, password }) => {
     if (!user) {
         throw new AppError("Usuario no encontrado", 404);
     }
-    const hashedPassword = await bcrypt.hashSync(password, 10);
 
-    await authModel.updateUser(user.id, { password: hashedPassword });
+    user.password = await bcrypt.hashSync(password, 10);
+
+    if (user.needs_password_change === true) {
+        user.needs_password_change = false;
+    }
+
+    await authModel.updateUser(user.id, user);
 
     return { message: "Contraseña restablecida correctamente" };
 };

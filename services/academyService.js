@@ -87,6 +87,7 @@ class AcademyService {
                 email_verified: true,
                 tour_completed: false,
                 hide_tour: false,
+                needs_password_change: true,
                 created_at: new Date(),
                 updated_at: new Date()
             });

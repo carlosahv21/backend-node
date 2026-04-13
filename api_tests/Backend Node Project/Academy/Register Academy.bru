@@ -6,10 +6,27 @@ meta {
 
 post {
   url: {{base_url}}/academies/register
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "academy": {
+      "name": "Nombre de tu Academia",
+      "address": "Dirección física (opcional)",
+      "logo_url": "https://ejemplo.com/logo.png"
+    },
+    "user": {
+      "first_name": "Nombre del Admin",
+      "last_name": "Apellido del Admin",
+      "email": "admin@academia.com",
+      "password": "password_de_al_menos_8_caracteres"
+    }
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

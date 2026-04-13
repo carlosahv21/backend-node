@@ -25,11 +25,6 @@ async function getFieldsData(knex) {
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'plans' })
         .select('blocks.id').first();
 
-    const studentsBlockInfo = await knex('blocks')
-        .join('modules', 'blocks.module_id', 'modules.id')
-        .where({ 'blocks.name': 'Class Details', 'modules.name': 'students' })
-        .select('blocks.id').first();
-
     const paymentsBlockInfo = await knex('blocks')
         .join('modules', 'blocks.module_id', 'modules.id')
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'payments' })
@@ -334,7 +329,7 @@ async function getFieldsData(knex) {
         },
         {
             name: "payment_date",
-            type: "date",
+            type: "range",
             label: "Date",
             required: true,
             order_sequence: 9,
