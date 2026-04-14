@@ -18,10 +18,21 @@ router.post("/register",
     (req, res) => res.status(501).json({ message: "Not implemented yet" })
 );
 
-// POST /api/auth/reset-password (Placeholder for when password reset is fully implemented)
-router.post("/reset-password",
+// POST /api/auth/forgot-password
+router.post("/forgot-password",
+    passwordResetLimiter,
+    (req, res, next) => authController.forgotPassword(req, res, next)    
+);
+
+// POST /api/auth/reset-password/:token
+router.post("/reset-password/:token",
     passwordResetLimiter,
     (req, res, next) => authController.resetPassword(req, res, next)    
+);
+
+// GET /api/auth/reset-password/:token (Verificar token)
+router.get("/reset-password/:token",
+    (req, res, next) => authController.verifyToken(req, res, next)
 );
 
 // GET /api/auth/me

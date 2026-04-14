@@ -1,6 +1,6 @@
-// services/authService.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from 'crypto';
 import authModel from '../models/authModel.js';
 import AppError from "../utils/AppError.js";
 import { buildPermissionMap } from "../utils/permissionMapper.js";
@@ -117,28 +117,100 @@ const getAuthenticatedUser = async (userId) => {
 };
 
 /**
- * Lógica de negocio de Reset de Contraseña
+ * Lógica de negocio de Olvido de Contraseña (Generación de Token)
  */
-const resetPassword = async ({ email, password }) => {
+const forgotPassword = async (email) => {
     const user = await authModel.findUserByEmail(email);
 
     if (!user) {
-        throw new AppError("Usuario no encontrado", 404);
+        throw new AppError("No existe una cuenta con ese correo electrónico", 404);
     }
 
-    user.password = await bcrypt.hashSync(password, 10);
+    // Generar token aleatorio
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Hash el token para guardarlo en la DB (seguridad extra)
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
 
-    if (user.needs_password_change === true) {
-        user.needs_password_change = false;
+    // Token expira en 1 hora
+    const expires = new Date(Date.now() + 3600000);
+
+    await authModel.updateUser(user.id, {
+        reset_password_token: hashedToken,
+        reset_password_expires: expires
+    });
+
+    // Enviar correo (Simulado por consola)
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    
+    console.log("\n--- [EMAIL SIMULADO: RECUPERACIÓN DE CONTRASEÑA] ---");
+    console.log(`Para: ${email}`);
+    console.log(`Link de recuperación: ${resetUrl}`);
+    console.log("----------------------------------------------------\n");
+
+    return { message: "Se ha enviado un correo con las instrucciones para restablecer su contraseña" };
+};
+
+/**
+ * Lógica de negocio de Reset de Contraseña con Token
+ */
+const resetPasswordWithToken = async (token, newPassword) => {
+    // Hash el token recibido para comparar con la DB
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+
+    const user = await authModel.knex("users")
+        .where("reset_password_token", hashedToken)
+        .andWhere("reset_password_expires", ">", new Date())
+        .first();
+
+    if (!user) {
+        throw new AppError("El token es inválido o ha expirado", 400);
     }
 
-    await authModel.updateUser(user.id, user);
+    // Actualizar contraseña y limpiar campos de reset
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    return { message: "Contraseña restablecida correctamente" };
+    await authModel.updateUser(user.id, {
+        password: hashedPassword,
+        reset_password_token: null,
+        reset_password_expires: null,
+        needs_password_change: false
+    });
+
+    return { message: "Contraseña actualizada correctamente" };
+};
+
+/**
+ * Verifica si un token de recuperación es válido y no ha expirado
+ */
+const verifyResetToken = async (token) => {
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+
+    const user = await authModel.knex("users")
+        .where("reset_password_token", hashedToken)
+        .andWhere("reset_password_expires", ">", new Date())
+        .first();
+
+    if (!user) {
+        throw new AppError("El token es inválido o ha expirado", 400);
+    }
+
+    return { valid: true, message: "Token válido" };
 };
 
 export default {
     authenticateUser,
     getAuthenticatedUser,
-    resetPassword,
+    forgotPassword,
+    resetPasswordWithToken,
+    verifyResetToken,
 };

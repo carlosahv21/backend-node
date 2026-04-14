@@ -37,15 +37,50 @@ class AuthController {
     }
 
     /**
-     * Maneja la solicitud de reset de contraseña.
+     * Maneja la solicitud de 'Olvidé mi contraseña' (envío de email con token).
+     */
+    async forgotPassword(req, res, next) {
+        try {
+            const { email } = req.body;
+            if (!email) throw new AppError("Email is required", 400);
+
+            const result = await authService.forgotPassword(email);
+            ApiResponse.success(res, 200, result.message);
+        } catch (err) {
+            const status = err.statusCode || 400;
+            ApiResponse.error(res, status, err.message);
+        }
+    }
+
+    /**
+     * Maneja el cambio de contraseña usando un token de recuperación.
      */
     async resetPassword(req, res, next) {
         try {
-            const { new_password: password, email } = req.body;
-            console.log("Request body:", req.body);
+            const { token } = req.params;
+            const { password } = req.body;
 
-            const result = await authService.resetPassword({ email, password });
-            ApiResponse.success(res, 200, "Contraseña restablecida correctamente", result);
+            if (!token) throw new AppError("Token is required", 400);
+            if (!password) throw new AppError("New password is required", 400);
+
+            const result = await authService.resetPasswordWithToken(token, password);
+            ApiResponse.success(res, 200, result.message, result);
+        } catch (err) {
+            const status = err.statusCode || 400;
+            ApiResponse.error(res, status, err.message);
+        }
+    }
+
+    /**
+     * Verifica si un token de recuperación es válido.
+     */
+    async verifyToken(req, res, next) {
+        try {
+            const { token } = req.params;
+            if (!token) throw new AppError("Token is required", 400);
+
+            const result = await authService.verifyResetToken(token);
+            ApiResponse.success(res, 200, result.message, result);
         } catch (err) {
             const status = err.statusCode || 400;
             ApiResponse.error(res, status, err.message);

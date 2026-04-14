@@ -34,6 +34,8 @@ export async function up(knex) {
             table.uuid("role_id").notNullable().references("id").inTable("roles").onDelete("CASCADE");
 
             // [Auditoría y Soft Delete]
+            table.string('reset_password_token').nullable();
+            table.timestamp('reset_password_expires').nullable();
             table.timestamp("deleted_at", { useTz: true }).nullable();
             table.uuid("deleted_by").nullable().references("id").inTable("users").onDelete("SET NULL");
             table.timestamps(true, true);
