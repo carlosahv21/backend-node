@@ -11,7 +11,7 @@ class ClassModel extends BaseModel {
     async findByIdDetails(id) {
         const db = this.knex;
 
-        const classData = await db("classes as c")
+        const classData = await this._applyTenantFilter(db("classes as c"), "c")
             .leftJoin("users as u", "c.teacher_id", "u.id")
             .where("c.id", id)
             .select(
@@ -34,21 +34,19 @@ class ClassModel extends BaseModel {
     async _getEnrolledStudentsDetailed(classId) {
         const db = this.knex;
 
-        return await db("user_class as uc")
+        return await this._applyTenantFilter(db("user_class as uc"), "uc")
             .join("users as u", "uc.user_id", "u.id")
             // JOIN optimizado para traer SOLO el último plan activo
             .leftJoin("user_plan as up", function () {
                 this.on("u.id", "=", "up.user_id").andOn(
                     "up.id",
                     "=",
-                    db
-                        .select("id")
-                        .from("user_plan")
+                    this._applyTenantFilter(db("user_plan").select("id"))
                         .whereRaw("user_id = u.id")
                         .orderBy("created_at", "desc")
                         .limit(1),
                 );
-            })
+            }.bind(this))
             .leftJoin("plans as p", "up.plan_id", "p.id")
             // JOIN optimizado para traer SOLO la última asistencia de esta clase específica
             .leftJoin("attendances as a", function () {
@@ -57,16 +55,14 @@ class ClassModel extends BaseModel {
                     .andOn(
                         "a.id",
                         "=",
-                        db
-                            .select("id")
-                            .from("attendances")
+                        this._applyTenantFilter(db("attendances").select("id"))
                             .whereRaw("student_id = u.id AND class_id = ?", [
                                 classId,
                             ])
                             .orderBy("date", "desc") // La fecha más reciente
                             .limit(1),
                     );
-            })
+            }.bind(this))
             .where("uc.class_id", classId)
             .select(
                 "u.id",
@@ -84,12 +80,12 @@ class ClassModel extends BaseModel {
 
     async _getClassStats(classId, capacity) {
         const db = this.knex;
-        const enrolled = await db("user_class")
+        const enrolled = await this._applyTenantFilter(db("user_class"))
             .where("class_id", classId)
             .count("user_id as total");
         const totalInscritos = enrolled[0].total || 0;
 
-        const avgAttendance = await db("attendances")
+        const avgAttendance = await this._applyTenantFilter(db("attendances"))
             .where("class_id", classId)
             .count("id as total");
 
@@ -163,7 +159,7 @@ class ClassModel extends BaseModel {
         /**
          * Buscamos la clase más cercana SOLO para el día de hoy
          */
-        const nextClass = await db("classes as c")
+        const nextClass = await this._applyTenantFilter(db("classes as c"), "c")
             .leftJoin("users as u", "c.teacher_id", "u.id")
             .where("c.date", currentDayName) // Comparación de strings: 'Monday' == 'Monday'
             .andWhere("c.hour", ">", currentTime) // La hora aún no ha pasado

@@ -30,7 +30,7 @@ class PaymentModel extends BaseModel {
      * Obtiene los detalles de un pago para el Drawer, transformando los datos.
      */
     async findByIdDetails(id) {
-        const payment = await this.knex(this.tableName)
+        const payment = await this._applyTenantFilter(this.knex(this.tableName))
             .select(
                 'payments.*',
                 'users.first_name',

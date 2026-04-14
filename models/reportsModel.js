@@ -21,7 +21,7 @@ class ReportsModel extends BaseModel {
      */
     async getKpiData() {
         // Cantidad de estudiantes activos (el plan termina hoy o después)
-        const activeStudentsResult = await this.knex("users as u")
+        const activeStudentsResult = await this._applyTenantFilter(this.knex("users as u"), "u")
             .join("user_plan as up", "u.id", "up.user_id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .where("r.name", "student")
@@ -30,14 +30,14 @@ class ReportsModel extends BaseModel {
             .count("u.id as active_students");
 
         // Cantidad de clases del dia actual
-        const todayClassesResult = await this.knex("classes as c")
+        const todayClassesResult = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .where("c.date", "=", this.todayDate)
             .count("c.id as today_classes");
 
         // Ingresos mensuales (venta del plan este mes)
         // Usamos la tabla payments para exactitud financiera si existe, o user_plan start_date
         // El requerimiento anterior usaba users.plan_start_date. Ahora usaremos user_plan.
-        const monthlyRevenueResult = await this.knex("payments as p")
+        const monthlyRevenueResult = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .join("users as u", "p.user_id", "=", "u.id")
             .whereBetween("p.payment_date", [this.start_date, this.end_date])
             .select(
@@ -45,7 +45,7 @@ class ReportsModel extends BaseModel {
             );
 
         // Tasa de asistencia
-        const attendanceRateResult = await this.knex("attendances as a")
+        const attendanceRateResult = await this._applyTenantFilter(this.knex("attendances as a"), "a")
             .whereBetween("a.date", [this.start_date, this.end_date])
             .select(
                 this.knex.raw(`
@@ -83,7 +83,7 @@ class ReportsModel extends BaseModel {
      * Mide cuántos cupos se usan en relación a la capacidad máxima.
      */
     async getClassOccupancy() {
-        const report = this.knex("classes as c")
+        const report = this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("user_class as cu", "c.id", "cu.class_id")
             .leftJoin("users as u", "cu.user_id", "u.id")
             .leftJoin("user_plan as up", "u.id", "up.user_id")
@@ -108,7 +108,7 @@ class ReportsModel extends BaseModel {
      * Distribución de Usuarios por Plan
      */
     async getUserDistribution() {
-        const report = this.knex("user_plan as up")
+        const report = this._applyTenantFilter(this.knex("user_plan as up"), "up")
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("plans as p", "up.plan_id", "p.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
@@ -126,7 +126,7 @@ class ReportsModel extends BaseModel {
      * Porcentaje de estudiantes que asistieron vs. inscritos en cada clase.
      */
     async getAttendanceRate() {
-        const report = await this.knex("classes as c")
+        const report = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("attendances as a", "c.id", "a.class_id")
             .select(
                 "c.id",
@@ -150,7 +150,7 @@ class ReportsModel extends BaseModel {
      * Horas o cantidad de clases impartidas por cada teacher.
      */
     async getTeachersParticipation() {
-        return this.knex("classes as c")
+        return this._applyTenantFilter(this.knex("classes as c"), "c")
             .join("users as u", "c.teacher_id", "u.id")
             .select(
                 "u.first_name",
@@ -167,7 +167,7 @@ class ReportsModel extends BaseModel {
      */
     async getRetentionChurnAnalysis() {
         // Análisis de cohortes: usuarios agrupados por mes de inicio
-        const cohortAnalysis = await this.knex("user_registration_history as urh")
+        const cohortAnalysis = await this._applyTenantFilter(this.knex("user_registration_history as urh"), "urh")
             .join("users as u", "urh.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .leftJoin("user_plan as up", "u.id", "up.user_id")
@@ -188,7 +188,7 @@ class ReportsModel extends BaseModel {
             .orderBy("cohort_month", "desc");
 
         // Tasa de churn mensual
-        const churnRate = await this.knex("user_plan as up")
+        const churnRate = await this._applyTenantFilter(this.knex("user_plan as up"), "up")
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .select(
@@ -218,7 +218,7 @@ class ReportsModel extends BaseModel {
      */
     async getRevenueOptimization() {
         // ARPU (Average Revenue Per User)
-        const arpu = await this.knex("payments as p")
+        const arpu = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .join("users as u", "p.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .select(
@@ -231,7 +231,7 @@ class ReportsModel extends BaseModel {
             .first();
 
         // Impacto de descuentos
-        const discountImpact = await this.knex("payments as p")
+        const discountImpact = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .select(
                 "p.discount_type",
                 this.knex.raw("COUNT(*) as payment_count"),
@@ -248,7 +248,7 @@ class ReportsModel extends BaseModel {
             .groupBy("p.discount_type");
 
         // Análisis por método de pago
-        const paymentMethodAnalysis = await this.knex("payments as p")
+        const paymentMethodAnalysis = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .select(
                 "p.payment_method",
                 this.knex.raw("COUNT(*) as transaction_count"),
@@ -273,7 +273,7 @@ class ReportsModel extends BaseModel {
      */
     async getStudentEngagement() {
         // Tasa de utilización de clases
-        const classUtilization = await this.knex("user_plan as up")
+        const classUtilization = await this._applyTenantFilter(this.knex("user_plan as up"), "up")
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .leftJoin("plans as p", "up.plan_id", "p.id")
@@ -303,11 +303,11 @@ class ReportsModel extends BaseModel {
     }
 
     async getUsersAtRisk() {
-        const usersAtRisk = await this.knex("users as u")
+        const usersAtRisk = await this._applyTenantFilter(this.knex("users as u"), "u")
             .join("user_plan as up", "u.id", "up.user_id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .leftJoin(
-                this.knex("attendances")
+                this._applyTenantFilter(this.knex("attendances"), "attendances")
                     .select("student_id")
                     .max("date as last_attendance")
                     .groupBy("student_id")
@@ -341,7 +341,7 @@ class ReportsModel extends BaseModel {
      */
     async getOperationalEfficiency() {
         // Fill Rate por clase
-        const fillRateByClass = await this.knex("classes as c")
+        const fillRateByClass = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("attendances as a", "c.id", "a.class_id")
             .select(
                 "c.id",
@@ -374,7 +374,7 @@ class ReportsModel extends BaseModel {
                 this.knex.raw("ROUND(AVG(class_fill.fill_rate), 2) as avg_fill_rate")
             )
             .from(
-                this.knex("classes as c")
+                this._applyTenantFilter(this.knex("classes as c"), "c")
                     .leftJoin("attendances as a", "c.id", "a.class_id")
                     .select(
                         "c.id",
@@ -410,7 +410,7 @@ class ReportsModel extends BaseModel {
      */
     async getAdminAudit() {
         // Cambios manuales en user_plan
-        const manualPlanChanges = await this.knex("audit_log as al")
+        const manualPlanChanges = await this._applyTenantFilter(this.knex("audit_log as al"), "al")
             .join("users as u", "al.user_id", "u.id")
             .select(
                 "al.id",
@@ -428,7 +428,7 @@ class ReportsModel extends BaseModel {
             .limit(50);
 
         // Anulaciones de pagos
-        const paymentCancellations = await this.knex("payments as p")
+        const paymentCancellations = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .join("users as u", "p.user_id", "u.id")
             .select(
                 "p.id",
@@ -444,7 +444,7 @@ class ReportsModel extends BaseModel {
             .limit(50);
 
         // Actividad de administradores
-        const adminActivity = await this.knex("audit_log as al")
+        const adminActivity = await this._applyTenantFilter(this.knex("audit_log as al"), "al")
             .join("users as u", "al.user_id", "u.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .select(
@@ -481,7 +481,7 @@ class ReportsModel extends BaseModel {
         const startOfWeekStr = startOfWeek.toISOString().split("T")[0];
 
         // Section 2: Perfil del usuario general
-        const section2 = await this.knex("users")
+        const section2 = await this._applyTenantFilter(this.knex("users"), "users")
             .select(
                 "users.id",
                 "users.first_name",
@@ -502,13 +502,13 @@ class ReportsModel extends BaseModel {
             // ADMIN / RECEPTIONIST
 
             // Section 1: Universal - Agenda (Todas las clases de hoy)
-            section1 = await this.knex("classes")
+            section1 = await this._applyTenantFilter(this.knex("classes"), "classes")
                 .where("date", currentDayName)
                 .select("name", "genre", "hour", "level")
                 .orderBy("hour", "asc");
 
             // Section 2: Recaudación del día
-            const todayPayments = await this.knex("payments")
+            const todayPayments = await this._applyTenantFilter(this.knex("payments"), "payments")
                 .where("payment_date", todayStr)
                 .sum("amount as total_amount")
                 .first();
@@ -516,7 +516,7 @@ class ReportsModel extends BaseModel {
             section2.daily_revenue = parseFloat(todayPayments?.total_amount || 0);
 
             // Section 3: Nuevos Estudiantes esta semana
-            const newStudentsResult = await this.knex("users as u")
+            const newStudentsResult = await this._applyTenantFilter(this.knex("users as u"), "u")
                 .join("roles as r", "u.role_id", "r.id")
                 .where("r.name", "student")
                 .andWhere("u.created_at", ">=", startOfWeekStr)
@@ -529,14 +529,14 @@ class ReportsModel extends BaseModel {
             // PROFESOR
 
             // Section 1: Universal - Agenda del profesor hoy
-            section1 = await this.knex("classes")
+            section1 = await this._applyTenantFilter(this.knex("classes"), "classes")
                 .where("teacher_id", userId)
                 .andWhere("date", currentDayName)
                 .select("name", "genre", "hour", "level")
                 .orderBy("hour", "asc");
 
             // Section 2: Ratio de Asistencia
-            const attendanceInfo = await this.knex("attendances as a")
+            const attendanceInfo = await this._applyTenantFilter(this.knex("attendances as a"), "a")
                 .join("classes as c", "a.class_id", "c.id")
                 .where("c.teacher_id", userId)
                 .select(
@@ -552,7 +552,7 @@ class ReportsModel extends BaseModel {
             section2.attendance_ratio = parseFloat(attendanceRate);
 
             // Section 3: Clases con Mayor Inscripción
-            const topClasses = await this.knex("classes as c")
+            const topClasses = await this._applyTenantFilter(this.knex("classes as c"), "c")
                 .leftJoin("user_class as uc", "c.id", "uc.class_id")
                 .where("c.teacher_id", userId)
                 .select("c.name", "c.genre")
@@ -567,7 +567,7 @@ class ReportsModel extends BaseModel {
             // ESTUDIANTE
 
             // Section 1: Universal - Clases donde está inscrito hoy
-            section1 = await this.knex("classes as c")
+            section1 = await this._applyTenantFilter(this.knex("classes as c"), "c")
                 .join("user_class as uc", "c.id", "uc.class_id")
                 .where("uc.user_id", userId)
                 .andWhere("c.date", currentDayName)
@@ -575,7 +575,7 @@ class ReportsModel extends BaseModel {
                 .orderBy("c.hour", "asc");
 
             // Section 2: Estado de Cuenta y Plan
-            const userPlan = await this.knex("user_plan as up")
+            const userPlan = await this._applyTenantFilter(this.knex("user_plan as up"), "up")
                 .join("plans as p", "up.plan_id", "p.id")
                 .where("up.user_id", userId)
                 .andWhere("up.status", "active")
@@ -594,7 +594,7 @@ class ReportsModel extends BaseModel {
             }
 
             // Section 3: Asistencia Semanal
-            const weeklyAttendanceCount = await this.knex("attendances")
+            const weeklyAttendanceCount = await this._applyTenantFilter(this.knex("attendances"), "attendances")
                 .where("student_id", userId)
                 .andWhere("date", ">=", startOfWeekStr)
                 .select(

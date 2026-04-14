@@ -16,18 +16,17 @@ class StudentModel extends UserModel {
         // Guardamos la referencia a knex para usarla dentro de los callbacks
         const db = this.knex;
 
-        const student = await db('users as u')
+        const student = await this._applyTenantFilter(db('users as u'), 'u')
             .leftJoin('roles as r', 'u.role_id', 'r.id')
             .leftJoin('user_plan as up', function() {
                 // Seleccionamos solo el plan más reciente para el usuario
                 this.on('u.id', '=', 'up.user_id')
-                    .andOn('up.id', '=', db.select('id')
-                        .from('user_plan')
+                    .andOn('up.id', '=', this._applyTenantFilter(db('user_plan').select('id'))
                         .whereRaw('user_id = u.id')
                         .orderBy('created_at', 'desc')
                         .limit(1)
                     );
-            })
+            }.bind(this))
             .leftJoin('plans as p', 'up.plan_id', 'p.id')
             .where('u.id', id)
             .select(

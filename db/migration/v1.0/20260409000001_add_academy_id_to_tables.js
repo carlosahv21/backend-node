@@ -17,6 +17,7 @@ const TENANT_TABLES = [
     "classes",
     "attendances",
     "payments",
+    "plans",
     "user_plan",
     "user_class",
     "user_registration_history",

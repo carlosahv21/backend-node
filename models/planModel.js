@@ -33,7 +33,7 @@ class PlanModel extends BaseModel {
     }
 
     async getStudentPlan(student_id) {
-        const plan = await this.knex('user_plan as up')
+        const plan = await this._applyTenantFilter(this.knex('user_plan as up'), 'up')
             .join('plans as p', 'up.plan_id', 'p.id')
             .select('p.name', 'p.description', 'p.type', 'p.price', 'up.status', 'up.start_date', 'up.end_date', 'up.classes_remaining', 'up.max_classes')
             .where('up.user_id', student_id)

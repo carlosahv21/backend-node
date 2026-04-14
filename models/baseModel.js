@@ -13,7 +13,6 @@ const GLOBAL_TABLES = new Set([
     "roles",
     "permissions",
     "modules",
-    "plans",
     "role_permissions",
     "knex_migrations",
     "knex_migrations_lock",
@@ -281,7 +280,6 @@ class BaseModel {
         await this._runValidations(data);
 
         const { standardFields } = this.splitFields(data);
-        console.log(standardFields);
 
         // ── TENANT ISOLATION ─────────────────────────────────────────────
         // Inyectar academy_id automáticamente en el insert si la tabla es scoped

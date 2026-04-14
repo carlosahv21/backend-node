@@ -43,7 +43,7 @@ class RegistrationModel extends BaseModel {
     }
 
     async havePlan(userId) {
-        const result = await this.knex("user_plan")
+        const result = await this._applyTenantFilter(this.knex("user_plan"))
             .join("users", "user_plan.user_id", "users.id")
             .where({ "users.id": userId })
             .select("user_plan.plan_id")
@@ -54,12 +54,12 @@ class RegistrationModel extends BaseModel {
 
     // Check if a class has reached the maximum number of students
     async maxUserPerClass(class_id) {
-        const result = await this.knex(this.tableName)
+        const result = await this._applyTenantFilter(this.knex(this.tableName))
             .where({ class_id: class_id })
             .count("* as count")
             .first();
 
-        const classes = await this.knex("classes")
+        const classes = await this._applyTenantFilter(this.knex("classes"))
             .select("classes.capacity")
             .where("classes.id", class_id)
             .first();
@@ -69,12 +69,12 @@ class RegistrationModel extends BaseModel {
 
     // Check if a user registered in max_classes
     async isRegisteredInMaxClasses(userId) {
-        const result = await this.knex(this.tableName)
+        const result = await this._applyTenantFilter(this.knex(this.tableName))
             .where({ user_id: userId })
             .count("* as count")
             .first();
 
-        const plan = await this.knex("users")
+        const plan = await this._applyTenantFilter(this.knex("users"))
             .join("user_plan", "users.id", "user_plan.user_id")
             .join("plans", "user_plan.plan_id", "plans.id")
             .where("users.id", userId)
@@ -90,14 +90,14 @@ class RegistrationModel extends BaseModel {
 
     // Check if a user is already registered in a class
     async isRegistered(userId, classId) {
-        const result = await this.knex(this.tableName)
+        const result = await this._applyTenantFilter(this.knex(this.tableName))
             .where({ user_id: userId, class_id: classId })
             .first();
         return !!result;
     }
 
     async isActive(userId) {
-        const result = await this.knex("users")
+        const result = await this._applyTenantFilter(this.knex("users"))
             .where({ id: userId })
             .select("plan_status", "first_name", "last_name")
             .first();

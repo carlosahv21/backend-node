@@ -40,7 +40,7 @@ class AttendanceModel extends BaseModel {
      * Obtiene registros de asistencia detallados por class_id y date
      */
     async getDetails(class_id, date) {
-        let query = this.knex(this.tableName)
+        let query = this._applyTenantFilter(this.knex(this.tableName))
             .select("attendances.*")
             .where({ 'attendances.class_id': class_id });
 
@@ -72,7 +72,7 @@ class AttendanceModel extends BaseModel {
             const studentIds = [...new Set(attendanceRecords.map(r => r.student_id))];
 
             // Obtener el plan ACTIVO de cada estudiante
-            const activePlans = await trx('user_plan')
+            const activePlans = await this._applyTenantFilter(trx('user_plan'))
                 .select('user_id', 'id as user_plan_id', 'status', 'classes_remaining', 'classes_used')
                 .whereIn('user_id', studentIds)
                 .andWhere('status', 'active');
@@ -80,7 +80,7 @@ class AttendanceModel extends BaseModel {
             const studentPlanMap = new Map(activePlans.map(p => [p.user_id, p]));
 
             // También obtenemos info básica del usuario para mensajes de error si no tiene plan
-            const usersInfo = await trx('users').select('id', 'first_name', 'last_name').whereIn('id', studentIds);
+            const usersInfo = await this._applyTenantFilter(trx('users')).select('id', 'first_name', 'last_name').whereIn('id', studentIds);
             const userMap = new Map(usersInfo.map(u => [u.id, u]));
             // --- Validation Block End ---
 
@@ -104,7 +104,7 @@ class AttendanceModel extends BaseModel {
                     }
                 }
 
-                const existingRecord = await trx(this.tableName)
+                const existingRecord = await this._applyTenantFilter(trx(this.tableName))
                     .where({ class_id, student_id })
                     .whereRaw('DATE(date) = ?', [date])
                     .first();
@@ -136,6 +136,14 @@ class AttendanceModel extends BaseModel {
 
             // Upsert asistencias
             if (recordsToUpdate.length > 0) {
+                // Usamos _getTenantId() y verificamos, o no. Inserts onConflict son complicados.
+                // Sin embargo `bulkCreateOrUpdate` normalmente se usa a nivel tenant.
+                // Inyectemos academy_id en todos los records a actualizar, por seguridad.
+                const tenantId = this._getTenantId();
+                if (tenantId) {
+                    recordsToUpdate.forEach(r => r.academy_id = tenantId);
+                }
+
                 await trx(this.tableName)
                     .insert(recordsToUpdate)
                     .onConflict(['class_id', 'student_id', 'date'])
@@ -149,7 +157,7 @@ class AttendanceModel extends BaseModel {
                     if (!userPlan) continue; // Should not happen given validation above but safe check
 
                     // Actualizar contadores
-                    await trx("user_plan")
+                    await this._applyTenantFilter(trx("user_plan"))
                         .where({ id: userPlan.user_plan_id })
                         .update({
                             classes_used: this.knex.raw(`classes_used + ?`, [change]),
@@ -159,7 +167,7 @@ class AttendanceModel extends BaseModel {
 
                     // Verificar si se agotó el plan despues del update
                     // Volvemos a consultar para tener el valor actualizado exacto o calculamos en memoria
-                    const updatedPlan = await trx("user_plan")
+                    const updatedPlan = await this._applyTenantFilter(trx("user_plan"))
                         .select('classes_remaining', 'status', 'max_classes') // max_classes para saber si es ilimitado (aunque remaining alto ya lo cubre)
                         .where({ id: userPlan.user_plan_id })
                         .first();
@@ -168,13 +176,13 @@ class AttendanceModel extends BaseModel {
                         // Si llego a 0 y NO es ilimitado (asumimos logicamente que si remaining llega a 0 es porque no es ilimitado o se acabaron las 9999)
                         // Logica: si remaining <= 0, plan finished.
                         if (updatedPlan.classes_remaining <= 0 && updatedPlan.status === 'active') {
-                            await trx("user_plan")
+                            await this._applyTenantFilter(trx("user_plan"))
                                 .where({ id: userPlan.user_plan_id })
                                 .update({ status: 'expired', updated_at: new Date() }); // 'expired' or 'finished'
                         }
                         // Si devolvimos clases y el plan estaba expired, lo reactivamos?
                         else if (change < 0 && updatedPlan.classes_remaining > 0 && updatedPlan.status === 'expired') {
-                            await trx("user_plan")
+                            await this._applyTenantFilter(trx("user_plan"))
                                 .where({ id: userPlan.user_plan_id })
                                 .update({ status: 'active', updated_at: new Date() });
                         }

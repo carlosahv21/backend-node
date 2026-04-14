@@ -1,7 +1,9 @@
 import knex from '../config/knex.js';
+import BaseModel from './baseModel.js';
 
-class searchModel {
+class searchModel extends BaseModel {
     constructor() {
+        super('users'); // Base ficticia para tener acceso a helpers
         this.knex = knex;
     }
     /**
@@ -18,7 +20,7 @@ class searchModel {
 
         // Función auxiliar para construir la base de la consulta de usuarios
         const buildUserQuery = (roleName) => {
-            return this.knex('users as u')
+            return this._applyTenantFilter(this.knex('users as u'), 'u')
                 .join('roles as r', 'u.role_id', 'r.id')
                 .where('r.name', roleName)
                 .whereNull('u.deleted_at')
@@ -31,7 +33,7 @@ class searchModel {
 
         // Función auxiliar para construir la base de la consulta de clases
         const buildClassQuery = () => {
-            return this.knex('classes')
+            return this._applyTenantFilter(this.knex('classes'), 'classes')
                 .whereNull('deleted_at')
                 .where(function () {
                     this.where('name', 'like', searchSafe)

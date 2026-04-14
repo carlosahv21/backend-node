@@ -162,6 +162,16 @@ class FieldModel extends BaseModel {
 
         let query = this.knex(table);
 
+        // Aplicar aislamiento de tenant si el modelo destino está configurado para ello
+        if (targetModel && targetModel._isTenantScoped) {
+            query = this._applyTenantFilter(query, table);
+        }
+
+        // Aplicar filtro de borrado lógico si el modelo destino lo soporta
+        if (targetModel && targetModel.softDelete) {
+            query = query.whereNull(`${table}.deleted_at`);
+        }
+
         if (joins.length > 0) {
             joins.forEach(j => {
                 query = query.leftJoin(`${j.table} as ${j.alias}`, j.on[0], j.on[1]);

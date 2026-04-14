@@ -16,13 +16,6 @@ export async function up(knex) {
             table.uuid("deleted_by").nullable();
             table.timestamps(true, true);
         });
-
-        await knex('plans').insert([
-            { name: "Mensualidad Ilimitada", description: "Acceso ilimitado a las clases mensuales.", price: 30, type: "monthly", max_sessions: 0, max_classes: 0, trial_period_days: 0 },
-            { name: "Paquete de 4 Clases", description: "Bono de 4 clases que el alumno puede consumir en cualquier momento.", price: 12, type: "package", max_sessions: 4, max_classes: 1, trial_period_days: 0 },
-            { name: "Paquete de 8 Clases", description: "Bono de 8 clases ideal para estudiantes frecuentes.", price: 20, type: "package", max_sessions: 8, max_classes: 2, trial_period_days: 0 },
-            { name: "Paquete de 16 Clases", description: "Bono de 16 clases ideal para estudiantes frecuentes.", price: 30, type: "package", max_sessions: 16, max_classes: 4, trial_period_days: 0 }
-        ]);
     }
 }
 

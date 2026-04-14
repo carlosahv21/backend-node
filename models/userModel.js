@@ -97,7 +97,7 @@ class UserModel extends BaseModel {
     }
 
     async assignRole(userId, roleId) {
-        await this.knex('users').where({ id: userId }).update({ role_id: roleId });
+        await this._applyTenantFilter(this.knex('users')).where({ id: userId }).update({ role_id: roleId });
     }
 
     async updateRole(userId, roleName) {
@@ -108,7 +108,7 @@ class UserModel extends BaseModel {
     }
 
     async findByEmail(email) {
-        return this.knex(this.tableName).where({ email }).first();
+        return this._applyTenantFilter(this.knex(this.tableName)).where({ email }).first();
     }
 }
 

@@ -128,9 +128,7 @@ class UserController {
     async savePushToken(req, res, next) {
         try {
             const { userId } = req.params;
-            const { pushToken } = req.body;
-
-            console.log(userId, pushToken);
+            const { pushToken } = req.body
 
 
             if (!pushToken) {

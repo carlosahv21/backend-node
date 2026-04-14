@@ -27,7 +27,7 @@ class NotificationModel extends BaseModel {
 
         // Build base query
         // Join with interactions table to get read/deleted status for this specific user
-        let query = this.knex('notifications as n')
+        let query = this._applyTenantFilter(this.knex('notifications as n'), 'n')
             .leftJoin('user_notifications_interactions as uni', function () {
                 this.on('n.id', '=', 'uni.notification_id')
                     .andOn('uni.user_id', '=', knex.raw('?', [userId]));
@@ -119,7 +119,7 @@ class NotificationModel extends BaseModel {
             });
 
         // Return updated notification with read status
-        const notification = await this.knex('notifications').where({ id: notificationId }).first();
+        const notification = await this._applyTenantFilter(this.knex('notifications')).where({ id: notificationId }).first();
         return { ...notification, is_read: true };
     }
 
@@ -141,6 +141,7 @@ class NotificationModel extends BaseModel {
             SELECT ?, n.id, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
             FROM notifications n
             WHERE (n.user_id = ? OR n.role_target = ?)
+            AND n.academy_id = ?
             AND n.id NOT IN (
                 SELECT notification_id FROM user_notifications_interactions 
                 WHERE user_id = ? AND is_read = true AND (is_deleted IS NULL OR is_deleted = false)
@@ -149,7 +150,8 @@ class NotificationModel extends BaseModel {
             DO UPDATE SET is_read = true, updated_at = CURRENT_TIMESTAMP
         `;
 
-        const result = await this.knex.raw(query, [userId, userId, userRole.toUpperCase(), userId]);
+        const tenantId = this._getTenantId();
+        const result = await this.knex.raw(query, [userId, userId, userRole.toUpperCase(), tenantId, userId]);
         return result.rowCount || 0;
     }
 
@@ -204,7 +206,7 @@ class NotificationModel extends BaseModel {
      * @private
      */
     async _verifyAccess(notificationId, userId) {
-        const notification = await this.knex('notifications')
+        const notification = await this._applyTenantFilter(this.knex('notifications'))
             .where({ id: notificationId })
             .first();
 
