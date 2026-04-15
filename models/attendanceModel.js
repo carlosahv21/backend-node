@@ -25,7 +25,8 @@ class AttendanceModel extends BaseModel {
             'class_id': 'attendances.class_id',
             'student_id': 'attendances.student_id',
             'date': 'attendances.date',
-            'status': 'attendances.status'
+            'status': 'attendances.status',
+            'created_at': 'attendances.date'
         };
 
         this.relationMaps = {
@@ -72,7 +73,7 @@ class AttendanceModel extends BaseModel {
             const studentIds = [...new Set(attendanceRecords.map(r => r.student_id))];
 
             // Obtener el plan ACTIVO de cada estudiante
-            const activePlans = await this._applyTenantFilter(trx('user_plan'))
+            const activePlans = await this._applyTenantFilter(trx('user_plan'), 'user_plan')
                 .select('user_id', 'id as user_plan_id', 'status', 'classes_remaining', 'classes_used')
                 .whereIn('user_id', studentIds)
                 .andWhere('status', 'active');
@@ -80,7 +81,7 @@ class AttendanceModel extends BaseModel {
             const studentPlanMap = new Map(activePlans.map(p => [p.user_id, p]));
 
             // También obtenemos info básica del usuario para mensajes de error si no tiene plan
-            const usersInfo = await this._applyTenantFilter(trx('users')).select('id', 'first_name', 'last_name').whereIn('id', studentIds);
+            const usersInfo = await this._applyTenantFilter(trx('users'), 'users').select('id', 'first_name', 'last_name').whereIn('id', studentIds);
             const userMap = new Map(usersInfo.map(u => [u.id, u]));
             // --- Validation Block End ---
 
@@ -157,7 +158,7 @@ class AttendanceModel extends BaseModel {
                     if (!userPlan) continue; // Should not happen given validation above but safe check
 
                     // Actualizar contadores
-                    await this._applyTenantFilter(trx("user_plan"))
+                    await this._applyTenantFilter(trx("user_plan"), "user_plan")
                         .where({ id: userPlan.user_plan_id })
                         .update({
                             classes_used: this.knex.raw(`classes_used + ?`, [change]),
@@ -167,7 +168,7 @@ class AttendanceModel extends BaseModel {
 
                     // Verificar si se agotó el plan despues del update
                     // Volvemos a consultar para tener el valor actualizado exacto o calculamos en memoria
-                    const updatedPlan = await this._applyTenantFilter(trx("user_plan"))
+                    const updatedPlan = await this._applyTenantFilter(trx("user_plan"), "user_plan")
                         .select('classes_remaining', 'status', 'max_classes') // max_classes para saber si es ilimitado (aunque remaining alto ya lo cubre)
                         .where({ id: userPlan.user_plan_id })
                         .first();
@@ -176,13 +177,13 @@ class AttendanceModel extends BaseModel {
                         // Si llego a 0 y NO es ilimitado (asumimos logicamente que si remaining llega a 0 es porque no es ilimitado o se acabaron las 9999)
                         // Logica: si remaining <= 0, plan finished.
                         if (updatedPlan.classes_remaining <= 0 && updatedPlan.status === 'active') {
-                            await this._applyTenantFilter(trx("user_plan"))
+                            await this._applyTenantFilter(trx("user_plan"), "user_plan")
                                 .where({ id: userPlan.user_plan_id })
                                 .update({ status: 'expired', updated_at: new Date() }); // 'expired' or 'finished'
                         }
                         // Si devolvimos clases y el plan estaba expired, lo reactivamos?
                         else if (change < 0 && updatedPlan.classes_remaining > 0 && updatedPlan.status === 'expired') {
-                            await this._applyTenantFilter(trx("user_plan"))
+                            await this._applyTenantFilter(trx("user_plan"), "user_plan")
                                 .where({ id: userPlan.user_plan_id })
                                 .update({ status: 'active', updated_at: new Date() });
                         }

@@ -43,7 +43,7 @@ class RegistrationModel extends BaseModel {
     }
 
     async havePlan(userId) {
-        const result = await this._applyTenantFilter(this.knex("user_plan"))
+        const result = await this._applyTenantFilter(this.knex("user_plan"), "user_plan")
             .join("users", "user_plan.user_id", "users.id")
             .where({ "users.id": userId })
             .select("user_plan.plan_id")
@@ -59,7 +59,7 @@ class RegistrationModel extends BaseModel {
             .count("* as count")
             .first();
 
-        const classes = await this._applyTenantFilter(this.knex("classes"))
+        const classes = await this._applyTenantFilter(this.knex("classes"), "classes")
             .select("classes.capacity")
             .where("classes.id", class_id)
             .first();
@@ -74,7 +74,7 @@ class RegistrationModel extends BaseModel {
             .count("* as count")
             .first();
 
-        const plan = await this._applyTenantFilter(this.knex("users"))
+        const plan = await this._applyTenantFilter(this.knex("users"), "users")
             .join("user_plan", "users.id", "user_plan.user_id")
             .join("plans", "user_plan.plan_id", "plans.id")
             .where("users.id", userId)
@@ -97,7 +97,7 @@ class RegistrationModel extends BaseModel {
     }
 
     async isActive(userId) {
-        const result = await this._applyTenantFilter(this.knex("users"))
+        const result = await this._applyTenantFilter(this.knex("users"), "users")
             .where({ id: userId })
             .select("plan_status", "first_name", "last_name")
             .first();

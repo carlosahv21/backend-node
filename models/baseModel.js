@@ -129,7 +129,7 @@ class BaseModel {
 
         Object.keys(otherQueryParams).forEach((key) => {
             if (
-                ["search", "page", "limit", "order_by", "order_direction", "withDeleted", "onlyDeleted"].includes(key)
+                ["search", "page", "limit", "order_by", "order_direction", "withDeleted", "onlyDeleted", "date_range"].includes(key)
             )
                 return;
 
@@ -147,6 +147,51 @@ class BaseModel {
 
             query = query.where(columnName, value);
         });
+
+        // ── DATE RANGE FILTERING ──────────────────────────────────────────
+        if (queryParams.date_range) {
+            const dateColumn = (this.filterMapping && this.filterMapping['created_at']) || `${this.tableName}.created_at`;
+            const now = new Date();
+            let startDate, endDate;
+
+            switch (queryParams.date_range) {
+                case 'today':
+                    startDate = new Date(now.setHours(0, 0, 0, 0));
+                    break;
+                case 'yesterday':
+                    startDate = new Date(now);
+                    startDate.setDate(startDate.getDate() - 1);
+                    startDate.setHours(0, 0, 0, 0);
+                    endDate = new Date(startDate);
+                    endDate.setHours(23, 59, 59, 999);
+                    break;
+                case 'this_week':
+                    startDate = new Date(now);
+                    const day = startDate.getDay();
+                    const diff = startDate.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+                    startDate.setDate(diff);
+                    startDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'this_month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    break;
+                case 'last_month':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+                    break;
+                case 'this_year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    break;
+            }
+
+            if (startDate) {
+                query = query.where(dateColumn, '>=', startDate);
+            }
+            if (endDate) {
+                query = query.where(dateColumn, '<=', endDate);
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         if (!isCount && order_by) {
 

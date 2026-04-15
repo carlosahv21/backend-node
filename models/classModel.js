@@ -37,32 +37,32 @@ class ClassModel extends BaseModel {
         return await this._applyTenantFilter(db("user_class as uc"), "uc")
             .join("users as u", "uc.user_id", "u.id")
             // JOIN optimizado para traer SOLO el último plan activo
-            .leftJoin("user_plan as up", function () {
-                this.on("u.id", "=", "up.user_id").andOn(
+            .leftJoin("user_plan as up", (join) => {
+                join.on("u.id", "=", "up.user_id").andOn(
                     "up.id",
                     "=",
-                    this._applyTenantFilter(db("user_plan").select("id"))
+                    this._applyTenantFilter(db("user_plan").select("id"), "user_plan")
                         .whereRaw("user_id = u.id")
                         .orderBy("created_at", "desc")
                         .limit(1),
                 );
-            }.bind(this))
+            })
             .leftJoin("plans as p", "up.plan_id", "p.id")
             // JOIN optimizado para traer SOLO la última asistencia de esta clase específica
-            .leftJoin("attendances as a", function () {
-                this.on("u.id", "=", "a.student_id")
+            .leftJoin("attendances as a", (join) => {
+                join.on("u.id", "=", "a.student_id")
                     .andOn("a.class_id", "=", db.raw("?", [classId]))
                     .andOn(
                         "a.id",
                         "=",
-                        this._applyTenantFilter(db("attendances").select("id"))
+                        this._applyTenantFilter(db("attendances").select("id"), "attendances")
                             .whereRaw("student_id = u.id AND class_id = ?", [
                                 classId,
                             ])
                             .orderBy("date", "desc") // La fecha más reciente
                             .limit(1),
                     );
-            }.bind(this))
+            })
             .where("uc.class_id", classId)
             .select(
                 "u.id",
@@ -80,12 +80,12 @@ class ClassModel extends BaseModel {
 
     async _getClassStats(classId, capacity) {
         const db = this.knex;
-        const enrolled = await this._applyTenantFilter(db("user_class"))
+        const enrolled = await this._applyTenantFilter(db("user_class"), "user_class")
             .where("class_id", classId)
             .count("user_id as total");
         const totalInscritos = enrolled[0].total || 0;
 
-        const avgAttendance = await this._applyTenantFilter(db("attendances"))
+        const avgAttendance = await this._applyTenantFilter(db("attendances"), "attendances")
             .where("class_id", classId)
             .count("id as total");
 

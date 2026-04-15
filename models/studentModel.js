@@ -18,15 +18,15 @@ class StudentModel extends UserModel {
 
         const student = await this._applyTenantFilter(db('users as u'), 'u')
             .leftJoin('roles as r', 'u.role_id', 'r.id')
-            .leftJoin('user_plan as up', function() {
+            .leftJoin('user_plan as up', (join) => {
                 // Seleccionamos solo el plan más reciente para el usuario
-                this.on('u.id', '=', 'up.user_id')
-                    .andOn('up.id', '=', this._applyTenantFilter(db('user_plan').select('id'))
+                join.on('u.id', '=', 'up.user_id')
+                    .andOn('up.id', '=', this._applyTenantFilter(db('user_plan').select('id'), 'user_plan')
                         .whereRaw('user_id = u.id')
                         .orderBy('created_at', 'desc')
                         .limit(1)
                     );
-            }.bind(this))
+            })
             .leftJoin('plans as p', 'up.plan_id', 'p.id')
             .where('u.id', id)
             .select(

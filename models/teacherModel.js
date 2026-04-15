@@ -28,7 +28,7 @@ class TeacherModel extends UserModel {
             // Estadísticas (Simuladas según la UI: Clases, Rating, Alumnos)
             this._getTeacherStats(id),
             // Clases de la semana
-            this._applyTenantFilter(db('classes'))
+            this._applyTenantFilter(db('classes'), 'classes')
                 .where('teacher_id', id)
                 .select('id', 'name', 'date', 'hour', 'duration', 'genre')
                 .orderBy('date', 'asc')
@@ -43,7 +43,7 @@ class TeacherModel extends UserModel {
     async _getTeacherStats(id) {
         const db = this.knex;
         // Total de clases asignadas
-        const classesCount = await this._applyTenantFilter(db('classes')).where('teacher_id', id).count('id as total');
+        const classesCount = await this._applyTenantFilter(db('classes'), 'classes').where('teacher_id', id).count('id as total');
         // Total de alumnos únicos en sus clases (vía user_class)
         const studentsCount = await this._applyTenantFilter(db('user_class as uc'), 'uc')
             .join('classes as c', 'uc.class_id', 'c.id')
@@ -61,7 +61,7 @@ class TeacherModel extends UserModel {
         const db = this.knex;
         const currentMonth = new Date().getMonth() + 1;
         
-        const paidThisMonth = await this._applyTenantFilter(db('payments'))
+        const paidThisMonth = await this._applyTenantFilter(db('payments'), 'payments')
             .where('user_id', id)
                 .andWhereRaw('EXTRACT(MONTH FROM payment_date) = ?', [currentMonth])
             .sum('amount as total');
