@@ -76,10 +76,10 @@ class TeacherModel extends UserModel {
     _transformToDetailedModel(teacher, stats, classes, payments) {
         return {
             header: {
-                id: teacher.id,
+                ...teacher,
                 full_name: `${teacher.first_name} ${teacher.last_name}`,
                 role_label: teacher.role_name,
-                email: teacher.email
+                role: teacher.role_name
             },
             stats: {
                 classes_count: stats.classes,

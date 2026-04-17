@@ -102,6 +102,7 @@ class ClassModel extends BaseModel {
     _transformToClassDetailView(data, stats, students) {
         return {
             header: {
+                id: data.id,
                 title: data.name,
                 level_tag: `${data.level} • ${data.date}`,
                 genre: data.genre,

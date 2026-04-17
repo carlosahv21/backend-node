@@ -88,6 +88,7 @@ class ReportsModel extends BaseModel {
             .leftJoin("users as u", "cu.user_id", "u.id")
             .leftJoin("user_plan as up", "u.id", "up.user_id")
             .select(
+                "c.id as id",
                 "c.name",
                 "c.genre",
                 "c.capacity",
@@ -97,7 +98,7 @@ class ReportsModel extends BaseModel {
                 )
             )
             .where("up.status", "active")
-            .groupBy("c.genre", "c.name", "c.capacity")
+            .groupBy("c.id", "c.genre", "c.name", "c.capacity")
             .orderBy("c.genre", "asc")
             .orderBy("occupancy_rate", "desc");
 
@@ -129,7 +130,7 @@ class ReportsModel extends BaseModel {
         const report = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("attendances as a", "c.id", "a.class_id")
             .select(
-                "c.id",
+                "c.id as id",
                 "c.name",
                 this.knex.raw(
                     "COUNT(CASE WHEN LOWER(a.status) = 'present' THEN 1 END) as attended_count"
@@ -150,9 +151,10 @@ class ReportsModel extends BaseModel {
      * Horas o cantidad de clases impartidas por cada teacher.
      */
     async getTeachersParticipation() {
-        return this._applyTenantFilter(this.knex("classes as c"), "c")
+        return await this._applyTenantFilter(this.knex("classes as c"), "c")
             .join("users as u", "c.teacher_id", "u.id")
             .select(
+                "u.id as id",
                 "u.first_name",
                 "u.last_name",
                 this.knex.raw("COUNT(c.id) as classes_count"),
@@ -316,7 +318,7 @@ class ReportsModel extends BaseModel {
                 "last_att.student_id"
             )
             .select(
-                "u.id",
+                "u.id as id",
                 "u.first_name",
                 "u.last_name",
                 "u.email",
@@ -344,7 +346,7 @@ class ReportsModel extends BaseModel {
         const fillRateByClass = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("attendances as a", "c.id", "a.class_id")
             .select(
-                "c.id",
+                "c.id as id",
                 "c.name",
                 "c.genre",
                 "c.level",

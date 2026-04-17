@@ -7,6 +7,22 @@ import { UserModel } from './userModel.js';
 class StudentModel extends UserModel {
     constructor() {
         super();
+        
+        // Añadimos joins para poder filtrar por planes en las listas (BaseView)
+        this.joins.push(
+            { table: "user_plan", alias: "up", on: ["users.id", "up.user_id"] },
+            { table: "plans", alias: "p", on: ["up.plan_id", "p.id"] }
+        );
+
+        // Mapeamos el filtro plan_name a la columna real en la tabla de planes
+        this.filterMapping = {
+            ...this.filterMapping,
+            'plan_name': 'p.name',
+            'plan_status': 'up.status'
+        };
+
+        // Agregamos el nombre del plan a los campos seleccionados
+        this.selectFields = [...this.selectFields, 'p.name as plan_name'];
     }
 
     /**

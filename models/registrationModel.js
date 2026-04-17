@@ -7,7 +7,8 @@ class RegistrationModel extends BaseModel {
 
         this.joins = [
             { table: "classes", alias: "c", on: ["user_class.class_id", "c.id"] },
-            { table: "users", alias: "u", on: ["user_class.user_id", "u.id"] }
+            { table: "users", alias: "u", on: ["user_class.user_id", "u.id"] },
+            { table: "payments", alias: "pay", on: ["u.id", "pay.user_id"] }
         ];
 
         this.selectFields = [
@@ -19,13 +20,15 @@ class RegistrationModel extends BaseModel {
             "c.genre as class_genre",
             "u.first_name as user_first_name",
             "u.last_name as user_last_name",
+            "pay.payment_method as payment_method"
         ];
 
         this.searchFields = ["c.name", "c.hour", "c.date", "u.first_name", "u.last_name"];
 
         this.filterMapping = {
             'class_id': 'user_class.class_id',
-            'user_id': 'user_class.user_id'
+            'user_id': 'user_class.user_id',
+            'payment_method': 'pay.payment_method'
         };
 
         this.orderMapping = {
