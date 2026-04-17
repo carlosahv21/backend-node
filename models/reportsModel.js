@@ -19,14 +19,17 @@ class ReportsModel extends BaseModel {
     /**
      * Indicadores Clave (KPI)
      */
-    async getKpiData() {
+    async getKpiData(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         // Cantidad de estudiantes activos (el plan termina hoy o después)
         const activeStudentsResult = await this._applyTenantFilter(this.knex("users as u"), "u")
             .join("user_plan as up", "u.id", "up.user_id")
             .leftJoin("roles as r", "u.role_id", "r.id")
             .where("r.name", "student")
             .andWhere("up.status", "active")
-            .andWhere("up.end_date", ">=", this.start_date) // Active in current scope
+            .andWhere("up.end_date", ">=", start) // Active in current scope
             .count("u.id as active_students");
 
         // Cantidad de clases del dia actual
@@ -39,14 +42,14 @@ class ReportsModel extends BaseModel {
         // El requerimiento anterior usaba users.plan_start_date. Ahora usaremos user_plan.
         const monthlyRevenueResult = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .join("users as u", "p.user_id", "=", "u.id")
-            .whereBetween("p.payment_date", [this.start_date, this.end_date])
+            .whereBetween("p.payment_date", [start, end])
             .select(
                 this.knex.raw("SUM(CAST(p.amount AS DECIMAL(10, 2))) AS total_revenue")
             );
 
         // Tasa de asistencia
         const attendanceRateResult = await this._applyTenantFilter(this.knex("attendances as a"), "a")
-            .whereBetween("a.date", [this.start_date, this.end_date])
+            .whereBetween("a.date", [start, end])
             .select(
                 this.knex.raw(`
                 ROUND(
@@ -82,7 +85,10 @@ class ReportsModel extends BaseModel {
      * Ocupación de Clases (Capacidad)
      * Mide cuántos cupos se usan en relación a la capacidad máxima.
      */
-    async getClassOccupancy() {
+    async getClassOccupancy(startDate, endDate) {
+        // En este reporte específico, el rango podría usarse para ver inscritos activos en ese periodo
+        const start = startDate || this.start_date;
+
         const report = this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("user_class as cu", "c.id", "cu.class_id")
             .leftJoin("users as u", "cu.user_id", "u.id")
@@ -98,6 +104,7 @@ class ReportsModel extends BaseModel {
                 )
             )
             .where("up.status", "active")
+            .andWhere("up.end_date", ">=", start)
             .groupBy("c.id", "c.genre", "c.name", "c.capacity")
             .orderBy("c.genre", "asc")
             .orderBy("occupancy_rate", "desc");
@@ -108,7 +115,9 @@ class ReportsModel extends BaseModel {
     /**
      * Distribución de Usuarios por Plan
      */
-    async getUserDistribution() {
+    async getUserDistribution(startDate, endDate) {
+        const start = startDate || this.start_date;
+
         const report = this._applyTenantFilter(this.knex("user_plan as up"), "up")
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("plans as p", "up.plan_id", "p.id")
@@ -116,7 +125,7 @@ class ReportsModel extends BaseModel {
             .select("p.name as plan_name", this.knex.raw("COUNT(u.id) as user_count"))
             .where("r.name", "student")
             .andWhere("up.status", "active")
-            .andWhere("up.end_date", ">=", this.start_date)
+            .andWhere("up.end_date", ">=", start)
             .groupBy("p.id", "p.name");
 
         return report;
@@ -126,9 +135,13 @@ class ReportsModel extends BaseModel {
      * Tasa de Asistencia por Clase
      * Porcentaje de estudiantes que asistieron vs. inscritos en cada clase.
      */
-    async getAttendanceRate() {
+    async getAttendanceRate(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         const report = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("attendances as a", "c.id", "a.class_id")
+            .whereBetween("a.date", [start, end])
             .select(
                 "c.id as id",
                 "c.name",
@@ -148,17 +161,22 @@ class ReportsModel extends BaseModel {
 
     /**
      * Participación del Profesorado
-     * Horas o cantidad de clases impartidas por cada teacher.
+     * Horas o cantidad de clases impartidas por cada teacher en el rango.
      */
-    async getTeachersParticipation() {
+    async getTeachersParticipation(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         return await this._applyTenantFilter(this.knex("classes as c"), "c")
             .join("users as u", "c.teacher_id", "u.id")
+            .leftJoin("attendances as att", "c.id", "att.class_id")
+            .whereBetween("att.date", [start, end])
             .select(
                 "u.id as id",
                 "u.first_name",
                 "u.last_name",
-                this.knex.raw("COUNT(c.id) as classes_count"),
-                this.knex.raw("SUM(CAST(c.duration AS DECIMAL)) as total_minutes")
+                this.knex.raw("COUNT(DISTINCT c.id) as classes_count"),
+                this.knex.raw("SUM(DISTINCT CAST(c.duration AS DECIMAL)) as total_minutes")
             )
             .groupBy("u.id", "u.first_name", "u.last_name");
     }
@@ -167,7 +185,10 @@ class ReportsModel extends BaseModel {
      * REPORT 1: Retention & Churn Analysis
      * Analiza la retención de usuarios por cohortes y calcula tasas de churn
      */
-    async getRetentionChurnAnalysis() {
+    async getRetentionChurnAnalysis(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         // Análisis de cohortes: usuarios agrupados por mes de inicio
         const cohortAnalysis = await this._applyTenantFilter(this.knex("user_registration_history as urh"), "urh")
             .join("users as u", "urh.user_id", "u.id")
@@ -218,7 +239,10 @@ class ReportsModel extends BaseModel {
      * REPORT 2: Revenue Optimization
      * Analiza ingresos, descuentos y métodos de pago
      */
-    async getRevenueOptimization() {
+    async getRevenueOptimization(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         // ARPU (Average Revenue Per User)
         const arpu = await this._applyTenantFilter(this.knex("payments as p"), "p")
             .join("users as u", "p.user_id", "u.id")
@@ -230,6 +254,7 @@ class ReportsModel extends BaseModel {
             )
             .where("r.name", "student")
             .andWhere("p.status", "completed")
+            .andWhereBetween("p.payment_date", [start, end])
             .first();
 
         // Impacto de descuentos
@@ -247,6 +272,7 @@ class ReportsModel extends BaseModel {
             )
             .whereNotNull("p.discount_type")
             .andWhere("p.status", "completed")
+            .andWhereBetween("p.payment_date", [start, end])
             .groupBy("p.discount_type");
 
         // Análisis por método de pago
@@ -260,6 +286,7 @@ class ReportsModel extends BaseModel {
                 )
             )
             .where("p.status", "completed")
+            .andWhereBetween("p.payment_date", [start, end])
             .groupBy("p.payment_method");
 
         return {
@@ -273,7 +300,10 @@ class ReportsModel extends BaseModel {
      * REPORT 3: Student Engagement
      * Identifica usuarios en riesgo y analiza utilización de clases
      */
-    async getStudentEngagement() {
+    async getStudentEngagement(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         // Tasa de utilización de clases
         const classUtilization = await this._applyTenantFilter(this.knex("user_plan as up"), "up")
             .join("users as u", "up.user_id", "u.id")
@@ -341,10 +371,14 @@ class ReportsModel extends BaseModel {
      * REPORT 4: Operational Efficiency
      * Analiza ocupación, rentabilidad y clases "zombie"
      */
-    async getOperationalEfficiency() {
+    async getOperationalEfficiency(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         // Fill Rate por clase
         const fillRateByClass = await this._applyTenantFilter(this.knex("classes as c"), "c")
             .leftJoin("attendances as a", "c.id", "a.class_id")
+            .whereBetween("a.date", [start, end])
             .select(
                 "c.id as id",
                 "c.name",
@@ -378,6 +412,7 @@ class ReportsModel extends BaseModel {
             .from(
                 this._applyTenantFilter(this.knex("classes as c"), "c")
                     .leftJoin("attendances as a", "c.id", "a.class_id")
+                    .whereBetween("a.date", [start, end])
                     .select(
                         "c.id",
                         "c.teacher_id",
@@ -410,7 +445,10 @@ class ReportsModel extends BaseModel {
      * REPORT 5: Admin Audit
      * Monitorea cambios administrativos y actividad sensible
      */
-    async getAdminAudit() {
+    async getAdminAudit(startDate, endDate) {
+        const start = startDate || this.start_date;
+        const end = endDate || this.end_date;
+
         // Cambios manuales en user_plan
         const manualPlanChanges = await this._applyTenantFilter(this.knex("audit_log as al"), "al")
             .join("users as u", "al.user_id", "u.id")
@@ -426,6 +464,7 @@ class ReportsModel extends BaseModel {
                 "al.created_at"
             )
             .where("al.table_name", "user_plan")
+            .andWhereBetween("al.created_at", [`${start} 00:00:00`, `${end} 23:59:59`])
             .orderBy("al.created_at", "desc")
             .limit(50);
 
@@ -442,6 +481,7 @@ class ReportsModel extends BaseModel {
                 "p.updated_at"
             )
             .whereIn("p.status", ["refunded", "cancelled"])
+            .andWhereBetween("p.payment_date", [start, end])
             .orderBy("p.updated_at", "desc")
             .limit(50);
 
@@ -457,6 +497,7 @@ class ReportsModel extends BaseModel {
                 this.knex.raw("COUNT(*) as action_count")
             )
             .where("r.name", "admin")
+            .andWhereBetween("al.created_at", [`${start} 00:00:00`, `${end} 23:59:59`])
             .groupBy("date", "u.id", "u.first_name", "u.last_name", "al.action")
             .orderBy("date", "desc")
             .limit(100);

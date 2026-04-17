@@ -4,71 +4,71 @@ class ReportsService {
     /**
      * Obtiene los datos de KPI.
      */
-    async getKpiData() {
-        return ReportsModel.getKpiData();
+    async getKpiData(startDate, endDate) {
+        return ReportsModel.getKpiData(startDate, endDate);
     }
 
     /**
      * Obtiene la ocupación de clases.
      */
-    async getClassOccupancy() {
-        return ReportsModel.getClassOccupancy();
+    async getClassOccupancy(startDate, endDate) {
+        return ReportsModel.getClassOccupancy(startDate, endDate);
     }
 
     /**
      * Obtiene la distribución de usuarios.
      */
-    async getUserDistribution() {
-        return ReportsModel.getUserDistribution();
+    async getUserDistribution(startDate, endDate) {
+        return ReportsModel.getUserDistribution(startDate, endDate);
     }
 
     /**
      * Obtiene la participación de los profesores.
      */
-    async getTeachersParticipation() {
-        return ReportsModel.getTeachersParticipation();
+    async getTeachersParticipation(startDate, endDate) {
+        return ReportsModel.getTeachersParticipation(startDate, endDate);
     }
 
     /**
      * Obtiene la tasa de asistencia.
      */
-    async getAttendanceRate() {
-        return ReportsModel.getAttendanceRate();
+    async getAttendanceRate(startDate, endDate) {
+        return ReportsModel.getAttendanceRate(startDate, endDate);
     }
 
     /**
      * Obtiene el análisis de retención y abandono.
      */
-    async getRetentionChurnAnalysis() {
-        return ReportsModel.getRetentionChurnAnalysis();
+    async getRetentionChurnAnalysis(startDate, endDate) {
+        return ReportsModel.getRetentionChurnAnalysis(startDate, endDate);
     }
 
     /**
      * Obtiene la optimización de ingresos.
      */
-    async getRevenueOptimization() {
-        return ReportsModel.getRevenueOptimization();
+    async getRevenueOptimization(startDate, endDate) {
+        return ReportsModel.getRevenueOptimization(startDate, endDate);
     }
 
     /**
      * Obtiene el compromiso del estudiante.
      */
-    async getStudentEngagement() {
-        return ReportsModel.getStudentEngagement();
+    async getStudentEngagement(startDate, endDate) {
+        return ReportsModel.getStudentEngagement(startDate, endDate);
     }
 
     /**
      * Obtiene la eficiencia operativa.
      */
-    async getOperationalEfficiency() {
-        return ReportsModel.getOperationalEfficiency();
+    async getOperationalEfficiency(startDate, endDate) {
+        return ReportsModel.getOperationalEfficiency(startDate, endDate);
     }
 
     /**
      * Obtiene la auditoría administrativa.
      */
-    async getAdminAudit() {
-        return ReportsModel.getAdminAudit();
+    async getAdminAudit(startDate, endDate) {
+        return ReportsModel.getAdminAudit(startDate, endDate);
     }
 
     /**

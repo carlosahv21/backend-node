@@ -4,7 +4,8 @@ import ApiResponse from "../utils/apiResponse.js";
 class reportsController {
     async getKpiData(req, res, next) {
         try {
-            const data = await ReportsService.getKpiData();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getKpiData(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -19,7 +20,8 @@ class reportsController {
 
     async getClassOccupancy(req, res, next) {
         try {
-            const data = await ReportsService.getClassOccupancy();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getClassOccupancy(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -34,7 +36,8 @@ class reportsController {
 
     async getUserDistribution(req, res, next) {
         try {
-            const data = await ReportsService.getUserDistribution();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getUserDistribution(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -49,7 +52,8 @@ class reportsController {
 
     async getAttendanceRate(req, res, next) {
         try {
-            const data = await ReportsService.getAttendanceRate();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getAttendanceRate(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -64,7 +68,8 @@ class reportsController {
 
     async getTeachersParticipation(req, res, next) {
         try {
-            const data = await ReportsService.getTeachersParticipation();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getTeachersParticipation(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -81,7 +86,8 @@ class reportsController {
 
     async getRetentionChurnAnalysis(req, res, next) {
         try {
-            const data = await ReportsService.getRetentionChurnAnalysis();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getRetentionChurnAnalysis(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -96,7 +102,8 @@ class reportsController {
 
     async getRevenueOptimization(req, res, next) {
         try {
-            const data = await ReportsService.getRevenueOptimization();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getRevenueOptimization(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -111,7 +118,8 @@ class reportsController {
 
     async getStudentEngagement(req, res, next) {
         try {
-            const data = await ReportsService.getStudentEngagement();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getStudentEngagement(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -126,7 +134,8 @@ class reportsController {
 
     async getOperationalEfficiency(req, res, next) {
         try {
-            const data = await ReportsService.getOperationalEfficiency();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getOperationalEfficiency(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
@@ -141,7 +150,8 @@ class reportsController {
 
     async getAdminAudit(req, res, next) {
         try {
-            const data = await ReportsService.getAdminAudit();
+            const { start_date, end_date } = req.query;
+            const data = await ReportsService.getAdminAudit(start_date, end_date);
             ApiResponse.success(
                 res,
                 200,
