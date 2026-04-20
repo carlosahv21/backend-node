@@ -35,6 +35,12 @@ class RegistrationService {
     }
 
     async list(queryParams) {
+        const { group_by, ...rest } = queryParams;
+
+        if (group_by === "student") {
+            return await RegistrationModel.findGroupedByStudent(rest);
+        }
+
         return await RegistrationModel.findAll(queryParams);
     }
 

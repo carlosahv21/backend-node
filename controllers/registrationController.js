@@ -16,8 +16,14 @@ class RegistrationController {
     async listRegistrations(req, res, next) {
         try {
             const queryParams = req.query;
+            const isGrouped = queryParams.group_by === "student";
             const result = await RegistrationService.list(queryParams);
-            ApiResponse.success(res, 200, "Registrations retrieved successfully", result);
+
+            const message = isGrouped
+                ? "Registrations grouped by student successfully"
+                : "Registrations retrieved successfully";
+
+            ApiResponse.success(res, 200, message, result);
         } catch (error) {
             const status = error.statusCode || 500;
             ApiResponse.error(res, status, error.message);

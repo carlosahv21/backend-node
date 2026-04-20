@@ -13,7 +13,7 @@ class ApiResponse {
         let data = payload;
         let pagination = null;
 
-        // Check if payload looks like a paginated result from BaseModel
+        // Formato estándar de findAll: { data: [], total, page, limit }
         if (payload && Array.isArray(payload.data) && payload.total !== undefined) {
             data = payload.data;
             pagination = {
@@ -21,6 +21,12 @@ class ApiResponse {
                 page: payload.page,
                 limit: payload.limit
             };
+        }
+
+        // Formato agrupado: { data: [], pagination: { total_students, page, limit } }
+        else if (payload && Array.isArray(payload.data) && payload.pagination !== undefined) {
+            data = payload.data;
+            pagination = payload.pagination;
         }
 
         const response = {

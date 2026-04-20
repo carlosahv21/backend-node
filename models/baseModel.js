@@ -27,6 +27,8 @@ class BaseModel {
         this.softDelete = true;
         // Si la tabla es global, no aplicar filtro de tenant automáticamente
         this._isTenantScoped = !GLOBAL_TABLES.has(tableName);
+        // Columna usada por el filtro date_range. Los modelos hijos pueden sobreescribir esto.
+        this.dateRangeColumn = null;
     }
 
     // --- Helpers de Tenant ----------------------------------------------
@@ -55,6 +57,8 @@ class BaseModel {
 
     // Ejecuta las validaciones definidas para el modelo
     async _runValidations(data) {
+        const tenantId = this._getTenantId();
+
         for (const rule of this.validations) {
             const handler = validationHandlers[rule.name || rule];
 
@@ -64,17 +68,78 @@ class BaseModel {
                 this.knex,
                 this.tableName,
                 data,
-                rule.config || {}
+                rule.config || {},
+                tenantId
             );
 
             if (message) {
                 throw new AppError(message, 409);
             }
         }
-        return null;
     }
 
-    // Función auxiliar para construir la query base con filtros y búsqueda
+    // --- Helpers de Fecha ---------------------------------------------------
+
+    /**
+     * Convierte un preset de fecha (ej: "this_month") en { startDate, endDate }.
+     * Retorna null si el valor no es un preset conocido.
+     */
+    _resolveDateRange(preset) {
+        const DATE_PRESETS = new Set(["today", "yesterday", "this_week", "this_month", "last_month", "this_year"]);
+        if (!DATE_PRESETS.has(preset)) return null;
+
+        const nowTs = Date.now();
+        let startDate, endDate;
+
+        switch (preset) {
+            case "today": {
+                const d = new Date(nowTs);
+                startDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+                endDate   = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+                break;
+            }
+            case "yesterday": {
+                const d = new Date(nowTs);
+                d.setDate(d.getDate() - 1);
+                startDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+                endDate   = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+                break;
+            }
+            case "this_week": {
+                const d = new Date(nowTs);
+                const day = d.getDay();
+                const diffToMonday = day === 0 ? -6 : 1 - day;
+                const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diffToMonday, 0, 0, 0, 0);
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                sunday.setHours(23, 59, 59, 999);
+                startDate = monday;
+                endDate   = sunday;
+                break;
+            }
+            case "this_month": {
+                const d = new Date(nowTs);
+                startDate = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0, 0);
+                endDate   = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+                break;
+            }
+            case "last_month": {
+                const d = new Date(nowTs);
+                startDate = new Date(d.getFullYear(), d.getMonth() - 1, 1, 0, 0, 0, 0);
+                endDate   = new Date(d.getFullYear(), d.getMonth(), 0, 23, 59, 59, 999);
+                break;
+            }
+            case "this_year": {
+                const d = new Date(nowTs);
+                startDate = new Date(d.getFullYear(), 0, 1, 0, 0, 0, 0);
+                endDate   = new Date(d.getFullYear(), 11, 31, 23, 59, 59, 999);
+                break;
+            }
+        }
+
+        return { startDate, endDate };
+    }
+
     _buildQuery({
         search,
         isCount = false,
@@ -84,7 +149,8 @@ class BaseModel {
     }) {
         let query = this.knex(this.tableName);
 
-        if (this.joins && Array.isArray(this.joins)) {
+        // Aplicar JOINs definidos en el modelo hijo via this.joins
+        if (Array.isArray(this.joins) && this.joins.length > 0) {
             this.joins.forEach((j) => {
                 query = query.leftJoin(`${j.table} as ${j.alias}`, j.on[0], j.on[1]);
             });
@@ -118,9 +184,9 @@ class BaseModel {
             Array.isArray(this.searchFields) &&
             this.searchFields.length > 0
         ) {
+            const normalizedQuery = search.replace(/\+/g, " ").trim();
             query = query.where((builder) => {
                 this.searchFields.forEach((field, index) => {
-                    const normalizedQuery = search.replace(/\+/g, ' ').trim();
                     if (index === 0) builder.where(field, "ilike", `%${normalizedQuery}%`);
                     else builder.orWhere(field, "ilike", `%${normalizedQuery}%`);
                 });
@@ -145,56 +211,37 @@ class BaseModel {
                 columnName = `${this.tableName}.${key}`;
             }
 
-            query = query.where(columnName, value);
+            // Si el valor es un preset de fecha, aplicar lógica de rango en lugar de WHERE literal.
+            // Esto permite enviar ej: payment_date=this_month y resolverlo con el columnName correcto.
+            const dateRange = this._resolveDateRange(value);
+            if (dateRange) {
+                const { startDate, endDate } = dateRange;
+                if (startDate) query = query.where(columnName, ">=", startDate);
+                if (endDate)   query = query.where(columnName, "<=", endDate);
+            } else {
+                query = query.where(columnName, value);
+            }
         });
 
-        // ── DATE RANGE FILTERING ──────────────────────────────────────────
+        // ── DATE RANGE FILTERING (via ?date_range=preset) ─────────────────
         if (queryParams.date_range) {
-            const dateColumn = (this.filterMapping && this.filterMapping['created_at']) || `${this.tableName}.created_at`;
-            const now = new Date();
-            let startDate, endDate;
+            // Los modelos hijos pueden definir `this.dateRangeColumn` para apuntar
+            // a un campo distinto de created_at (ej: "pay.payment_date").
+            const dateColumn =
+                this.dateRangeColumn ||
+                (this.filterMapping && this.filterMapping["created_at"]) ||
+                `${this.tableName}.created_at`;
 
-            switch (queryParams.date_range) {
-                case 'today':
-                    startDate = new Date(now.setHours(0, 0, 0, 0));
-                    break;
-                case 'yesterday':
-                    startDate = new Date(now);
-                    startDate.setDate(startDate.getDate() - 1);
-                    startDate.setHours(0, 0, 0, 0);
-                    endDate = new Date(startDate);
-                    endDate.setHours(23, 59, 59, 999);
-                    break;
-                case 'this_week':
-                    startDate = new Date(now);
-                    const day = startDate.getDay();
-                    const diff = startDate.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-                    startDate.setDate(diff);
-                    startDate.setHours(0, 0, 0, 0);
-                    break;
-                case 'this_month':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'last_month':
-                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
-                    break;
-                case 'this_year':
-                    startDate = new Date(now.getFullYear(), 0, 1);
-                    break;
-            }
-
-            if (startDate) {
-                query = query.where(dateColumn, '>=', startDate);
-            }
-            if (endDate) {
-                query = query.where(dateColumn, '<=', endDate);
+            const dateRange = this._resolveDateRange(queryParams.date_range);
+            if (dateRange) {
+                const { startDate, endDate } = dateRange;
+                if (startDate) query = query.where(dateColumn, ">=", startDate);
+                if (endDate)   query = query.where(dateColumn, "<=", endDate);
             }
         }
         // ─────────────────────────────────────────────────────────────────
 
         if (!isCount && order_by) {
-
             let orderByColumn = order_by;
             // Map the field if it exists in filterMapping
             if (this.filterMapping && this.filterMapping[order_by]) {
@@ -209,36 +256,24 @@ class BaseModel {
         return query;
     }
 
-    // Guardar campos personalizados
-    async saveCustomFields(recordId, data) {
-        const customFields = {};
+    /**
+     * Guarda campos personalizados (cf_*) en la tabla field_values.
+     * Recibe directamente el objeto de campos personalizados ya filtrado por splitFields.
+     */
+    async saveCustomFields(recordId, customFields) {
+        if (!customFields || Object.keys(customFields).length === 0) return;
 
-        for (const key in data) {
-            if (key.startsWith("cf_")) {
-                customFields[key] = data[key];
+        await this.knex.transaction(async (trx) => {
+            for (const [name, value] of Object.entries(customFields)) {
+                const field = await trx("fields").where({ name }).first();
+                if (!field) continue;
+
+                await trx("field_values")
+                    .insert({ field_id: field.id, record_id: recordId, value })
+                    .onConflict(["field_id", "record_id"])
+                    .merge({ value });
             }
-        }
-
-        for (const [name, value] of Object.entries(customFields)) {
-            const field = await this.knex("fields").where({ name }).first();
-            if (!field) continue;
-
-            const existing = await this.knex("field_values")
-                .where({ field_id: field.id, record_id: recordId })
-                .first();
-
-            if (existing) {
-                await this.knex("field_values")
-                    .where({ id: existing.id })
-                    .update({ value });
-            } else {
-                await this.knex("field_values").insert({
-                    field_id: field.id,
-                    record_id: recordId,
-                    value,
-                });
-            }
-        }
+        });
     }
 
     // Función auxiliar para separar campos estándar y personalizados
@@ -258,27 +293,17 @@ class BaseModel {
     }
 
     // Obtener todos los registros con paginación y filtros
-    async findAll(queryParams = {}, queryModifier = null) {
+    async findAll(queryParams = {}) {
         const { page = 1, limit = 10, ...filters } = queryParams;
 
-        const query = this._buildQuery(filters);
+        // Construimos la query base una sola vez y clonamos para evitar
+        // reconstruir desde cero (y duplicar JOINs / filtros costosos).
+        const baseQuery = this._buildQuery(filters);
 
-        if (queryModifier) {
-            await queryModifier(query);
-        }
-
-        const results = await query
-            .clone()
-            .limit(limit)
-            .offset((page - 1) * limit);
-
-        const totalQuery = this._buildQuery({ ...filters, isCount: true });
-
-        if (queryModifier) {
-            await queryModifier(totalQuery);
-        }
-
-        const totalRes = await totalQuery.count("* as count").first();
+        const [results, totalRes] = await Promise.all([
+            baseQuery.clone().limit(limit).offset((page - 1) * limit),
+            baseQuery.clone().clearSelect().clearOrder().count("* as count").first(),
+        ]);
 
         return {
             data: results,
@@ -286,13 +311,6 @@ class BaseModel {
             page: parseInt(page),
             limit: parseInt(limit),
         };
-    }
-
-    //Obtener el primer registro
-    async findFirst() {
-        let query = this.knex(this.tableName);
-        query = this._applyTenantFilter(query);
-        return query.first();
     }
 
     // Obtener un registro por ID
@@ -324,7 +342,7 @@ class BaseModel {
     async create(data) {
         await this._runValidations(data);
 
-        const { standardFields } = this.splitFields(data);
+        const { standardFields, customFields } = this.splitFields(data);
 
         // ── TENANT ISOLATION ─────────────────────────────────────────────
         // Inyectar academy_id automáticamente en el insert si la tabla es scoped
@@ -336,21 +354,21 @@ class BaseModel {
         }
         // ─────────────────────────────────────────────────────────────────
 
-        const [record] = await this.knex(this.tableName).insert(standardFields).returning('id');
-        const recordId = typeof record === 'object' ? record.id : record;
+        const [record] = await this.knex(this.tableName).insert(standardFields).returning("id");
+        const recordId = typeof record === "object" ? record.id : record;
 
-        await this.saveCustomFields(recordId, data);
+        await this.saveCustomFields(recordId, customFields);
 
         return this.findById(recordId);
     }
 
     // Actualizar registro
     async update(id, data) {
-        const dataWithId = { ...data, id: id };
+        const dataWithId = { ...data, id };
 
         await this._runValidations(dataWithId);
 
-        const { standardFields } = this.splitFields(data);
+        const { standardFields, customFields } = this.splitFields(data);
 
         // Nunca permitir que un cliente sobreescriba el academy_id de un registro
         delete standardFields.academy_id;
@@ -364,7 +382,7 @@ class BaseModel {
             throw new AppError(`${this.tableName} record not found`, 404);
         }
 
-        await this.saveCustomFields(id, data);
+        await this.saveCustomFields(id, customFields);
 
         return this.findById(id);
     }
@@ -373,7 +391,7 @@ class BaseModel {
     async bin(id, userId = null) {
         return this.updateBinStatus(id, {
             deleted_at: this.knex.fn.now(),
-            deleted_by: userId
+            deleted_by: userId,
         });
     }
 
@@ -381,7 +399,7 @@ class BaseModel {
     async restore(id) {
         return this.updateBinStatus(id, {
             deleted_at: null,
-            deleted_by: null
+            deleted_by: null,
         });
     }
 
