@@ -14,8 +14,8 @@ export async function up(knex) {
             table.string("avatar", 255).nullable().unique();
 
             // [Datos Demográficos]
-            table.enum('gender', ['male', 'female', 'other']).nullable();
-            table.date("birth_date").nullable();
+            table.enum('gender', ['Male', 'Female', 'Other']).nullable();
+            table.date("birthdate").nullable();
 
             // [Seguridad y Auth]
             table.string("password", 255).notNullable(); // Siempre oculta en tus Models
@@ -56,8 +56,8 @@ export async function up(knex) {
             tour_completed: true,
             hide_tour: true,
             needs_password_change: false,
-            gender: "male",
-            birth_date: "1990-01-01"
+            gender: "Male",
+            birthdate: "1990-01-01"
         });
     }
 }

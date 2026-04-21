@@ -1,5 +1,7 @@
 // services/userService.js
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
 import userModel from "../models/userModel.js";
 import AppError from "../utils/AppError.js";
 
@@ -15,26 +17,37 @@ class UserService {
     }
 
     /**
-     * Crea un nuevo usuario. (Maneja el HASHING y la ASIGNACIÓN DE ROL)
+     * Crea un nuevo usuario. (Maneja el HASHING, la ASIGNACIÓN DE ROL y PASSWORD TEMPORAL)
      */
     async createUser(data) {
         const { role, ...userData } = data;
 
+        let tempPassword = null;
         if (!userData.password) {
-            throw new AppError("La contraseña es requerida", 400);
+            tempPassword = crypto.randomBytes(4).toString('hex'); // 8 caracteres aleatorios
+            userData.password = tempPassword;
+            userData.needs_password_change = true;
         }
+
         const salt = await bcrypt.genSalt(SALT_ROUNDS);
         userData.password = await bcrypt.hash(userData.password, salt);
 
         if (userData.email_verified === undefined) userData.email_verified = false;
 
-        const newUser = await userModel.create(userData);
+        // Incluimos el rol en el objeto que enviamos al modelo para que pueda resolver el role_id antes del insert
+        const newUser = await userModel.create({ ...userData, role });
 
-        if (role) {
-            await userModel.updateRole(newUser.id, role);
+        // Simular envío de email con la contraseña temporal
+        if (tempPassword) {
+            console.log("\n--- [EMAIL SIMULADO: BIENVENIDA Y CONTRASEÑA TEMPORAL] ---");
+            console.log(`Para: ${newUser.email}`);
+            console.log(`¡Bienvenido! Tu cuenta ha sido creada.`);
+            console.log(`Tu contraseña temporal es: ${tempPassword}`);
+            console.log(`Por favor, cámbiala al iniciar sesión.`);
+            console.log("---------------------------------------------------------\n");
         }
 
-        return { id: newUser.id, email: newUser.email, role: role || null }
+        return { ...newUser, role: role || null, tempPassword };
     }
 
     /**
@@ -49,7 +62,7 @@ class UserService {
             "password",
             "phone",
             "gender",
-            "birth_date",
+            "birthdate",
             "avatar",
             "email_verified",
             "push_token",

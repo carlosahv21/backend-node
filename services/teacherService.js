@@ -1,5 +1,6 @@
 // services/teacherService.js
 import teacherModel from '../models/teacherModel.js';
+import userService from './userService.js';
 
 class TeacherService {
     /**
@@ -14,11 +15,12 @@ class TeacherService {
     }
 
     /**
-     * Crea un nuevo profesor, delegando al modelo.
+     * Crea un nuevo profesor, delegando al servicio de usuarios para manejar
+     * la contraseña temporal y el hashing.
      */
     async createTeacher(data) {
-        // Validación de campos requeridos delegada al modelo o manejada por base de datos/controlador
-        const newTeacher = await teacherModel.create(data);
+        const teacherData = { ...data, role: 'teacher' };
+        const newTeacher = await userService.createUser(teacherData);
         return newTeacher;
     }
 

@@ -16,3 +16,6 @@ estructura.txt
 .vscode
 
 logs/*
+
+package-lock.json
+pnpm-lock.yaml

@@ -24,6 +24,12 @@ router.post("/forgot-password",
     (req, res, next) => authController.forgotPassword(req, res, next)    
 );
 
+// POST /api/auth/reset-password (Cambio forzado dentro de la app)
+router.post("/reset-password",
+    authMiddleware.authenticateToken,
+    (req, res, next) => authController.changePassword(req, res, next)
+);
+
 // POST /api/auth/reset-password/:token
 router.post("/reset-password/:token",
     passwordResetLimiter,

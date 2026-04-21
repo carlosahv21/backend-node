@@ -1,6 +1,7 @@
 // services/studentService.js
 import studentModel from "../models/studentModel.js";
 import notificationService from "./notificationService.js";
+import userService from "./userService.js";
 
 class StudentService {
     /**
@@ -25,7 +26,9 @@ class StudentService {
      * Crea un nuevo estudiante.
      */
     async createStudent(data) {
-        const newStudent = await studentModel.create(data);
+        // Asegurar que el rol sea 'student' antes de llamar a userService
+        const studentData = { ...data, role: 'student' };
+        const newStudent = await userService.createUser(studentData);
 
         try {
             const firstName = newStudent.first_name || 'Usuario';

@@ -69,7 +69,7 @@ const getUserData = async (userId) => {
             phone: userRecord.phone || null,
             avatar: userRecord.avatar || null,
             gender: userRecord.gender || null,
-            birth_date: userRecord.birth_date || null
+            birthdate: userRecord.birthdate || null
         },
         academy,
         modules: productModules, // Solo modulos SaaS exportados al UI
@@ -207,10 +207,31 @@ const verifyResetToken = async (token) => {
     return { valid: true, message: "Token válido" };
 };
 
+/**
+ * Lógica para cambio de contraseña forzado (dentro de la app)
+ */
+const changePasswordByEmail = async (email, newPassword) => {
+    const user = await authModel.findUserByEmail(email);
+
+    if (!user) {
+        throw new AppError("Usuario no encontrado", 404);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await authModel.updateUser(user.id, {
+        password: hashedPassword,
+        needs_password_change: false
+    });
+
+    return { message: "Contraseña actualizada exitosamente" };
+};
+
 export default {
     authenticateUser,
     getAuthenticatedUser,
     forgotPassword,
     resetPasswordWithToken,
     verifyResetToken,
+    changePasswordByEmail
 };

@@ -86,6 +86,24 @@ class AuthController {
             ApiResponse.error(res, status, err.message);
         }
     }
+
+    /**
+     * Maneja el cambio de contraseña forzado (dentro de la app).
+     */
+    async changePassword(req, res, next) {
+        try {
+            const { email, new_password } = req.body;
+
+            if (!email) throw new AppError("Email is required", 400);
+            if (!new_password) throw new AppError("New password is required", 400);
+
+            const result = await authService.changePasswordByEmail(email, new_password);
+            ApiResponse.success(res, 200, result.message);
+        } catch (err) {
+            const status = err.statusCode || 400;
+            ApiResponse.error(res, status, err.message);
+        }
+    }
 }
 
 export default new AuthController();

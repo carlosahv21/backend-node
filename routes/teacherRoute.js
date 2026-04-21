@@ -31,6 +31,7 @@ router.get("/details/:id",
 router.post("/",
     authMiddleware.authenticateToken,
     authMiddleware.authorize("teachers", "create"),
+    validateModule("users"),
     (req, res, next) => teacherController.create(req, res, next)
 );
 
