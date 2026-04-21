@@ -167,6 +167,23 @@ class fieldService {
         return fieldModel.restore(id);
     }
 
+    /**
+     * Reordena los campos dentro de un bloque
+     */
+    async reorderFields(updates) {
+        if (!Array.isArray(updates) || updates.length === 0) {
+            throw new AppError('Se requiere un array de actualizaciones válido.', 400);
+        }
+        
+        // Validación básica
+        updates.forEach(u => {
+            if (!u.id || u.order_sequence === undefined) {
+                throw new AppError('Cada actualización debe contener id y order_sequence.', 400);
+            }
+        });
+
+        return fieldModel.bulkUpdateOrder(updates);
+    }
 }
 
 export default new fieldService();

@@ -40,6 +40,13 @@ router.post("/",
     (req, res, next) => fieldController.create(req, res, next)
 );
 
+// PATCH /api/fields/reorder
+router.patch("/reorder",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("fields", "edit"),
+    (req, res, next) => fieldController.reorder(req, res, next)
+);
+
 // PUT /api/fields/:id
 router.put("/:id",
     authMiddleware.authenticateToken,

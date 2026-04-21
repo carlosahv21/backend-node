@@ -131,6 +131,20 @@ class FieldController {
             }
         }
     }
+
+    /**
+     * Reordena masivamente la secuencia (order_sequence) de los campos.
+     */
+    async reorder(req, res, next) {
+        try {
+            const { updates } = req.body; // Array de { id, order_sequence }
+            await fieldService.reorderFields(updates);
+            ApiResponse.success(res, 200, "Orden de los campos actualizado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new FieldController();
