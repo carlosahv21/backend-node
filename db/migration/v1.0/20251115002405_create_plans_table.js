@@ -12,6 +12,9 @@ export async function up(knex) {
             table.integer('max_classes').defaultTo(0).nullable();
             table.integer('trial_period_days').defaultTo(0);
             table.boolean('active').defaultTo(true);
+            table.string('status').defaultTo('active');
+            table.text('notes').nullable();
+            table.jsonb('metadata').nullable();
             table.timestamp("deleted_at").nullable();
             table.uuid("deleted_by").nullable();
             table.timestamps(true, true);

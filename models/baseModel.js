@@ -259,21 +259,38 @@ class BaseModel {
     /**
      * Guarda campos personalizados (cf_*) en la tabla field_values.
      * Recibe directamente el objeto de campos personalizados ya filtrado por splitFields.
+     * Puede recibir una transacción opcional para reutilizarla.
      */
-    async saveCustomFields(recordId, customFields) {
+    async saveCustomFields(recordId, customFields, trx = null) {
         if (!customFields || Object.keys(customFields).length === 0) return;
 
-        await this.knex.transaction(async (trx) => {
+        const execute = async (t) => {
+            const tenantId = this._getTenantId();
             for (const [name, value] of Object.entries(customFields)) {
-                const field = await trx("fields").where({ name }).first();
+                const field = await t("fields").where({ name }).first();
                 if (!field) continue;
 
-                await trx("field_values")
-                    .insert({ field_id: field.id, record_id: recordId, value })
-                    .onConflict(["field_id", "record_id"])
-                    .merge({ value });
+                const existing = await t("field_values")
+                    .where({ field_id: field.id, record_id: recordId })
+                    .first();
+
+                if (existing) {
+                    await t("field_values")
+                        .where({ id: existing.id })
+                        .update({ value, updated_at: new Date() });
+                } else {
+                    const insertData = { field_id: field.id, record_id: recordId, value };
+                    if (tenantId) insertData.academy_id = tenantId;
+                    await t("field_values").insert(insertData);
+                }
             }
-        });
+        };
+
+        if (trx) {
+            await execute(trx);
+        } else {
+            await this.knex.transaction(execute);
+        }
     }
 
     // Función auxiliar para separar campos estándar y personalizados

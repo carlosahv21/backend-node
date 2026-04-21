@@ -3,6 +3,7 @@ import PaymentModel from '../models/paymentModel.js';
 import knex from '../config/knex.js';
 import AppError from '../utils/AppError.js';
 import notificationService from './notificationService.js';
+import { getCurrentTenantId } from '../utils/tenantContext.js';
 
 class PaymentService {
     async getAllPayments(query) {
@@ -30,9 +31,21 @@ class PaymentService {
                     data.payment_date = data.payment_date[0]; // Normalizar para la tabla payments
                 }
 
-                const [result] = await trx('payments').insert(data).returning('id');
+                const { standardFields, customFields } = PaymentModel.splitFields(data);
+
+                // Inyectar academy_id para multi-tenancy
+                const tenantId = getCurrentTenantId();
+                if (tenantId && !standardFields.academy_id) {
+                    standardFields.academy_id = tenantId;
+                }
+
+                const [result] = await trx('payments').insert(standardFields).returning('id');
                 const paymentId = typeof result === 'object' ? result.id : result;
-                const payment = { ...data, id: paymentId };
+
+                // Guardar campos personalizados (cf_*)
+                await PaymentModel.saveCustomFields(paymentId, customFields, trx);
+
+                const payment = { ...standardFields, ...customFields, id: paymentId };
 
                 //falta condicion de solo insertar plan si el pago fue completado
 
@@ -55,6 +68,7 @@ class PaymentService {
 
                 const maxClasses = plan.max_sessions || 0;
                 await trx('user_plan').insert({
+                    academy_id: tenantId,
                     user_id: data.user_id,
                     plan_id: data.plan_id,
                     payment_id: paymentId,
@@ -69,6 +83,7 @@ class PaymentService {
                 });
 
                 await trx('user_registration_history').insert({
+                    academy_id: tenantId,
                     user_id: data.user_id,
                     plan_id: data.plan_id,
                     payment_id: paymentId,
@@ -128,6 +143,10 @@ class PaymentService {
 
     async updatePayment(id, data) {
         return PaymentModel.update(id, data);
+    }
+
+    async binPayment(id, userId) {
+        return PaymentModel.bin(id, userId);
     }
 
     async deletePayment(id) {

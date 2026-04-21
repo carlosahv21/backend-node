@@ -122,7 +122,7 @@ class ReportsModel extends BaseModel {
             .join("users as u", "up.user_id", "u.id")
             .leftJoin("plans as p", "up.plan_id", "p.id")
             .leftJoin("roles as r", "u.role_id", "r.id")
-            .select("p.name as plan_name", this.knex.raw("COUNT(u.id) as user_count"))
+            .select("p.id as plan_id", "p.name as plan_name", this.knex.raw("COUNT(u.id) as user_count"))
             .where("r.name", "student")
             .andWhere("up.status", "active")
             .andWhere("up.end_date", ">=", start)

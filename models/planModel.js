@@ -9,19 +9,25 @@ class PlanModel extends BaseModel {
         super('plans');
 
         this.jsonFields = ['metadata'];
-        this.searchFields = ['plans.name', 'plans.description', 'plans.type'];
+        this.searchFields = ['plans.name', 'plans.description', 'plans.type', 'plans.status'];
     }
 
     // --- Métodos de CRUD (Se mantienen iguales) ---
     async create(data) {
-        const { max_sessions } = data;
-        data.max_sessions = max_sessions === "Ilimitadas" ? 0 : parseInt(max_sessions);
+        if (data.max_sessions !== undefined) {
+            data.max_sessions = data.max_sessions === "Ilimitadas" ? 0 : parseInt(data.max_sessions || 0);
+        }
         return super.create(data);
     }
 
     async update(id, data) {
-        const { max_sessions } = data;
-        data.max_sessions = max_sessions === "Ilimitadas" ? 0 : parseInt(max_sessions);
+        if (!id || id === 'undefined' || id === 'null') {
+            throw new AppError("ID de plan no válido", 400);
+        }
+
+        if (data.max_sessions !== undefined) {
+            data.max_sessions = data.max_sessions === "Ilimitadas" ? 0 : parseInt(data.max_sessions || 0);
+        }
         return super.update(id, data);
     }
 
@@ -48,7 +54,35 @@ class PlanModel extends BaseModel {
         // Obtenemos el plan ya con la sesión máxima transformada
         const plan = await this.findById(id);
 
-        return this._transformToViewModel(plan);
+        if (!plan) return null;
+
+        const students = await this._getPlanStudents(id);
+
+        return {
+            ...this._transformToViewModel(plan),
+            students: students.map(s => ({
+                id: s.id,
+                full_name: `${s.first_name} ${s.last_name}`,
+                status: s.status,
+                joined_at: s.created_at
+            }))
+        };
+    }
+
+    async _getPlanStudents(planId) {
+        const db = this.knex;
+
+        return await this._applyTenantFilter(db('user_plan as up'), 'up')
+            .join('users as u', 'up.user_id', 'u.id')
+            .where('up.plan_id', planId)
+            .select(
+                'u.id',
+                'u.first_name',
+                'u.last_name',
+                'up.status',
+                'up.created_at'
+            )
+            .orderBy('up.created_at', 'desc');
     }
 
     /**
