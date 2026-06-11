@@ -45,8 +45,7 @@ async function initializeVersion(version) {
 }
 
 async function updateVersion(version) {
-  // Es mejor práctica insertar una nueva fila o actualizar la última para mantener historial
-  await db('database_version').update({ version, updated_at: db.fn.now() });
+    await db('database_version').insert({ version });
 }
 
 async function migrateDatabase() {
@@ -71,7 +70,7 @@ async function migrateDatabase() {
       })
       .sort();
 
-    const pendingVersions = availableVersions.filter(v => v > currentVersion);
+    const pendingVersions = availableVersions.filter(v => v >= currentVersion);
     
     if (pendingVersions.length === 0) {
       console.log('No hay migraciones pendientes. El esquema está al día.');

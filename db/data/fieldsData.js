@@ -30,6 +30,36 @@ async function getFieldsData(knex) {
         .where({ 'blocks.name': 'Basic Information', 'modules.name': 'payments' })
         .select('blocks.id').first();
 
+    const wellBeingBlock = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Physical Well-being', 'modules.name': 'classes' })
+        .select('blocks.id').first();
+
+    const prefsBlock = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Preferences', 'modules.name': 'users' })
+        .select('blocks.id').first();
+
+    const achieveBlock = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Achievement Catalog', 'modules.name': 'achievements' })
+        .select('blocks.id').first();
+
+    const challengeBlock = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Challenge Catalog', 'modules.name': 'challenges' })
+        .select('blocks.id').first();
+
+    const reviewBlock = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Review Details', 'modules.name': 'teacher_reviews' })
+        .select('blocks.id').first();
+
+    const statsBlock = await knex('blocks')
+        .join('modules', 'blocks.module_id', 'modules.id')
+        .where({ 'blocks.name': 'Statistics', 'modules.name': 'student_stats' })
+        .select('blocks.id').first();
+
     const fieldsData = [
         // 🧩 Información general (Clases)
         {
@@ -369,6 +399,318 @@ async function getFieldsData(knex) {
             order_sequence: 11,
             block_id: paymentsBlockInfo.id,
         },
+
+        // 🏋️ Physical Well-being (Clases)
+        ...(wellBeingBlock ? [
+            {
+                name: "calories_estimate",
+                type: "number",
+                label: "Calorías estimadas (kcal)",
+                required: false,
+                order_sequence: 1,
+                block_id: wellBeingBlock.id,
+            },
+            {
+                name: "intensity_level",
+                type: "select",
+                label: "Nivel de intensidad",
+                required: false,
+                order_sequence: 2,
+                options: JSON.stringify(["low", "medium", "high"]),
+                block_id: wellBeingBlock.id,
+            },
+        ] : []),
+
+        // 📅 Schedule extras (Clases)
+        {
+            name: "is_recurring",
+            type: "boolean",
+            label: "Clase recurrente",
+            required: false,
+            order_sequence: 4,
+            block_id: blockSchedule.id,
+        },
+        {
+            name: "recurrence_rule",
+            type: "text",
+            label: "Regla de recurrencia (RRULE)",
+            required: false,
+            order_sequence: 5,
+            block_id: blockSchedule.id,
+        },
+
+        // ⚙️ Preferences (Users)
+        ...(prefsBlock ? [
+            {
+                name: "push_notifications",
+                type: "boolean",
+                label: "Notificaciones push",
+                required: false,
+                order_sequence: 1,
+                block_id: prefsBlock.id,
+            },
+            {
+                name: "last_seen_at",
+                type: "date",
+                label: "Última vez visto",
+                required: false,
+                order_sequence: 2,
+                block_id: prefsBlock.id,
+            },
+        ] : []),
+
+        // 🏆 Achievement Catalog
+        ...(achieveBlock ? [
+            {
+                name: "name",
+                type: "text",
+                label: "Nombre",
+                required: true,
+                order_sequence: 1,
+                block_id: achieveBlock.id,
+            },
+            {
+                name: "description",
+                type: "textarea",
+                label: "Descripción",
+                required: false,
+                order_sequence: 2,
+                block_id: achieveBlock.id,
+            },
+            {
+                name: "icon_url",
+                type: "text",
+                label: "Ícono (URL)",
+                required: false,
+                order_sequence: 3,
+                block_id: achieveBlock.id,
+            },
+            {
+                name: "trigger_type",
+                type: "select",
+                label: "Tipo de activación",
+                required: true,
+                order_sequence: 4,
+                options: JSON.stringify(["attendance_streak", "classes_count", "milestone"]),
+                block_id: achieveBlock.id,
+            },
+            {
+                name: "trigger_value",
+                type: "number",
+                label: "Valor requerido",
+                required: true,
+                order_sequence: 5,
+                block_id: achieveBlock.id,
+            },
+            {
+                name: "points",
+                type: "number",
+                label: "Puntos",
+                required: true,
+                order_sequence: 6,
+                block_id: achieveBlock.id,
+            },
+        ] : []),
+
+        // 🎯 Challenge Catalog
+        ...(challengeBlock ? [
+            {
+                name: "title",
+                type: "text",
+                label: "Título",
+                required: true,
+                order_sequence: 1,
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "description",
+                type: "textarea",
+                label: "Descripción",
+                required: false,
+                order_sequence: 2,
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "type",
+                type: "select",
+                label: "Tipo",
+                required: true,
+                order_sequence: 3,
+                options: JSON.stringify(["individual", "group"]),
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "start_date",
+                type: "date",
+                label: "Fecha de inicio",
+                required: true,
+                order_sequence: 4,
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "end_date",
+                type: "date",
+                label: "Fecha de fin",
+                required: true,
+                order_sequence: 5,
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "goal_metric",
+                type: "select",
+                label: "Métrica de objetivo",
+                required: true,
+                order_sequence: 6,
+                options: JSON.stringify(["classes_attended", "streak_days"]),
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "goal_value",
+                type: "number",
+                label: "Valor objetivo",
+                required: true,
+                order_sequence: 7,
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "reward_points",
+                type: "number",
+                label: "Puntos de recompensa",
+                required: true,
+                order_sequence: 8,
+                block_id: challengeBlock.id,
+            },
+            {
+                name: "is_active",
+                type: "boolean",
+                label: "Activo",
+                required: false,
+                order_sequence: 9,
+                block_id: challengeBlock.id,
+            },
+        ] : []),
+
+        // ⭐ Review Details (Teacher Reviews)
+        ...(reviewBlock ? [
+            {
+                name: "teacher_id",
+                type: "relation",
+                label: "Profesor",
+                required: true,
+                order_sequence: 1,
+                relation_config: JSON.stringify({
+                    table: "users", value_field: "users.id",
+                    display_field: "CONCAT(users.first_name, ' ', users.last_name)",
+                    display_alias: "teacher_name",
+                    filters: { role_name: "teacher" }, multiple: false, search: true, limit: 20
+                }),
+                block_id: reviewBlock.id,
+            },
+            {
+                name: "student_id",
+                type: "relation",
+                label: "Estudiante",
+                required: true,
+                order_sequence: 2,
+                relation_config: JSON.stringify({
+                    table: "users", value_field: "users.id",
+                    display_field: "CONCAT(users.first_name, ' ', users.last_name)",
+                    display_alias: "student_name",
+                    filters: { role_name: "student" }, multiple: false, search: true, limit: 20
+                }),
+                block_id: reviewBlock.id,
+            },
+            {
+                name: "class_id",
+                type: "relation",
+                label: "Clase",
+                required: false,
+                order_sequence: 3,
+                relation_config: JSON.stringify({
+                    table: "classes", value_field: "classes.id",
+                    display_field: "classes.name", display_alias: "class_name",
+                    filters: {}, multiple: false, search: true, limit: 20
+                }),
+                block_id: reviewBlock.id,
+            },
+            {
+                name: "rating",
+                type: "number",
+                label: "Calificación (1-5)",
+                required: true,
+                order_sequence: 4,
+                block_id: reviewBlock.id,
+            },
+            {
+                name: "comment",
+                type: "textarea",
+                label: "Comentario",
+                required: false,
+                order_sequence: 5,
+                block_id: reviewBlock.id,
+            },
+            {
+                name: "is_anonymous",
+                type: "boolean",
+                label: "Anónimo",
+                required: false,
+                order_sequence: 6,
+                block_id: reviewBlock.id,
+            },
+        ] : []),
+
+        // 📊 Statistics (Student Stats)
+        ...(statsBlock ? [
+            {
+                name: "total_classes_attended",
+                type: "number",
+                label: "Total clases asistidas",
+                required: false,
+                order_sequence: 1,
+                block_id: statsBlock.id,
+            },
+            {
+                name: "current_streak_days",
+                type: "number",
+                label: "Racha actual (días)",
+                required: false,
+                order_sequence: 2,
+                block_id: statsBlock.id,
+            },
+            {
+                name: "longest_streak_days",
+                type: "number",
+                label: "Racha más larga (días)",
+                required: false,
+                order_sequence: 3,
+                block_id: statsBlock.id,
+            },
+            {
+                name: "total_points",
+                type: "number",
+                label: "Puntos totales",
+                required: false,
+                order_sequence: 4,
+                block_id: statsBlock.id,
+            },
+            {
+                name: "level",
+                type: "select",
+                label: "Nivel",
+                required: false,
+                order_sequence: 5,
+                options: JSON.stringify(["beginner", "intermediate", "advanced", "expert"]),
+                block_id: statsBlock.id,
+            },
+            {
+                name: "last_activity_at",
+                type: "date",
+                label: "Última actividad",
+                required: false,
+                order_sequence: 6,
+                block_id: statsBlock.id,
+            },
+        ] : []),
     ];
 
     return fieldsData;
