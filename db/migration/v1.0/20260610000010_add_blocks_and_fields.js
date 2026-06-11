@@ -122,7 +122,6 @@ export async function up(knex) {
     const prefsBlockId = await getBlockId('Preferences', 'users');
     if (prefsBlockId) {
         await insertField(prefsBlockId, { name: 'push_notifications', type: 'boolean', label: 'Notificaciones push', required: false, order_sequence: 1 });
-        await insertField(prefsBlockId, { name: 'last_seen_at', type: 'date', label: 'Última vez visto', required: false, order_sequence: 2 });
     }
 
     // Achievements

@@ -228,6 +228,36 @@ class FieldModel extends BaseModel {
             return Promise.all(promises);
         });
     }
+
+    /**
+     * Actualiza el orden de campos dentro de un bloque específico.
+     * Valida que todos los IDs pertenezcan al bloque antes de actualizar.
+     * @param {string} blockId 
+     * @param {Array<{id: string, order_sequence: number}>} updates 
+     */
+    async bulkUpdateOrderInBlock(blockId, updates) {
+        return this.knex.transaction(async (trx) => {
+            const ids = updates.map(u => u.id);
+
+            const existing = await trx('fields')
+                .where({ block_id: blockId })
+                .whereIn('id', ids)
+                .select('id');
+
+            if (existing.length !== ids.length) {
+                const foundIds = new Set(existing.map(e => e.id));
+                const missing = ids.filter(id => !foundIds.has(id));
+                throw new Error(`Field IDs not found in block ${blockId}: ${missing.join(', ')}`);
+            }
+
+            const promises = updates.map(update => {
+                return trx('fields')
+                    .where({ id: update.id, block_id: blockId })
+                    .update({ order_sequence: update.order_sequence });
+            });
+            return Promise.all(promises);
+        });
+    }
 }
 
 export default new FieldModel();

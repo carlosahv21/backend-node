@@ -145,6 +145,22 @@ class FieldController {
             ApiResponse.error(res, status, error.message);
         }
     }
+
+    /**
+     * Reordena campos dentro de un bloque específico usando un array de IDs.
+     * PUT /api/fields/:blockId/order { field_ids: [...] }
+     */
+    async reorderInBlock(req, res, next) {
+        try {
+            const { blockId } = req.params;
+            const { field_ids } = req.body;
+            await fieldService.reorderFieldsInBlock(blockId, field_ids);
+            ApiResponse.success(res, 200, "Orden de los campos actualizado correctamente");
+        } catch (error) {
+            const status = error.statusCode || 500;
+            ApiResponse.error(res, status, error.message);
+        }
+    }
 }
 
 export default new FieldController();

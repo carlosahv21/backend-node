@@ -184,6 +184,23 @@ class fieldService {
 
         return fieldModel.bulkUpdateOrder(updates);
     }
+
+    /**
+     * Reordena campos dentro de un bloque específico.
+     * Valida que todos los IDs pertenezcan al bloque antes de actualizar.
+     */
+    async reorderFieldsInBlock(blockId, fieldIds) {
+        if (!Array.isArray(fieldIds) || fieldIds.length === 0) {
+            throw new AppError('Se requiere un array field_ids válido.', 400);
+        }
+
+        const updates = fieldIds.map((id, index) => ({
+            id,
+            order_sequence: index + 1,
+        }));
+
+        return fieldModel.bulkUpdateOrderInBlock(blockId, updates);
+    }
 }
 
 export default new fieldService();

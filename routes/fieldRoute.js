@@ -47,6 +47,13 @@ router.patch("/reorder",
     (req, res, next) => fieldController.reorder(req, res, next)
 );
 
+// PUT /api/fields/:blockId/order
+router.put("/:blockId/order",
+    authMiddleware.authenticateToken,
+    authMiddleware.authorize("fields", "edit"),
+    (req, res, next) => fieldController.reorderInBlock(req, res, next)
+);
+
 // PUT /api/fields/:id
 router.put("/:id",
     authMiddleware.authenticateToken,

@@ -448,15 +448,7 @@ async function getFieldsData(knex) {
                 required: false,
                 order_sequence: 1,
                 block_id: prefsBlock.id,
-            },
-            {
-                name: "last_seen_at",
-                type: "date",
-                label: "Última vez visto",
-                required: false,
-                order_sequence: 2,
-                block_id: prefsBlock.id,
-            },
+            }
         ] : []),
 
         // 🏆 Achievement Catalog

@@ -267,12 +267,15 @@ class BaseModel {
         const execute = async (t) => {
             const tenantId = this._getTenantId();
             for (const [name, value] of Object.entries(customFields)) {
-                const field = await t("fields").where({ name }).first();
+                const fieldQuery = t("fields").where({ name });
+                if (tenantId) fieldQuery.where("academy_id", tenantId);
+                const field = await fieldQuery.first();
                 if (!field) continue;
 
-                const existing = await t("field_values")
-                    .where({ field_id: field.id, record_id: recordId })
-                    .first();
+                const existingQuery = t("field_values")
+                    .where({ field_id: field.id, record_id: recordId });
+                if (tenantId) existingQuery.where("academy_id", tenantId);
+                const existing = await existingQuery.first();
 
                 if (existing) {
                     await t("field_values")
@@ -342,10 +345,14 @@ class BaseModel {
             throw new AppError(`${this.tableName} record not found`, 404);
         }
 
-        const fieldValues = await this.knex("field_values as fv")
+        const fvQuery = this.knex("field_values as fv")
             .join("fields as f", "fv.field_id", "f.id")
-            .where("fv.record_id", id)
-            .select("f.name as field_name", "fv.value");
+            .where("fv.record_id", id);
+
+        const tenantId = this._getTenantId();
+        if (tenantId) fvQuery.where("fv.academy_id", tenantId);
+
+        const fieldValues = await fvQuery.select("f.name as field_name", "fv.value");
 
         fieldValues.forEach((fv) => {
             record[fv.field_name] = fv.value;
@@ -423,7 +430,10 @@ class BaseModel {
     // Papelera: eliminación permanente (Hard Delete)
     async permanentDelete(id) {
         // Primero eliminamos los campos personalizados asociados
-        await this.knex("field_values").where({ record_id: id }).del();
+        const fvQuery = this.knex("field_values").where({ record_id: id });
+        const tenantId = this._getTenantId();
+        if (tenantId) fvQuery.where("academy_id", tenantId);
+        await fvQuery.del();
 
         let query = this.knex(this.tableName).where({ id });
         query = this._applyTenantFilter(query);

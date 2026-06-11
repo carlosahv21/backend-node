@@ -8,7 +8,6 @@ class RegistrationModel extends BaseModel {
         this.joins = [
             { table: "classes", alias: "c", on: ["user_class.class_id", "c.id"] },
             { table: "users", alias: "u", on: ["user_class.user_id", "u.id"] },
-            { table: "payments", alias: "pay", on: ["u.id", "pay.user_id"] }
         ];
 
         this.selectFields = [
@@ -20,7 +19,6 @@ class RegistrationModel extends BaseModel {
             "c.genre as class_genre",
             "u.first_name as user_first_name",
             "u.last_name as user_last_name",
-            "pay.payment_method as payment_method"
         ];
 
         this.searchFields = ["c.name", "c.hour", "c.date", "u.first_name", "u.last_name"];
@@ -28,21 +26,11 @@ class RegistrationModel extends BaseModel {
         this.filterMapping = {
             'class_id': 'user_class.class_id',
             'user_id': 'user_class.user_id',
-            'payment_method': 'pay.payment_method',
-            'payment_date': 'pay.payment_date'
         };
 
         this.orderMapping = {
             'user_first_name': 'u.first_name',
             'user_last_name': 'u.last_name'
-        };
-
-        this.relationMaps = {
-            'default': {
-                joins: this.joins,
-                column_map: this.filterMapping,
-                order_map: this.orderMapping
-            }
         };
     }
 
@@ -67,7 +55,6 @@ class RegistrationModel extends BaseModel {
                 "user_class.user_id",
                 "u.first_name",
                 "u.last_name",
-                "pay.payment_method",
                 "user_class.academy_id"
             )
             .orderBy("u.first_name", "asc")
@@ -103,7 +90,6 @@ class RegistrationModel extends BaseModel {
                 "user_class.academy_id",
                 "u.first_name as user_first_name",
                 "u.last_name as user_last_name",
-                "pay.payment_method",
                 "c.name as class_name",
                 "c.hour as class_hour",
                 "c.date as class_date",
@@ -120,7 +106,6 @@ class RegistrationModel extends BaseModel {
                     user_id: row.user_id,
                     first_name: row.user_first_name,
                     last_name: row.user_last_name,
-                    payment_method: row.payment_method,
                     academy_id: row.academy_id,
                     classes: [],
                 });
