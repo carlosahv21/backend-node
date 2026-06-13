@@ -7,6 +7,33 @@ import knex from '../config/knex.js';
 import { applyScope } from '../utils/applyScope.js';
 
 class attendanceService {
+    async _calculateStreak(studentId) {
+        const recentAttendances = await knex('attendances')
+            .where('student_id', studentId)
+            .where('status', 'present')
+            .whereNull('deleted_at')
+            .orderBy('date', 'desc')
+            .limit(30)
+            .select('date');
+
+        if (recentAttendances.length === 0) return 0;
+
+        let streak = 1;
+        for (let i = 0; i < recentAttendances.length - 1; i++) {
+            const current = new Date(recentAttendances[i].date);
+            const previous = new Date(recentAttendances[i + 1].date);
+            const diffDays = Math.round((current - previous) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                streak++;
+            } else {
+                break;
+            }
+        }
+
+        return streak;
+    }
+
     async createAttendance(data) {
         const records = Array.isArray(data) ? data : [data];
 
@@ -14,6 +41,13 @@ class attendanceService {
             const isRegistered = await registrationModel.isRegistered(record.student_id, record.class_id);
             if (!isRegistered) {
                 throw new AppError(`El estudiante no esta registrado en la clase ${record.class_id}`);
+            }
+        }
+
+        // Calculate streak for each record
+        for (const record of records) {
+            if (record.status === 'present') {
+                record.streak_count_at_moment = await this._calculateStreak(record.student_id);
             }
         }
 

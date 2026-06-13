@@ -101,7 +101,7 @@ const cleanDb = async (knex, academyId, studentRoleId, teacherRoleId) => {
     console.log(`\n--- Limpiando Tablas para Academia: ${academyId} ---`);
 
     const order = [
-        'user_connections',
+        'connections',
         'user_challenges',
         'user_achievements',
         'challenges',
@@ -124,7 +124,7 @@ const cleanDb = async (knex, academyId, studentRoleId, teacherRoleId) => {
         .whereIn('role_id', [studentRoleId, teacherRoleId])
         .del();
 
-    
+
     for (const table of order) {
         try {
             const hasAcademyId = await knex.schema.hasColumn(table, 'academy_id');
@@ -590,7 +590,7 @@ export async function seed(knex) {
     }
     if (reviewData.length) await knex.batchInsert('teacher_reviews', reviewData, 500);
 
-    // 14. Generar user_connections
+    // 14. Generar connections
     console.log(`--- Generando Conexiones entre Alumnos ---`);
     const connectionsData = [];
     const pairSet = new Set();
@@ -617,7 +617,7 @@ export async function seed(knex) {
             });
         }
     }
-    if (connectionsData.length) await knex.batchInsert('user_connections', connectionsData, 500);
+    if (connectionsData.length) await knex.batchInsert('connections', connectionsData, 500);
 
     console.log(`\n✅ Seed Finalizado con éxito para: ${academy.name} (${academyId})`);
 }

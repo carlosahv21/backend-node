@@ -27,7 +27,12 @@ export async function up(knex) {
             { name: "plans", description: "Gestión de planes", has_custom_fields: true, has_recycle_bin: true },
             { name: "registrations", description: "Gestión de inscripciones", has_custom_fields: false, has_recycle_bin: true },
             { name: "payments", description: "Gestión de pagos", has_custom_fields: true, has_recycle_bin: true },
-            { name: "recycle_bin", description: "Recycle Bin", has_custom_fields: false, has_recycle_bin: false }
+            { name: "recycle_bin", description: "Recycle Bin", has_custom_fields: false, has_recycle_bin: false },
+            { name: "student_stats", description: "Estadísticas de estudiantes", has_custom_fields: false, has_recycle_bin: false },
+            { name: "teacher_reviews", description: "Reseñas de profesores", has_custom_fields: false, has_recycle_bin: false },
+            { name: "achievements", description: "Logros del sistema", has_custom_fields: false, has_recycle_bin: true },
+            { name: "challenges", description: "Retos del sistema", has_custom_fields: false, has_recycle_bin: true },
+            { name: "connections", description: "Conexiones sociales", has_custom_fields: false, has_recycle_bin: true }
         ]);
 
         const usersModule = await knex("modules").where("name", "users").first();

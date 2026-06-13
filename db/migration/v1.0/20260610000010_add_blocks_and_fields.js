@@ -193,6 +193,6 @@ export async function down(knex) {
     }
 
     await knex('modules').whereIn('name', [
-        'student_stats', 'teacher_reviews', 'achievements', 'challenges', 'user_connections'
+        'student_stats', 'teacher_reviews', 'achievements', 'challenges', 'connections'
     ]).del();
 }

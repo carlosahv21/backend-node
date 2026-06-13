@@ -93,6 +93,9 @@ const authenticateUser = async ({ email, password }) => {
 
     const data = await getUserData(user.id);
 
+    // Update last_seen_at on successful login
+    await authModel.knex("users").where({ id: user.id }).update({ last_seen_at: new Date() });
+
     // JWT ultraligero: solo identidad y tenant (academy)
     // academy_id se lee directamente del registro del usuario para garantizar
     // que el valor del token siempre refleje el tenant real del usuario.

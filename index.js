@@ -34,6 +34,13 @@ import searchRoutes from './routes/searchRoute.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import cronService from './services/cronService.js';
 import academyRoutes from './routes/academyRoute.js';
+import studentStatsRoutes from './routes/studentStatsRoute.js';
+import teacherReviewsRoutes from './routes/teacherReviewsRoute.js';
+import achievementsRoutes from './routes/achievementsRoute.js';
+import userAchievementsRoutes from './routes/userAchievementsRoute.js';
+import challengesRoutes from './routes/challengesRoute.js';
+import userChallengesRoutes from './routes/userChallengesRoute.js';
+import ConnectionsRoutes from './routes/ConnectionsRoute.js';
 // ----------------------------------------------------
 
 const app = express();
@@ -98,6 +105,13 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/academies", academyRoutes);
+app.use("/api/student-stats", studentStatsRoutes);
+app.use("/api/teacher-reviews", teacherReviewsRoutes);
+app.use("/api/achievements", achievementsRoutes);
+app.use("/api/user-achievements", userAchievementsRoutes);
+app.use("/api/challenges", challengesRoutes);
+app.use("/api/user-challenges", userChallengesRoutes);
+app.use("/api/user-connections", ConnectionsRoutes);
 
 // --- 404 Not Found Handler ---
 app.use((req, res, next) => {

@@ -62,6 +62,25 @@ ApiResponse.success(res, 200, "Message", data);  // { success: true, message, da
 ApiResponse.error(res, status, message);          // { success: false, message }
 ```
 
+## New Entities (Fase 1 & 2)
+
+### API Endpoints
+
+| Entity | Endpoints | Auth |
+|--------|-----------|------|
+| `student_stats` | `GET /`, `GET /:id`, `GET /student/:studentId` | `student_stats:view` |
+| `teacher_reviews` | `GET /`, `GET /:id`, `GET /teacher/:teacherId`, `POST /`, `PUT /:id`, `PATCH /:id/bin`, `PATCH /:id/restore`, `DELETE /:id` | `teacher_reviews:*` |
+| `achievements` | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `PATCH /:id/bin`, `PATCH /:id/restore`, `DELETE /:id` | `achievements:*` |
+| `user_achievements` | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /`, `DELETE /:id` | `achievements:*` |
+| `challenges` | `GET /`, `GET /:id`, `POST /`, `PUT /:id`, `PATCH /:id/bin`, `PATCH /:id/restore`, `DELETE /:id` | `challenges:*` |
+| `user_challenges` | `GET /`, `GET /:id`, `GET /user/:userId`, `POST /join`, `DELETE /leave/:challengeId`, `DELETE /:id` | `challenges:*` |
+| `connections` | `GET /` (my connections), `GET /all`, `GET /:id`, `POST /request`, `PATCH /:id/accept`, `PATCH /:id/reject`, `DELETE /:id` | `connections:*` |
+
+### Server-Side Logic
+
+- **`last_seen_at`**: Updated on login in `authService.js`
+- **`streak_count_at_moment`**: Calculated on attendance creation in `attendanceService.js`
+
 ## EAV System (Dynamic Forms)
 
 `modules` → `blocks` → `fields` → `field_values` allows runtime form configuration per module. Blocks group fields visually; fields define type/options/validation. The `field_values` table stores actual values keyed by `record_id`.

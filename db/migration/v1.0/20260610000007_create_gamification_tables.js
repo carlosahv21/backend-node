@@ -9,6 +9,8 @@ export async function up(knex) {
             table.integer("trigger_value").unsigned().notNullable();
             table.integer("points").unsigned().defaultTo(0);
             table.uuid("academy_id").notNullable().references("id").inTable("academies").onDelete("CASCADE");
+            table.timestamp("deleted_at", { useTz: true }).nullable();
+            table.uuid("deleted_by").nullable().references("id").inTable("users").onDelete("SET NULL");
             table.timestamps(true, true);
         });
     }
@@ -40,6 +42,8 @@ export async function up(knex) {
             table.integer("reward_points").unsigned().defaultTo(0);
             table.boolean("is_active").defaultTo(true);
             table.uuid("academy_id").notNullable().references("id").inTable("academies").onDelete("CASCADE");
+            table.timestamp("deleted_at", { useTz: true }).nullable();
+            table.uuid("deleted_by").nullable().references("id").inTable("users").onDelete("SET NULL");
             table.timestamps(true, true);
         });
     }
