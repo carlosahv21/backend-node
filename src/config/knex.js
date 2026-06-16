@@ -3,7 +3,6 @@ import knexfile from '../../knexfile.js';
 import knexFactory from 'knex';
 import fs from 'fs';
 import path from 'path';
-import { log } from 'console';
 
 const environment = process.env.NODE_ENV || 'development';
 const config = knexfile[environment];
@@ -44,11 +43,6 @@ SQL: ${obj.sql}
 PARAMS: ${JSON.stringify(obj.bindings)}
 CÓDIGO: ${error.code || 'N/A'}
 ------------------------------------------------------------------\n`;
-
-        fs.appendFile(errorFile, errorMessage, () => {
-            // Alerta visual en la terminal de desarrollo
-            console.error(`\x1b[31m[SQL Error]\x1b[0m Revisar logs/sql-errors.log`);
-        });
     });
 }
 

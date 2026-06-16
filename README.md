@@ -7,7 +7,8 @@ Este es el backend de la aplicación, construido con **Node.js** y **Express**, 
 Antes de empezar, asegúrate de tener instalado lo siguiente:
 
 - **[Node.js](https://nodejs.org/)** (v18 o superior)
-- **[Laragon](https://laragon.org/)** (Recomendado para manejar MySQL en Windows) o MySQL instalado aparte.
+- **[PostgreSQL](https://www.postgresql.org/)** (Base de datos utilizada).
+- **[pgAdmin](https://www.pgadmin.org/)** (Para gestionar visualmente la base de datos en Windows/Linux).
 - **[DBeaver](https://dbeaver.io/)** (Para gestionar visualmente la base de datos).
 - **[Bruno](https://www.usebruno.com/)** (Para ejecutar las pruebas de la API).
 
@@ -38,23 +39,26 @@ Sigue estos pasos para levantar el entorno de desarrollo:
     PORT=tu_puerto
 
     # Configuración de Base de Datos
+    DB_CLIENT=pg
     DB_HOST=tu_host
     DB_USER=tu_usuario
-    DB_PASSWORD=tu_contraseña         # Deja vacío si usas Laragon por defecto
-    DB_NAME=tu_basedatos   # Asegúrate de crear esta DB en DBeaver/Laragon
-    DB_PORT=tu_puerto
+    DB_PASSWORD=tu_contraseña
+    DB_NAME=backend_db
+    DB_PORT=5432
 
     # Seguridad
     JWT_SECRET=tu_secreto_super_seguro
+
+    # Debug (opcional)
+    SQL_DEBUG=false
     ```
 
 ## 🗄️ Base de Datos
 
-Utilizamos **MySQL**. Puedes usar **Laragon** para iniciar el servicio de MySQL rápidamente.
+Utilizamos **PostgreSQL**. Asegúrate de tener PostgreSQL instalado y ejecutándose.
 
-1.  Abre **Laragon** y dale a "Start All".
-2.  Abre **DBeaver** y conéctate a tu servidor local.
-3.  Crea una base de datos vacía (ej. `backend_db`) que coincida con tu `.env`.
+1.  Abre **pgAdmin** (o tu cliente favorito) y conéctate a tu servidor local.
+2.  Crea una base de datos vacía (ej. `backend_db`) que coincida con tu `.env`.
 
 ### Migraciones y Seeds
 
@@ -67,6 +71,15 @@ npm run migrate
 # Llenar la base de datos con datos de prueba (seeds)
 npm run seed
 ```
+
+### Debug de Consultas SQL
+
+La variable `SQL_DEBUG=true` en el archivo `.env` habilita el registro de todas las consultas a la base de datos:
+
+- **`logs/sql-history-YYYY-MM-DD.log`** — Registra todas las queries ejecutadas con su SQL y parámetros.
+- **`logs/sql-errors-YYYY-MM-DD.log`** — Registra únicamente queries que fallan, incluyendo el mensaje de error.
+
+> Los archivos de log se crean automáticamente en la carpeta `logs/` en la raíz del proyecto.
 
 ## 🧪 Pruebas de API con Bruno
 
@@ -113,7 +126,7 @@ En la terminal puedes ejecutar:
 | `npm start`        | Inicia el servidor en modo producción (Node estándar).                               |
 | `npm run migrate`  | Ejecuta las migraciones de Knex ubicadas en `db/migration`.                          |
 | `npm run seed`     | Ejecuta los seeders de Knex para poblar la DB.                                       |
-| `npm run rollback` | Deshace el último lote de migraciones.                                               |
+| `npm run rollback` | Deshace el último lote de migraciones.                                              |
 | `npm run generate` | Ejecuta el script de generación de código (`scripts/generate.js`).                   |
 
 ---
