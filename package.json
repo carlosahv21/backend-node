@@ -1,12 +1,12 @@
 {
   "name": "backend-project",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js",
-    "start": "node index.js",
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
     "migrate": "node db/migration/migrate.js",
     "rollback": "npx knex migrate:rollback",
     "seed": "npx knex seed:run",

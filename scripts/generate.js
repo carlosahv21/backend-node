@@ -1,17 +1,16 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-// Función auxiliar para capitalizar la primera letra (ej: 'categorias' -> 'Categorias')
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
-// --- 1. DEFINICIÓN DE ARCHIVOS Y CARPETAS ---
 
 const files = [
     {
-        dir: 'models', suffix: 'Model', template: (entitySingular, entityPlural) => `
-import BaseModel from './baseModel.js';
+        suffix: 'Repository',
+        dir: (domain, entity) => `src/domains/${domain}/${entity}`,
+        template: (entitySingular, entityPlural) => `
+import BaseModel from "../../shared/models/baseModel.js";
 
-class ${entitySingular}Model extends BaseModel {
+class ${entitySingular}Repository extends BaseModel {
     constructor() {
         super('${entityPlural.toLowerCase()}');
         this.joins = [];
@@ -20,59 +19,57 @@ class ${entitySingular}Model extends BaseModel {
     }
 }
 
-export default new ${entitySingular}Model();
+export default new ${entitySingular}Repository();
 `},
     {
-        dir: 'services', suffix: 'Service', template: (entitySingular, entityPlural) => `
-import ${entitySingular.toLowerCase()}Model from '../models/${entityPlural}Model.js';
+        suffix: 'Service',
+        dir: (domain, entity) => `src/domains/${domain}/${entity}`,
+        template: (entitySingular, entityPlural) => `
+import ${entitySingular}Repository from './${entitySingular.toLowerCase()}.repository.js';
 
-const getAll${entityPlural} = async (queryParams) => {
-    return ${entitySingular.toLowerCase()}Model.findAll(queryParams);
-};
+class ${entitySingular}Service {
+    async getAll(queryParams) {
+        return ${entitySingular}Repository.findAll(queryParams);
+    }
 
-const get${entitySingular}ById = async (id) => {
-    return ${entitySingular.toLowerCase()}Model.findById(id);
-};
+    async getById(id) {
+        return ${entitySingular}Repository.findById(id);
+    }
 
-const create${entitySingular} = async (data) => {
-    return ${entitySingular.toLowerCase()}Model.create(data);
-};
+    async create(data) {
+        return ${entitySingular}Repository.create(data);
+    }
 
-const update${entitySingular} = async (id, data) => {
-    return ${entitySingular.toLowerCase()}Model.update(id, data);
-};
+    async update(id, data) {
+        return ${entitySingular}Repository.update(id, data);
+    }
 
-const bin${entitySingular} = async (id) => {
-    return ${entitySingular.toLowerCase()}Model.bin(id);
-};
+    async bin(id) {
+        return ${entitySingular}Repository.bin(id);
+    }
 
-const restore${entitySingular} = async (id) => {
-    return ${entitySingular.toLowerCase()}Model.restore(id);
-};
+    async restore(id) {
+        return ${entitySingular}Repository.restore(id);
+    }
 
-const delete${entitySingular} = async (id) => {
-    return ${entitySingular.toLowerCase()}Model.delete(id);
-};
+    async delete(id) {
+        return ${entitySingular}Repository.delete(id);
+    }
+}
 
-export default {
-    getAll${entityPlural},
-    get${entitySingular}ById,
-    create${entitySingular},
-    update${entitySingular},
-    bin${entitySingular},
-    restore${entitySingular},
-    delete${entitySingular},
-};
+export default new ${entitySingular}Service();
 `},
     {
-        dir: 'controllers', suffix: 'Controller', template: (entitySingular, entityPlural) => `
-import ${entityPlural.toLowerCase()}Service from '../services/${entityPlural}Service.js';
-import ApiResponse from '../utils/apiResponse.js';
+        suffix: 'Controller',
+        dir: (domain, entity) => `src/domains/${domain}/${entity}`,
+        template: (entitySingular, entityPlural) => `
+import ${entitySingular}Service from './${entitySingular.toLowerCase()}.service.js';
+import ApiResponse from "../../shared/utils/apiResponse.js";
 
 class ${entitySingular}Controller {
     async getAll(req, res, next) {
         try {
-            const result = await ${entityPlural.toLowerCase()}Service.getAll${entityPlural}(req.query);
+            const result = await ${entitySingular}Service.getAll(req.query);
             ApiResponse.success(res, 200, "${entityPlural} retrieved successfully", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -83,7 +80,7 @@ class ${entitySingular}Controller {
     async getById(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await ${entityPlural.toLowerCase()}Service.get${entitySingular}ById(id);
+            const result = await ${entitySingular}Service.getById(id);
             ApiResponse.success(res, 200, "${entitySingular} retrieved successfully", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -93,7 +90,7 @@ class ${entitySingular}Controller {
 
     async create(req, res, next) {
         try {
-            const result = await ${entityPlural.toLowerCase()}Service.create${entitySingular}(req.body);
+            const result = await ${entitySingular}Service.create(req.body);
             ApiResponse.success(res, 201, "${entitySingular} created successfully", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -104,7 +101,7 @@ class ${entitySingular}Controller {
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await ${entityPlural.toLowerCase()}Service.update${entitySingular}(id, req.body);
+            const result = await ${entitySingular}Service.update(id, req.body);
             ApiResponse.success(res, 200, "${entitySingular} updated successfully", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -115,7 +112,7 @@ class ${entitySingular}Controller {
     async bin(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await ${entityPlural.toLowerCase()}Service.bin${entitySingular}(id);
+            const result = await ${entitySingular}Service.bin(id);
             ApiResponse.success(res, 200, "${entitySingular} moved to bin successfully", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -126,7 +123,7 @@ class ${entitySingular}Controller {
     async restore(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await ${entityPlural.toLowerCase()}Service.restore${entitySingular}(id);
+            const result = await ${entitySingular}Service.restore(id);
             ApiResponse.success(res, 200, "${entitySingular} restored successfully", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -137,7 +134,7 @@ class ${entitySingular}Controller {
     async delete(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await ${entityPlural.toLowerCase()}Service.delete${entitySingular}(id);
+            const result = await ${entitySingular}Service.delete(id);
             ApiResponse.success(res, 200, "${entitySingular} deleted permanently", result);
         } catch (error) {
             const status = error.statusCode || 500;
@@ -149,101 +146,112 @@ class ${entitySingular}Controller {
 export default new ${entitySingular}Controller();
 `},
     {
-        dir: 'routes', suffix: 'Route', template: (entitySingular, entityPlural) => `
+        suffix: 'Routes',
+        dir: (domain, entity) => `src/domains/${domain}/${entity}`,
+        template: (entitySingular, entityPlural) => `
 import { Router } from 'express';
-import ${entitySingular.toLowerCase()}Controller from '../controllers/${entityPlural}Controller.js';
-import authMiddleware from '../middlewares/authMiddleware.js';
+import ${entitySingular}Controller from './${entitySingular.toLowerCase()}.controller.js';
+import authMiddleware from '../../shared/middlewares/authMiddleware.js';
 
 const router = Router();
 
-// GET /api/${entityPlural.toLowerCase()}
 router.get('/',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'view'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.getAll(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.getAll(req, res, next)
 );
 
-// GET /api/${entityPlural.toLowerCase()}/:id
 router.get('/:id',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'view'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.getById(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.getById(req, res, next)
 );
 
-// POST /api/${entityPlural.toLowerCase()}
 router.post('/',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'create'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.create(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.create(req, res, next)
 );
 
-// PUT /api/${entityPlural.toLowerCase()}/:id
 router.put('/:id',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'edit'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.update(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.update(req, res, next)
 );
 
-// PATCH /api/${entityPlural.toLowerCase()}/:id/bin
 router.patch('/:id/bin',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'delete'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.bin(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.bin(req, res, next)
 );
 
-// PATCH /api/${entityPlural.toLowerCase()}/:id/restore
 router.patch('/:id/restore',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'delete'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.restore(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.restore(req, res, next)
 );
 
-// DELETE /api/${entityPlural.toLowerCase()}/:id
 router.delete('/:id',
     authMiddleware.authenticateToken,
     authMiddleware.authorize('${entityPlural.toLowerCase()}', 'delete'),
-    (req, res, next) => ${entitySingular.toLowerCase()}Controller.delete(req, res, next)
+    (req, res, next) => ${entitySingular}Controller.delete(req, res, next)
 );
 
 export default router;
 `},
 ];
 
-// --- 2. LÓGICA DE GENERACIÓN ---
+const DOMAIN_MAP = {
+    security: ['auth', 'users', 'roles', 'permissions', 'rolePermissions', 'routes'],
+    academy: ['academies', 'students', 'teachers', 'classes', 'attendance', 'blocks', 'connections', 'studentStats', 'teacherReviews', 'achievements', 'userAchievements', 'challenges', 'userChallenges'],
+    billing: ['plans', 'payments', 'registrations'],
+    fields: ['fields', 'modules'],
+    notifications: ['notifications'],
+    reports: ['reports'],
+    search: ['search'],
+    settings: ['settings']
+};
+
+function getDomainForEntity(entityPlural) {
+    for (const [domain, entities] of Object.entries(DOMAIN_MAP)) {
+        if (entities.includes(entityPlural.toLowerCase())) {
+            return domain;
+        }
+    }
+    return 'academy';
+}
 
 async function generateModule() {
-    // El argumento de la entidad se espera en la posición 2 del array (posición 0 es 'node', 1 es 'generate.js')
     const entityPluralInput = process.argv[2];
 
     if (!entityPluralInput) {
         console.error('❌ ERROR: Debes proporcionar el nombre de la entidad (en plural) como argumento.');
         console.log('Ejemplo de uso: node scripts/generate.js categorias');
+        console.log('Dominios disponibles: ' + Object.keys(DOMAIN_MAP).join(', '));
         return;
     }
 
-    // Normalización de nombres
-    const entityPlural = entityPluralInput.toLowerCase(); // ej: 'categorias'
+    const entityPlural = entityPluralInput.toLowerCase();
     let entitySingular;
 
     if (entityPlural.endsWith('s')) {
-        // Si termina en 's', asume singular sin 's' final, y lo capitaliza. ej: 'categorias' -> 'Categoria'
         entitySingular = capitalize(entityPlural.slice(0, -1));
     } else {
-        // Si no termina en 's', lo capitaliza directamente. ej: 'usuario' -> 'Usuario'
         console.warn('⚠️ ADVERTENCIA: Se esperaba nombre de entidad en plural (terminado en "s").');
         entitySingular = capitalize(entityPlural);
     }
 
-    const baseDir = '.';
+    const domain = getDomainForEntity(entityPlural);
 
     console.log(`\n✨ Iniciando generación para la entidad: ${entityPlural}`);
-    console.log(`  - Nombre singular (Clase/Modelo): ${entitySingular}\n`);
+    console.log(`  - Nombre singular (Clase): ${entitySingular}`);
+    console.log(`  - Dominio: ${domain}\n`);
 
     for (const fileDef of files) {
         const { dir, suffix, template } = fileDef;
 
-        const fullDirPath = path.join(baseDir, dir);
-        const fileName = `${entityPlural}${suffix}.js`;
+        const fullDirPath = path.join('.', dir(domain, entityPlural));
+        const fileName = `${entityPlural}.${suffix.toLowerCase()}.js`;
         const fullFilePath = path.join(fullDirPath, fileName);
 
         try {
@@ -251,7 +259,6 @@ async function generateModule() {
             const content = template(entitySingular, entityPlural);
             await fs.writeFile(fullFilePath, content.trim());
             console.log(`✅ Creado: ${fullFilePath}`);
-
         } catch (error) {
             console.error(`❌ Error al crear ${fullFilePath}: ${error.message}`);
         }
@@ -259,8 +266,8 @@ async function generateModule() {
 
     console.log('\n🎉 ¡Generación de módulo completa!');
     console.log('💡 Recuerda:');
-    console.log('  1. Implementar la validación completa en el servicio o un middleware.');
-    console.log('  2. Importar el nuevo router en tu archivo principal (ej. server.js).');
+    console.log('  1. Importar el nuevo router en src/routes/index.js');
+    console.log('  2. Agregar el módulo a db/data/blocksData.js y fieldsData.js si es necesario');
 }
 
 generateModule();
