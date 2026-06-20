@@ -19,8 +19,19 @@ export async function applyScope(query, permission, user, config) {
         return;
     }
 
-    // Scope 'own': Restringe a registros propios
+    // Scope 'own': Restringe a registros propios.
+    // Dos formas: columna directa (ownColumn) o relación resuelta (ownResolver
+    // que devuelve los ids permitidos, ej: clases en las que el user está inscrito).
     if (scope === 'own') {
+        if (config.ownResolver) {
+            try {
+                const ids = await config.ownResolver(user);
+                query.whereIn(config.ownColumn, ids);
+            } catch (error) {
+                throw new AppError(`Error al resolver registros propios: ${error.message}`, 500);
+            }
+            return;
+        }
         if (!config.ownColumn) {
             throw new AppError('Error interno: Configuración ownColumn faltante', 500);
         }

@@ -3,7 +3,8 @@
 import knex from "../../config/knex.js";
 import { validationHandlers } from "../utils/utilsValidations.js";
 import AppError from "../utils/AppError.js";
-import { getCurrentTenantId } from "../utils/tenantContext.js";
+import { getCurrentTenantId, getCurrentUser, getCurrentPermission } from "../utils/tenantContext.js";
+import { applyScope } from "../utils/applyScope.js";
 
 /**
  * Tablas de catálogo global que NO pertenecen a un tenant específico.
@@ -29,6 +30,11 @@ class BaseModel {
         this._isTenantScoped = !GLOBAL_TABLES.has(tableName);
         // Columna usada por el filtro date_range. Los modelos hijos pueden sobreescribir esto.
         this.dateRangeColumn = null;
+        // Configuración de scope RBAC (own/assigned). Los modelos hijos que necesiten
+        // restringir lecturas por scope la definen. Si es null y el scope exige filtro,
+        // BaseModel hace fail-open (devuelve todo) y registra una advertencia.
+        // Forma: { ownColumn, ownResolver?, assignedColumn, assignedResolver }
+        this.scopeConfig = null;
     }
 
     // --- Helpers de Tenant ----------------------------------------------
@@ -53,6 +59,38 @@ class BaseModel {
 
         const prefix = tableAlias || this.tableName;
         return query.where(`${prefix}.academy_id`, tenantId);
+    }
+
+    /**
+     * Aplica el filtro de scope RBAC (own/assigned) a una query, según el permiso
+     * resuelto en el contexto de la petición. Muta y devuelve el query builder.
+     *
+     * - Fuera de petición (cron/seeds) o sin permiso: no filtra.
+     * - scope 'all': no filtra.
+     * - scope 'own'/'assigned' sin scopeConfig: fail-open (no filtra) + advertencia,
+     *   para permitir una migración módulo por módulo sin romper endpoints.
+     *
+     * @param {object} query - Knex query builder
+     * @returns {Promise<object>} el mismo query builder
+     */
+    async _applyScopeFilter(query) {
+        const permission = getCurrentPermission();
+        // Sin permiso en contexto (ej: seeds, o ruta sin authorize) → no filtramos.
+        if (!permission || !permission.scope || permission.scope === 'all') {
+            return query;
+        }
+
+        if (!this.scopeConfig) {
+            console.warn(
+                `[scope] ${this.tableName}: scope '${permission.scope}' requiere scopeConfig pero no está definido. ` +
+                `Devolviendo todos los registros (fail-open). Configura scopeConfig en el repositorio.`
+            );
+            return query;
+        }
+
+        const user = getCurrentUser();
+        await applyScope(query, permission, user, this.scopeConfig);
+        return query;
     }
 
     // Ejecuta las validaciones definidas para el modelo
@@ -320,6 +358,10 @@ class BaseModel {
         // reconstruir desde cero (y duplicar JOINs / filtros costosos).
         const baseQuery = this._buildQuery(filters);
 
+        // Aplicamos el filtro de scope RBAC sobre la query base antes de clonar,
+        // para que tanto los resultados como el conteo respeten el scope.
+        await this._applyScopeFilter(baseQuery);
+
         const [results, totalRes] = await Promise.all([
             baseQuery.clone().limit(limit).offset((page - 1) * limit),
             baseQuery.clone().clearSelect().clearOrder().count("* as count").first(),
@@ -339,6 +381,9 @@ class BaseModel {
     async findById(id) {
         let query = this.knex(this.tableName).where({ id });
         query = this._applyTenantFilter(query);
+        // Aplicamos también el scope: un usuario con scope own/assigned no puede
+        // leer por ID un registro que no le pertenece, aunque conozca el UUID.
+        await this._applyScopeFilter(query);
         const record = await query.first();
 
         if (!record) {

@@ -5,6 +5,24 @@ class ClassRepository extends BaseModel {
         super("classes");
         this.selectFields = ["classes.*"];
         this.searchFields = ["classes.name", "classes.level", "classes.genre", "classes.date", "classes.hour"];
+
+        // Configuración de scope RBAC para 'classes':
+        // - teacher (assigned): solo las clases que imparte (classes.teacher_id = él).
+        // - student (own): solo las clases en las que está inscrito (vía user_class).
+        this.scopeConfig = {
+            // assigned → filtra por teacher_id; el resolver devuelve el id del propio teacher.
+            assignedColumn: "classes.teacher_id",
+            assignedResolver: async (user) => [user.id],
+
+            // own → filtra por classes.id usando los ids resueltos desde user_class.
+            ownColumn: "classes.id",
+            ownResolver: async (user) => {
+                const rows = await this.knex("user_class")
+                    .where({ user_id: user.id })
+                    .select("class_id");
+                return rows.map((r) => r.class_id);
+            },
+        };
     }
 
     async findByIdDetails(id) {

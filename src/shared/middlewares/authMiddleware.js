@@ -5,7 +5,7 @@ import jwtConfig from "../../config/jwt.js";
 import ApiResponse from "../utils/apiResponse.js";
 import cache from "../utils/cache.js";
 import { buildPermissionMap } from "../utils/permissionMapper.js";
-import { runWithTenant } from "../utils/tenantContext.js";
+import { runWithTenant, setRequestPermission } from "../utils/tenantContext.js";
 
 /**
  * Obtiene todos los permisos de un usuario y los estructura en un Map O(1).
@@ -67,7 +67,9 @@ const authenticateToken = (req, res, next) => {
 		// Activar el contexto de tenant para toda la cadena de petición.
 		// Cualquier llamada a BaseModel dentro de este contexto filtrará
 		// automáticamente por academy_id sin necesidad de pasarlo explícitamente.
-		runWithTenant(req.user.academy_id, next);
+		// Pasamos también el usuario para que el filtro de scope (own/assigned)
+		// pueda resolverse más adelante en BaseModel.
+		runWithTenant(req.user.academy_id, next, req.user);
 	});
 };
 
@@ -116,6 +118,10 @@ const authorize = (resourceName, actionName) => {
 				action: actionName,
 				scope: actionScope,
 			};
+
+			// Lo publicamos también en el contexto async para que BaseModel
+			// aplique el filtro de scope automáticamente sin tocar services.
+			setRequestPermission(req.permission);
 
 			next();
 		} catch (error) {
