@@ -2,19 +2,23 @@
 
 /**
  * Transforma un arreglo plano de permisos desde BD en un mapa jerárquico O(1).
- * Agrupa todas las acciones bajo el mismo recurso.
+ * Agrupa las acciones de cada recurso conservando el scope POR ACCIÓN.
+ *
+ * El scope se guarda en BD por fila (rol, acción, módulo), de modo que dentro
+ * de un mismo módulo cada acción puede tener su propio scope. Por eso `actions`
+ * es un objeto acción → scope y NO existe un scope a nivel de módulo.
  *
  * Entrada:
  * [
- *   { moduleName: 'students', action: 'view', scope: 'all' },
- *   { moduleName: 'students', action: 'create', scope: 'all' },
- *   { moduleName: 'payments', action: 'view', scope: 'academy' }
+ *   { moduleName: 'students', action: 'view',   scope: 'all' },
+ *   { moduleName: 'students', action: 'edit',   scope: 'own' },
+ *   { moduleName: 'classes',  action: 'view',   scope: 'assigned' }
  * ]
  *
  * Salida:
  * {
- *   students: { actions: ['view', 'create'], scope: 'all' },
- *   payments: { actions: ['view'], scope: 'academy' }
+ *   students: { actions: { view: 'all', edit: 'own' } },
+ *   classes:  { actions: { view: 'assigned' } }
  * }
  */
 export function buildPermissionMap(rawPermissions) {
@@ -22,16 +26,11 @@ export function buildPermissionMap(rawPermissions) {
 
     for (const p of rawPermissions) {
         if (!map[p.moduleName]) {
-            map[p.moduleName] = {
-                actions: [],
-                scope: p.scope // Asumimos que el scope es el mismo para todas las acciones del módulo en este rol
-            };
+            map[p.moduleName] = { actions: {} };
         }
-        
-        // Evitamos duplicados por si acaso
-        if (!map[p.moduleName].actions.includes(p.action)) {
-            map[p.moduleName].actions.push(p.action);
-        }
+
+        // El scope corresponde a esta acción concreta dentro del módulo.
+        map[p.moduleName].actions[p.action] = p.scope;
     }
 
     return map;

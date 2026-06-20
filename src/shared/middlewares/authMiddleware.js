@@ -99,8 +99,10 @@ const authorize = (resourceName, actionName) => {
 			req.user.permissionsMap = permissionMap;
 
 			const modulePerms = permissionMap[resourceName];
+			// El scope vive por acción: actions = { view: 'all', edit: 'own', ... }
+			const actionScope = modulePerms?.actions?.[actionName];
 
-			if (!modulePerms || !modulePerms.actions.includes(actionName)) {
+			if (!actionScope) {
 				return ApiResponse.error(
 					res,
 					403,
@@ -108,11 +110,11 @@ const authorize = (resourceName, actionName) => {
 				);
 			}
 
-			// Inyectamos el permiso resuelto completo (con scope) para uso en policyEngine / applyScope
+			// Inyectamos el permiso resuelto (con el scope de ESTA acción) para applyScope.
 			req.permission = {
 				resource: resourceName,
 				action: actionName,
-				scope: modulePerms.scope,
+				scope: actionScope,
 			};
 
 			next();
