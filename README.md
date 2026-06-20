@@ -33,7 +33,7 @@ Sigue estos pasos para levantar el entorno de desarrollo:
 
 3.  **Configurar variables de entorno:**
 
-    Crea un archivo `.env` en la raíz del proyecto (puedes copiar el `.env_example`) y configura tus credenciales:
+    Crea un archivo `.env` en la raíz del proyecto (puedes copiar el `.env.example`) y configura tus credenciales:
 
     ```ini
     PORT=tu_puerto

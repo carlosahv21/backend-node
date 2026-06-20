@@ -6,7 +6,7 @@
 import {
     generateSchemaForModule,
     safeValidateModuleData
-} from '../validators/Schemas.js';
+} from '../validators/index.js';
 
 console.log('🧪 Iniciando pruebas de validación dinámica...\n');
 

@@ -20,7 +20,7 @@ router.post("/forgot-password",
     (req, res, next) => authController.forgotPassword(req, res, next)    
 );
 
-router.post("/reset-password",
+router.post("/change-password",
     authMiddleware.authenticateToken,
     (req, res, next) => authController.changePassword(req, res, next)
 );

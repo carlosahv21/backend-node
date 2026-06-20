@@ -16,8 +16,31 @@ const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', 1);
 
+// ── CORS ──────────────────────────────────────────────────────────────
+// CORS_ORIGIN acepta una lista de orígenes separados por coma.
+// En producción es obligatorio definirla: usar "*" junto con credentials
+// está prohibido por los navegadores y abriría el API a cualquier origen.
+const isProduction = process.env.NODE_ENV === 'production';
+const corsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+if (isProduction && corsOrigins.length === 0) {
+  throw new Error(
+    'CORS_ORIGIN debe estar definido en producción (lista de orígenes permitidos separados por coma)'
+  );
+}
+
+// En desarrollo, sin configuración explícita, reflejamos el origen de la
+// petición para facilitar pruebas locales sin abrir credentials a "*".
+const corsOptions = {
+  origin: corsOrigins.length > 0 ? corsOrigins : true,
+  credentials: true,
+};
+
 app.use(morgan("dev"));
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

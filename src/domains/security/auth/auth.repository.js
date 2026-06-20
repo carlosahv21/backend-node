@@ -10,6 +10,10 @@ class AuthRepository {
         return this.knex('users').where({ email }).first();
     }
 
+    async findUserById(userId) {
+        return this.knex('users').where({ id: userId }).first();
+    }
+
     async findRoleByUserId(userId) {
         const roleData = await this.knex("users")
             .join("roles", "users.role_id", "roles.id")

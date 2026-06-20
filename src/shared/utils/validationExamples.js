@@ -11,7 +11,7 @@ import {
     generateSchemaForBlock,
     validateModuleData,
     safeValidateModuleData
-} from '../validators/Schemas.js';
+} from '../validators/index.js';
 
 // ============================================
 // EJEMPLO 1: Validar datos de un módulo completo

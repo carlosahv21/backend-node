@@ -43,6 +43,7 @@ SQL: ${obj.sql}
 PARAMS: ${JSON.stringify(obj.bindings)}
 CÓDIGO: ${error.code || 'N/A'}
 ------------------------------------------------------------------\n`;
+        fs.appendFile(errorFile, errorMessage, () => { });
     });
 }
 

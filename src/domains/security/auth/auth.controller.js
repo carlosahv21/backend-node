@@ -1,6 +1,7 @@
 // auth.controller.js
 import authService from "./auth.service.js";
 import ApiResponse from "../../../shared/utils/apiResponse.js";
+import AppError from "../../../shared/utils/AppError.js";
 
 class AuthController {
     async login(req, res, next) {
@@ -27,7 +28,7 @@ class AuthController {
     async forgotPassword(req, res, next) {
         try {
             const { email } = req.body;
-            if (!email) throw new Error("Email is required");
+            if (!email) throw new AppError("Email is required", 400);
 
             const result = await authService.forgotPassword(email);
             ApiResponse.success(res, 200, result.message);
@@ -42,8 +43,8 @@ class AuthController {
             const { token } = req.params;
             const { password } = req.body;
 
-            if (!token) throw new Error("Token is required");
-            if (!password) throw new Error("New password is required");
+            if (!token) throw new AppError("Token is required", 400);
+            if (!password) throw new AppError("New password is required", 400);
 
             const result = await authService.resetPasswordWithToken(token, password);
             ApiResponse.success(res, 200, result.message, result);
@@ -56,7 +57,7 @@ class AuthController {
     async verifyToken(req, res, next) {
         try {
             const { token } = req.params;
-            if (!token) throw new Error("Token is required");
+            if (!token) throw new AppError("Token is required", 400);
 
             const result = await authService.verifyResetToken(token);
             ApiResponse.success(res, 200, result.message, result);
@@ -68,12 +69,17 @@ class AuthController {
 
     async changePassword(req, res, next) {
         try {
-            const { email, new_password } = req.body;
+            const { current_password, new_password } = req.body;
 
-            if (!email) throw new Error("Email is required");
-            if (!new_password) throw new Error("New password is required");
+            if (!current_password) throw new AppError("Current password is required", 400);
+            if (!new_password) throw new AppError("New password is required", 400);
 
-            const result = await authService.changePasswordByEmail(email, new_password);
+            // Opera siempre sobre el usuario del token, nunca sobre un email del body.
+            const result = await authService.changePassword(
+                req.user.id,
+                current_password,
+                new_password
+            );
             ApiResponse.success(res, 200, result.message);
         } catch (err) {
             const status = err.statusCode || 400;

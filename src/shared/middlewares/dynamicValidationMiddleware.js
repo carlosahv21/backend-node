@@ -1,4 +1,4 @@
-import { safeValidateModuleData } from '../validators/Schemas.js';
+import { safeValidateModuleData } from '../validators/index.js';
 import ApiResponse from '../utils/apiResponse.js';
 
 /**

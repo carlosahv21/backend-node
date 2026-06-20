@@ -3,10 +3,11 @@ import jwt from "jsonwebtoken";
 import crypto from 'crypto';
 import authRepository from "./auth.repository.js";
 import AppError from "../../../shared/utils/AppError.js";
+import jwtConfig from "../../../config/jwt.js";
 import { buildPermissionMap } from "../../../shared/utils/permissionMapper.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = "1h";
+const JWT_SECRET = jwtConfig.secret;
+const JWT_EXPIRES_IN = jwtConfig.expiresIn;
 
 const getUserData = async (userId) => {
     const userRecord = await authRepository.knex("users").where({ id: userId }).first();
@@ -178,11 +179,21 @@ const verifyResetToken = async (token) => {
     return { valid: true, message: "Token válido" };
 };
 
-const changePasswordByEmail = async (email, newPassword) => {
-    const user = await authRepository.findUserByEmail(email);
+/**
+ * Cambio de contraseña self-service para un usuario autenticado.
+ * Opera siempre sobre el userId del token (nunca sobre un email del body)
+ * y exige la contraseña actual para evitar tomas de cuenta.
+ */
+const changePassword = async (userId, currentPassword, newPassword) => {
+    const user = await authRepository.findUserById(userId);
 
     if (!user) {
         throw new AppError("Usuario no encontrado", 404);
+    }
+
+    const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentValid) {
+        throw new AppError("La contraseña actual es incorrecta", 401);
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -201,5 +212,5 @@ export default {
     forgotPassword,
     resetPasswordWithToken,
     verifyResetToken,
-    changePasswordByEmail
+    changePassword
 };

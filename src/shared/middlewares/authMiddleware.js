@@ -1,6 +1,7 @@
 // middlewares/authMiddleware.js
 import jwt from "jsonwebtoken";
 import knex from "../../config/knex.js";
+import jwtConfig from "../../config/jwt.js";
 import ApiResponse from "../utils/apiResponse.js";
 import cache from "../utils/cache.js";
 import { buildPermissionMap } from "../utils/permissionMapper.js";
@@ -42,7 +43,7 @@ const authenticateToken = (req, res, next) => {
 		);
 	}
 
-	jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+	jwt.verify(token, jwtConfig.secret, (err, decoded) => {
 		if (err) {
 			return ApiResponse.error(res, 401, "Sesión expirada o token inválido");
 		}
