@@ -9,8 +9,7 @@ class AuthController {
             const result = await authService.authenticateUser(req.body);
             ApiResponse.success(res, 200, "Login successful", result);
         } catch (err) {
-            const status = err.statusCode || 400;
-            ApiResponse.error(res, status, err.message);
+            next(err);
         }
     }
 
@@ -20,8 +19,7 @@ class AuthController {
             const data = await authService.getAuthenticatedUser(userId);
             ApiResponse.success(res, 200, "Perfil de usuario obtenido correctamente", data);
         } catch (err) {
-            const status = err.statusCode || 400;
-            ApiResponse.error(res, status, err.message);
+            next(err);
         }
     }
 
@@ -33,8 +31,7 @@ class AuthController {
             const result = await authService.forgotPassword(email);
             ApiResponse.success(res, 200, result.message);
         } catch (err) {
-            const status = err.statusCode || 400;
-            ApiResponse.error(res, status, err.message);
+            next(err);
         }
     }
 
@@ -49,8 +46,7 @@ class AuthController {
             const result = await authService.resetPasswordWithToken(token, password);
             ApiResponse.success(res, 200, result.message, result);
         } catch (err) {
-            const status = err.statusCode || 400;
-            ApiResponse.error(res, status, err.message);
+            next(err);
         }
     }
 
@@ -62,8 +58,7 @@ class AuthController {
             const result = await authService.verifyResetToken(token);
             ApiResponse.success(res, 200, result.message, result);
         } catch (err) {
-            const status = err.statusCode || 400;
-            ApiResponse.error(res, status, err.message);
+            next(err);
         }
     }
 
@@ -82,8 +77,7 @@ class AuthController {
             );
             ApiResponse.success(res, 200, result.message);
         } catch (err) {
-            const status = err.statusCode || 400;
-            ApiResponse.error(res, status, err.message);
+            next(err);
         }
     }
 }

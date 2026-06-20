@@ -7,8 +7,7 @@ class UserChallengesController {
             const result = await userChallengesService.getAllUserChallenges(req.query);
             ApiResponse.success(res, 200, "Desafíos de usuario obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class UserChallengesController {
             const userChallenge = await userChallengesService.getUserChallengeById(id);
             ApiResponse.success(res, 200, "Desafío de usuario obtenido correctamente", userChallenge);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +27,7 @@ class UserChallengesController {
             const challenges = await userChallengesService.getUserChallengesByUserId(userId);
             ApiResponse.success(res, 200, "Desafíos del usuario obtenidos correctamente", challenges);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -41,8 +38,7 @@ class UserChallengesController {
             const result = await userChallengesService.joinChallenge(userId, challengeId);
             ApiResponse.success(res, 201, "Te has unido al desafío correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -53,8 +49,7 @@ class UserChallengesController {
             await userChallengesService.leaveChallenge(userId, challengeId);
             ApiResponse.success(res, 200, "Has salido del desafío correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -63,8 +58,7 @@ class UserChallengesController {
             await userChallengesService.deleteUserChallenge(req.params.id);
             ApiResponse.success(res, 204, "Desafío de usuario eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

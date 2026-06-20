@@ -7,8 +7,7 @@ class RouteController {
             const routes = await routeService.getActiveRoutesWithModuleInfo();
             ApiResponse.success(res, 200, "Rutas obtenidas correctamente", routes);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

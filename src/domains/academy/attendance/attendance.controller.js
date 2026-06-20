@@ -7,8 +7,7 @@ class AttendanceController {
             const result = await attendanceService.getAllAttendances(req.query);
             ApiResponse.success(res, 200, "Asistencias obtenidas correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class AttendanceController {
             const attendance = await attendanceService.getAttendanceById(id);
             ApiResponse.success(res, 200, "Asistencia obtenida correctamente", attendance);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -30,8 +28,7 @@ class AttendanceController {
             const result = await attendanceService.getAttendanceByClass(class_id, date);
             ApiResponse.success(res, 200, "Asistencias de la clase obtenidas correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -40,8 +37,7 @@ class AttendanceController {
             const result = await attendanceService.createAttendance(req.body);
             ApiResponse.success(res, 201, "Asistencia creada correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -51,8 +47,7 @@ class AttendanceController {
             const result = await attendanceService.bulkCreateOrUpdate(attendance_records);
             ApiResponse.success(res, 200, "Asistencias actualizadas correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -61,8 +56,7 @@ class AttendanceController {
             await attendanceService.deleteAttendance(req.params.id);
             ApiResponse.success(res, 204, "Asistencia eliminada correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

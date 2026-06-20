@@ -8,8 +8,7 @@ class UserController {
             const result = await userService.getAllUsers(req.query);
             ApiResponse.success(res, 200, "Usuarios obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -19,8 +18,7 @@ class UserController {
             const user = await userRepository.findById(id);
             ApiResponse.success(res, 200, "Usuario obtenido correctamente", user);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -36,8 +34,7 @@ class UserController {
             const newUser = await userService.createUser(req.body);
             ApiResponse.success(res, 201, "Usuario creado correctamente", { user: newUser });
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -46,8 +43,7 @@ class UserController {
             const updatedUser = await userService.updateUser(req.params.id, req.body);
             ApiResponse.success(res, 200, "Usuario actualizado correctamente", updatedUser);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -56,8 +52,7 @@ class UserController {
             await userService.deleteUser(req.params.id);
             ApiResponse.success(res, 204, "Usuario eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -66,8 +61,7 @@ class UserController {
             const result = await userService.binUser(req.params.id);
             ApiResponse.success(res, 200, "Usuario movido a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -76,8 +70,7 @@ class UserController {
             const result = await userService.restoreUser(req.params.id);
             ApiResponse.success(res, 200, "Usuario restaurado correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -93,8 +86,7 @@ class UserController {
             const updatedUser = await userService.updateUser(userId, { push_token: pushToken });
             ApiResponse.success(res, 200, "Token PUSH guardado correctamente", updatedUser);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -109,8 +101,7 @@ class UserController {
 
             ApiResponse.success(res, 200, "Token PUSH obtenido correctamente", { push_token: user.push_token });
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -135,8 +126,7 @@ class UserController {
 
             ApiResponse.success(res, 200, "Notificación enviada correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -150,8 +140,7 @@ class UserController {
 
             ApiResponse.success(res, 200, "Recibos verificados", { receipts: [] });
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -161,8 +150,7 @@ class UserController {
             const user = await userRepository.findById(id);
             ApiResponse.success(res, 200, "Usuario obtenido correctamente", user);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

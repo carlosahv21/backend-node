@@ -7,8 +7,7 @@ class PlanController {
             const result = await planService.getAllPlans(req.query);
             ApiResponse.success(res, 200, "Planes obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class PlanController {
             const plan = await planService.getPlanById(id);
             ApiResponse.success(res, 200, "Plan obtenido correctamente", plan);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +27,7 @@ class PlanController {
             const planDetails = await planService.getPlanByIdDetails(id);
             ApiResponse.success(res, 200, "Detalles del plan obtenidos correctamente", planDetails);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -40,8 +37,7 @@ class PlanController {
             const plan = await planService.getStudentPlan(studentId);
             ApiResponse.success(res, 200, "Plan del estudiante obtenido correctamente", plan);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -50,8 +46,7 @@ class PlanController {
             const newPlan = await planService.createPlan(req.body);
             ApiResponse.success(res, 201, "Plan creado correctamente", newPlan);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -60,8 +55,7 @@ class PlanController {
             const updatedPlan = await planService.updatePlan(req.params.id, req.body);
             ApiResponse.success(res, 200, "Plan actualizado correctamente", updatedPlan);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -70,8 +64,7 @@ class PlanController {
             await planService.deletePlan(req.params.id);
             ApiResponse.success(res, 204, "Plan eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

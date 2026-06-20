@@ -7,8 +7,7 @@ class PaymentController {
             const result = await paymentService.getAllPayments(req.query);
             ApiResponse.success(res, 200, "Pagos obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class PaymentController {
             const payment = await paymentService.getPaymentById(id);
             ApiResponse.success(res, 200, "Pago obtenido correctamente", payment);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +27,7 @@ class PaymentController {
             const paymentDetails = await paymentService.getPaymentByIdDetails(id);
             ApiResponse.success(res, 200, "Detalles del pago obtenidos correctamente", paymentDetails);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -39,8 +36,7 @@ class PaymentController {
             const newPayment = await paymentService.createPayment(req.body);
             ApiResponse.success(res, 201, "Pago creado correctamente", newPayment);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -49,8 +45,7 @@ class PaymentController {
             const updatedPayment = await paymentService.updatePayment(req.params.id, req.body);
             ApiResponse.success(res, 200, "Pago actualizado correctamente", updatedPayment);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -59,8 +54,7 @@ class PaymentController {
             await paymentService.deletePayment(req.params.id);
             ApiResponse.success(res, 204, "Pago eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

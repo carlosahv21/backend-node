@@ -7,8 +7,7 @@ class PermissionController {
             const result = await permissionService.getAllPermissions(req.query);
             ApiResponse.success(res, 200, "Permisos obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class PermissionController {
             const permission = await permissionService.getPermissionById(id);
             ApiResponse.success(res, 200, "Permiso obtenido correctamente", permission);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -28,8 +26,7 @@ class PermissionController {
             const newPermission = await permissionService.createPermission(req.body);
             ApiResponse.success(res, 201, "Permiso creado correctamente", newPermission);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -38,8 +35,7 @@ class PermissionController {
             await permissionService.updatePermission(req.params.id, req.body);
             ApiResponse.success(res, 200, "Permiso actualizado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -48,8 +44,7 @@ class PermissionController {
             await permissionService.deletePermission(req.params.id);
             ApiResponse.success(res, 204, "Permiso eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -58,8 +53,7 @@ class PermissionController {
             const result = await permissionService.binPermission(req.params.id);
             ApiResponse.success(res, 200, "Permiso movido a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -68,8 +62,7 @@ class PermissionController {
             const result = await permissionService.restorePermission(req.params.id);
             ApiResponse.success(res, 200, "Permiso restaurado correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

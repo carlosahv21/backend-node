@@ -7,8 +7,7 @@ class UserAchievementsController {
             const result = await userAchievementsService.getAllUserAchievements(req.query);
             ApiResponse.success(res, 200, "Logros de usuario obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class UserAchievementsController {
             const userAchievement = await userAchievementsService.getUserAchievementById(id);
             ApiResponse.success(res, 200, "Logro de usuario obtenido correctamente", userAchievement);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +27,7 @@ class UserAchievementsController {
             const achievements = await userAchievementsService.getUserAchievementsByUserId(userId);
             ApiResponse.success(res, 200, "Logros del usuario obtenidos correctamente", achievements);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -39,8 +36,7 @@ class UserAchievementsController {
             const newUserAchievement = await userAchievementsService.createUserAchievement(req.body);
             ApiResponse.success(res, 201, "Logro de usuario creado correctamente", newUserAchievement);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -49,8 +45,7 @@ class UserAchievementsController {
             await userAchievementsService.deleteUserAchievement(req.params.id);
             ApiResponse.success(res, 204, "Logro de usuario eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

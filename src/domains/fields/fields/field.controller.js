@@ -7,8 +7,7 @@ class FieldController {
             const result = await fieldService.getAllFields(req.query);
             ApiResponse.success(res, 200, "Campos obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -27,8 +26,7 @@ class FieldController {
             const newField = await fieldService.createField(req.body);
             ApiResponse.success(res, 201, "Campo creado correctamente", newField);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -37,8 +35,7 @@ class FieldController {
             await fieldService.updateField(req.params.id, req.body);
             ApiResponse.success(res, 200, "Campo actualizado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -47,8 +44,7 @@ class FieldController {
             await fieldService.deleteField(req.params.id);
             ApiResponse.success(res, 204, "Campo eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -57,8 +53,7 @@ class FieldController {
             const result = await fieldService.binField(req.params.id);
             ApiResponse.success(res, 200, "Campo movido a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -67,8 +62,7 @@ class FieldController {
             const result = await fieldService.restoreField(req.params.id);
             ApiResponse.success(res, 200, "Campo restaurado correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -78,8 +72,7 @@ class FieldController {
             const data = await fieldService.getModuleFields(moduleName);
             ApiResponse.success(res, 200, "Bloques obtenidos correctamente", data);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -107,8 +100,7 @@ class FieldController {
             await fieldService.reorderFields(updates);
             ApiResponse.success(res, 200, "Orden de los campos actualizado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -119,8 +111,7 @@ class FieldController {
             await fieldService.reorderFieldsInBlock(blockId, field_ids);
             ApiResponse.success(res, 200, "Orden de los campos actualizado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

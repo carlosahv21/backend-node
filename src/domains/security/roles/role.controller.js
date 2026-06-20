@@ -7,8 +7,7 @@ class RoleController {
             const result = await roleService.getAllRoles(req.query);
             ApiResponse.success(res, 200, "Roles obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class RoleController {
             const role = await roleService.getRoleById(id);
             ApiResponse.success(res, 200, "Rol obtenido correctamente", role);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +27,7 @@ class RoleController {
             const role = await roleService.getRoleByIdDetails(id);
             ApiResponse.success(res, 200, "Rol obtenido correctamente", role);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -39,8 +36,7 @@ class RoleController {
             const newRole = await roleService.createRole(req.body);
             ApiResponse.success(res, 201, "Rol creado correctamente", newRole);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -49,8 +45,7 @@ class RoleController {
             await roleService.updateRole(req.params.id, req.body);
             ApiResponse.success(res, 200, "Rol actualizado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -59,8 +54,7 @@ class RoleController {
             await roleService.deleteRole(req.params.id);
             ApiResponse.success(res, 204, "Rol eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -69,8 +63,7 @@ class RoleController {
             const result = await roleService.binRole(req.params.id);
             ApiResponse.success(res, 200, "Rol movido a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -79,8 +72,7 @@ class RoleController {
             const result = await roleService.restoreRole(req.params.id);
             ApiResponse.success(res, 200, "Rol restaurado correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

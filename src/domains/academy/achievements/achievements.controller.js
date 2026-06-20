@@ -7,8 +7,7 @@ class AchievementsController {
             const result = await achievementsService.getAllAchievements(req.query);
             ApiResponse.success(res, 200, "Logros obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class AchievementsController {
             const achievement = await achievementsService.getAchievementById(id);
             ApiResponse.success(res, 200, "Logro obtenido correctamente", achievement);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -28,8 +26,7 @@ class AchievementsController {
             const newAchievement = await achievementsService.createAchievement(req.body);
             ApiResponse.success(res, 201, "Logro creado correctamente", newAchievement);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -38,8 +35,7 @@ class AchievementsController {
             const updatedAchievement = await achievementsService.updateAchievement(req.params.id, req.body);
             ApiResponse.success(res, 200, "Logro actualizado correctamente", updatedAchievement);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -48,8 +44,7 @@ class AchievementsController {
             const result = await achievementsService.binAchievement(req.params.id);
             ApiResponse.success(res, 200, "Logro movido a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -58,8 +53,7 @@ class AchievementsController {
             const result = await achievementsService.restoreAchievement(req.params.id);
             ApiResponse.success(res, 200, "Logro restaurado correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -68,8 +62,7 @@ class AchievementsController {
             await achievementsService.deleteAchievement(req.params.id);
             ApiResponse.success(res, 204, "Logro eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

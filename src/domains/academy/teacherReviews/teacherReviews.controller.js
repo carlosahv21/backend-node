@@ -7,8 +7,7 @@ class TeacherReviewsController {
             const result = await teacherReviewsService.getAllTeacherReviews(req.query);
             ApiResponse.success(res, 200, "Reviews obtenidas correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class TeacherReviewsController {
             const review = await teacherReviewsService.getTeacherReviewById(id);
             ApiResponse.success(res, 200, "Review obtenida correctamente", review);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +27,7 @@ class TeacherReviewsController {
             const reviews = await teacherReviewsService.getTeacherReviewsByTeacherId(teacherId);
             ApiResponse.success(res, 200, "Reviews del profesor obtenidas correctamente", reviews);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -39,8 +36,7 @@ class TeacherReviewsController {
             const newReview = await teacherReviewsService.createTeacherReview(req.body);
             ApiResponse.success(res, 201, "Review creada correctamente", newReview);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -49,8 +45,7 @@ class TeacherReviewsController {
             const updatedReview = await teacherReviewsService.updateTeacherReview(req.params.id, req.body);
             ApiResponse.success(res, 200, "Review actualizada correctamente", updatedReview);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -59,8 +54,7 @@ class TeacherReviewsController {
             const result = await teacherReviewsService.binTeacherReview(req.params.id);
             ApiResponse.success(res, 200, "Review movida a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -69,8 +63,7 @@ class TeacherReviewsController {
             const result = await teacherReviewsService.restoreTeacherReview(req.params.id);
             ApiResponse.success(res, 200, "Review restaurada correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -79,8 +72,7 @@ class TeacherReviewsController {
             await teacherReviewsService.deleteTeacherReview(req.params.id);
             ApiResponse.success(res, 204, "Review eliminada correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

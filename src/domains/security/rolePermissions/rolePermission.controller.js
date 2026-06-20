@@ -12,8 +12,7 @@ class RolePermissionController {
                 permissions
             });
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -29,8 +28,7 @@ class RolePermissionController {
                 permission_ids
             });
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -39,8 +37,7 @@ class RolePermissionController {
             const roles = await rolePermissionService.getAllRolesWithPermissions();
             ApiResponse.success(res, 200, "Roles obtenidos correctamente", roles);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

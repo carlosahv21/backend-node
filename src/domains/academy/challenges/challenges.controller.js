@@ -7,8 +7,7 @@ class ChallengesController {
             const result = await challengesService.getAllChallenges(req.query);
             ApiResponse.success(res, 200, "Desafíos obtenidos correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -18,8 +17,7 @@ class ChallengesController {
             const challenge = await challengesService.getChallengeById(id);
             ApiResponse.success(res, 200, "Desafío obtenido correctamente", challenge);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -28,8 +26,7 @@ class ChallengesController {
             const newChallenge = await challengesService.createChallenge(req.body);
             ApiResponse.success(res, 201, "Desafío creado correctamente", newChallenge);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -38,8 +35,7 @@ class ChallengesController {
             const updatedChallenge = await challengesService.updateChallenge(req.params.id, req.body);
             ApiResponse.success(res, 200, "Desafío actualizado correctamente", updatedChallenge);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -48,8 +44,7 @@ class ChallengesController {
             const result = await challengesService.binChallenge(req.params.id);
             ApiResponse.success(res, 200, "Desafío movido a papelera correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -58,8 +53,7 @@ class ChallengesController {
             const result = await challengesService.restoreChallenge(req.params.id);
             ApiResponse.success(res, 200, "Desafío restaurado correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -68,8 +62,7 @@ class ChallengesController {
             await challengesService.deleteChallenge(req.params.id);
             ApiResponse.success(res, 204, "Desafío eliminado correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

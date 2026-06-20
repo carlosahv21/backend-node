@@ -9,8 +9,7 @@ class NotificationController {
             const result = await notificationService.getNotificationsByUser(userId, userRole, req.query);
             ApiResponse.success(res, 200, "Notificaciones obtenidas correctamente", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -21,8 +20,7 @@ class NotificationController {
             const result = await notificationService.markAsRead(id, userId);
             ApiResponse.success(res, 200, "Notificación marcada como leída", result);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -33,8 +31,7 @@ class NotificationController {
             const count = await notificationService.markAllAsRead(userId, userRole);
             ApiResponse.success(res, 200, `${count} notificaciones marcadas como leídas`, { count });
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -45,8 +42,7 @@ class NotificationController {
             await notificationService.deleteByUser(id, userId);
             ApiResponse.success(res, 200, "Notificación eliminada correctamente");
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 
@@ -55,8 +51,7 @@ class NotificationController {
             const newNotification = await notificationService.createNotification(req.body);
             ApiResponse.success(res, 201, "Notificación creada correctamente", newNotification);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }

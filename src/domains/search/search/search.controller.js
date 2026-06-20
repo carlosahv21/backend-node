@@ -11,8 +11,7 @@ class SearchController {
             const data = await searchService.searchAll(q, parseInt(page), parseInt(limit));
             ApiResponse.success(res, 200, "Search results retrieved successfully", data);
         } catch (error) {
-            const status = error.statusCode || 500;
-            ApiResponse.error(res, status, error.message);
+            next(error);
         }
     }
 }
