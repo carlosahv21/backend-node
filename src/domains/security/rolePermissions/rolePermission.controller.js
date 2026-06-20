@@ -8,7 +8,7 @@ class RolePermissionController {
             const permissions = await rolePermissionService.getPermissionsByRole(role_id);
 
             ApiResponse.success(res, 200, "Permisos obtenidos correctamente", {
-                role_id: parseInt(role_id, 10),
+                role_id,
                 permissions
             });
         } catch (error) {
@@ -24,7 +24,7 @@ class RolePermissionController {
             await rolePermissionService.setPermissionsForRole(role_id, permission_ids);
 
             ApiResponse.success(res, 200, "Permisos actualizados correctamente para el rol", {
-                role_id: parseInt(role_id, 10),
+                role_id,
                 permission_ids
             });
         } catch (error) {

@@ -14,13 +14,32 @@ class RolePermissionService {
             throw new AppError('role_id y permission_ids[] son requeridos.', 400);
         }
 
+        const VALID_SCOPES = ['all', 'own', 'assigned'];
+
+        // El frontend envía cada permiso como objeto { permission_id, scope }.
+        // Se conserva compatibilidad con el formato antiguo (UUID plano → scope 'all').
+        const normalized = permission_ids.map((entry) => {
+            const permission_id = typeof entry === 'string' ? entry : entry?.permission_id;
+            const scope = typeof entry === 'string' ? 'all' : (entry?.scope ?? 'all');
+
+            if (!permission_id) {
+                throw new AppError('Cada permiso debe incluir permission_id.', 400);
+            }
+            if (!VALID_SCOPES.includes(scope)) {
+                throw new AppError(`Scope inválido '${scope}'. Valores permitidos: ${VALID_SCOPES.join(', ')}.`, 400);
+            }
+
+            return { permission_id, scope };
+        });
+
         try {
             await rolePermissionRepository.knex.transaction(async trx => {
                 await rolePermissionRepository.deleteByRoleId(role_id, trx);
 
-                const inserts = permission_ids.map(pid => ({
+                const inserts = normalized.map(({ permission_id, scope }) => ({
                     role_id,
-                    permission_id: pid,
+                    permission_id,
+                    scope,
                     created_at: rolePermissionRepository.knex.fn.now(),
                     updated_at: rolePermissionRepository.knex.fn.now()
                 }));
@@ -30,6 +49,7 @@ class RolePermissionService {
                 }
             });
         } catch (error) {
+            if (error instanceof AppError) throw error;
             throw new AppError("Fallo al actualizar los permisos del rol", 500);
         }
     }

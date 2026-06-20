@@ -20,6 +20,4 @@ logs/*
 package-lock.json
 pnpm-lock.yaml
 
-passo.md
-bienestar.md
-API_DOCUMENTATION.md
+docs/
